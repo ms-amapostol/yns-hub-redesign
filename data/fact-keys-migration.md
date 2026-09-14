@@ -5,6 +5,7 @@ Add to `fact_keys`. Half-lives follow the existing convention: free text never e
 | Key | Type | Written by | Half-life | Conditionable |
 |---|---|---|---|---|
 | `mindset_lean` | string enum: growth · mixed · fixed | Bounce Back | 270d | yes |
+| `why_1` … `why_5` | string (free) | Your Why (five whys) | never | no |
 | `setback_story` | string (free) | Bounce Back | never | no |
 | `setback_response` | string enum: pushed · pivoted · asked · paused · froze | Bounce Back | 270d | yes |
 | `setback_reframe` | string (free) | Bounce Back | never | no |
@@ -30,3 +31,7 @@ Notes for Delante
 - `bounce` reads `why_statement` on its close card only.
 - `grit` rung 1 reads its own `setback_response` to ask "same as last time?" — the one deliberate re-ask, framed as a comparison, per the spec's reflection rule.
 - Every file passed `YNSActivity.define()` under a stub with the expected slot counts. They have NOT been run against the live runtime. Run `YNSActivity.validate()` and the readability and referents scripts before shipping.
+
+
+## Changed live file
+`activities/why.js` is rewritten as the five whys. Slug and the `why_statement` / `why_who` / `why_test` keys are unchanged, so every other activity that reads the why still works. New keys `why_1`–`why_5` let a returning visitor's ladder drop the five screens instead of re-asking.
