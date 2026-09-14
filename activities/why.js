@@ -1,10 +1,11 @@
 /* =====================================================================
-   Your Why — the reason underneath all of it.
+   Your Why — the reason underneath all of it, found with the five whys.
 
    Outcome: "I can say what my work is for."
 
-   The shortest thing here, and the one with the longest half-life. Two
-   minutes, mostly free text, and the answer gets pinned to the top of
+   Five short screens that each ask "why?" about the last answer, then
+   the sentence. The first answer is usually a job or a complaint; the
+   fifth is usually the real reason. The sentence gets pinned to the top of
    their profile — so the next time they come back tired and unsure why
    they started, the first thing on the screen is their own sentence.
 
@@ -47,6 +48,46 @@ function whenPhrase() {
   } catch (e) { return "a weeknight"; }
 }
 
+
+/* The five why slots share a shape. `optional` from the third on means
+   "stop here", and the statement screen picks up the deepest answer. */
+function WHY(n, title, scene, placeholder, optional, examples) {
+  var rung = {
+    /* The one place a first rung carries a condition. It reads TRUE for a
+       first-timer (an unknown fact makes {fact:...} false, and `not`
+       flips it), so the one rule holds. It reads false once a why is on
+       file, which drops the five screens instead of digging twice. */
+    needs: { not: { fact: "why_statement" } },
+    asks: "why_" + n,
+    mechanic: "text",
+    eyebrow: "Why " + n + " of 5",
+    title: title,
+    scene: scene,
+    prompt: n === 1 ? "The plain version." : "Keep going.",
+    placeholder: placeholder,
+    rows: 3,
+    maxLength: 400,
+    cta: n === 5 ? "That's the bottom" : "Why?",
+    optional: !!optional,
+    skipLabel: "That's the real one. Stop here.",
+    skipTo: "statement"
+  };
+  if (examples) rung.examples = examples;
+  return { id: "why" + n, axes: [], ladder: [rung] };
+}
+
+/* The answers so far, this run first, stored facts as fallback. */
+function whysFrom(src) {
+  var out = [];
+  for (var i = 1; i <= 5; i++) {
+    var t = (src && src.extra && src.extra["why" + i + "_text"]) || (src && src.facts && src.facts["why_" + i]) || "";
+    if (t) out.push(t);
+  }
+  return out;
+}
+function whys(v) { return whysFrom({ extra: v && v.extra, facts: v && v.facts }); }
+function last(v) { var c = whys(v); return c.length ? c[c.length - 1] : "that"; }
+
 YNSActivity.define({
   slug: "why",
   title: "Your Why",
@@ -54,8 +95,64 @@ YNSActivity.define({
   slots: [
 
     /* ---------------------------------------------------------------
-       1. The sentence. This is the whole activity; everything else is
-       support for getting it written.
+       0. Frame. Say what the five whys are before asking the first one.
+       Dropped for anyone who already has a why on file.
+       --------------------------------------------------------------- */
+    {
+      id: "frame",
+      axes: [],
+      ladder: [
+        {
+          mechanic: "learn",
+          eyebrow: "Five minutes",
+          title: "Ask why five times.",
+          lead: "The first answer is usually a job or a complaint. The fifth is usually the real reason. That's the whole trick.",
+          body: [
+            "Each screen asks why about the thing you just wrote. It gets uncomfortable around the third one, which is a sign it's working. You can stop early if you hit the real one sooner.",
+            "It doesn't have to be noble or tidy. It just has to be true. Nothing here is shared."
+          ],
+          cta: "Start"
+        },
+        {
+          needs: { fact: "why_statement" },
+          mechanic: "learn",
+          eyebrow: "Already done",
+          title: "You've already found your why.",
+          lead: function (v) { return "\u201c" + ((v && v.facts && v.facts.why_statement) || "") + "\u201d"; },
+          body: ["No need to dig again. This run asks the question underneath it instead."],
+          provenance: "You've told us your why already, so the five whys are skipped.",
+          cta: "Okay"
+        }
+      ]
+    },
+
+    /* ---------------------------------------------------------------
+       1–5. The whys. Each one quotes the last answer and asks why about
+       it. From the third on, stopping is allowed, because some people
+       reach the bottom in three and making them write two more is
+       homework. Each has its own fact key so a returning visitor's
+       ladder drops them instead of re-asking.
+       --------------------------------------------------------------- */
+    WHY(1, "Why are you doing this at all?",
+      function () { return ["Whatever made you open a career site on " + whenPhrase() + ". Start with the obvious version. We'll dig from here."]; },
+      "Because\u2026", false,
+      ["Because I hate my job.", "Because I need more money.", "Because I'm 24 and still working the same register."]),
+    WHY(2, "And why does that matter to you?",
+      function (v) { return ["You said: \u201c" + last(v) + "\u201d", "Why does that matter? Not to anyone else. To you."]; },
+      "Because\u2026", false, null),
+    WHY(3, "Why?",
+      function (v) { return ["\u201c" + last(v) + "\u201d", "One more layer. This is the one where most people find the real thing."]; },
+      "Because\u2026", true, null),
+    WHY(4, "And underneath that?",
+      function (v) { return ["\u201c" + last(v) + "\u201d", "If that came true, what would it give you?"]; },
+      "It would mean\u2026", true, null),
+    WHY(5, "Last one. Why does that matter?",
+      function (v) { return ["\u201c" + last(v) + "\u201d", "This is usually where the real reason lives. Say it plainly."]; },
+      "Because\u2026", true, null),
+
+    /* ---------------------------------------------------------------
+       6. The sentence. Prefilled from the deepest answer, editable, and
+       tagged with who it's for. This is what gets pinned.
        --------------------------------------------------------------- */
     {
       id: "statement",
@@ -64,32 +161,20 @@ YNSActivity.define({
         {
           asks: "why_statement",
           mechanic: "text",
-          eyebrow: "Two minutes",
-          title: "Why are you doing this at all?",
-          /* "a Tuesday night" was hardcoded, so it was wrong roughly six
-             days out of seven. In an activity whose whole job is showing
-             somebody we were listening, opening with a detail they can
-             see is false is a bad first move. It reads off their clock
-             now. */
-          scene: function () {
-            return [
-              "We want the reason you're looking, rather than which job you want.",
-              "Whatever made you open a career site on " + whenPhrase() +
-              ". It doesn't have to be noble or tidy. It just has to be true."
-            ];
+          eyebrow: "Your why",
+          title: "Now say it in one sentence.",
+          scene: function (v) {
+            var chain = whys(v);
+            return chain.length
+              ? ["Here's the trail you just walked: " + chain.map(function (x) { return "\u201c" + x + "\u201d"; }).join(" \u2192 "), "The last one is usually the real one. We've put it in the box. Change it if a different rung was the true one."]
+              : ["One sentence is plenty."];
           },
-          prompt: "In your own words. One sentence is plenty.",
-          placeholder: "Because…",
-          rows: 5,
+          prompt: "In your own words.",
+          prefill: function (ctx) { var c = whysFrom(ctx); return c.length ? c[c.length - 1] : ""; },
+          placeholder: "Because\u2026",
+          rows: 4,
           maxLength: 600,
-          cta: "That's it",
-          examples: [
-            "Because I want to stop dreading Sunday nights.",
-            "Because my daughter is about to start school and I want to be there for pickup.",
-            "Because I'm good at something and nobody is paying me for it.",
-            "Because I've been doing the same thing for eleven years and I don't want to do it for eleven more.",
-            "Because I want to earn enough that a broken car isn't a crisis."
-          ],
+          cta: "That's my why",
           tagPrompt: "And mostly, this is for:",
           tagAsks: "why_who",
           tags: [
@@ -103,8 +188,8 @@ YNSActivity.define({
         },
 
         /* Rung 1. They already have a why on file. Do not re-ask it and
-           do not ask them to confirm it — go one level deeper instead,
-           at the thing a why is actually for: knowing when you have got
+           do not ask them to confirm it. Go one level deeper instead,
+           at the thing a why is actually for: knowing when you've got
            there. */
         {
           needs: { fact: "why_statement" },
@@ -116,8 +201,8 @@ YNSActivity.define({
             "You've already written down why you're doing this. Here's the harder question underneath it. A year from now, what would have to be true for you to say it worked?",
             "Be specific enough you could check. \"Happier\" isn't checkable. \"I don't think about work on Sunday\" is."
           ],
-          prompt: "One year from now, I will know this worked because…",
-          placeholder: "Because by then…",
+          prompt: "One year from now, I will know this worked because\u2026",
+          placeholder: "Because by then\u2026",
           provenance: "You've already told us your why, so this asks the next question instead of repeating it.",
           rows: 4,
           maxLength: 600,
@@ -126,8 +211,6 @@ YNSActivity.define({
         }
       ],
 
-      /* Ladder exhausted — both written, nothing left to ask. Give them
-         something rather than a shorter activity for no reason. */
       learn: {
         mechanic: "learn",
         eyebrow: "Worth knowing",
@@ -185,7 +268,7 @@ YNSActivity.define({
        to the stored fact — the whole point of this activity is reading it
        back, and an empty quote block would be the one failure that
        matters here. */
-    var why = r.extra.statement_text || r.ctx.facts.why_statement || "";
+    var why = r.extra.statement_text || r.ctx.facts.why_statement || (whysFrom({ extra: r.extra, facts: r.ctx.facts }).slice(-1)[0]) || "";
     var tag = r.extra.statement_tag || r.ctx.facts.why_who || "";
     var howLong = r.state.answers.urgency || "";
     var esc = r.esc;
@@ -218,8 +301,15 @@ YNSActivity.define({
        and saying otherwise is a promise the product cannot keep. */
     var signedIn = !!(window.YNS && YNS.signedIn && YNS.signedIn());
 
+    var chain = whysFrom({ extra: r.extra, facts: r.ctx.facts });
+
     return "<h1>That's your why.</h1>" +
       (why ? '<div class="ya-quote">' + esc(why) + "</div>" : "") +
+      (chain.length > 1
+        ? '<div class="ya-readout"><h3>How you got there</h3>' +
+          chain.map(function (x, i) { return "<p><b>" + (i + 1) + ".</b> " + esc(x) + "</p>"; }).join("") +
+          "<p>The first line is what you'd have said a week ago. The last one is the reason.</p></div>"
+        : "") +
       '<p class="ya-result-lead">' +
       (signedIn
         ? "It's at the top of your profile now. It'll be there on the week you can't remember " +
