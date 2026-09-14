@@ -87,7 +87,8 @@ function shell(r, inner, footer){
   host.innerHTML=h; host.scrollTop=0;
 }
 function primary(label, fn, disabled){ return '<button class="btn btn-primary" onclick="'+fn+'" '+(disabled?'disabled':'')+'>'+esc(label||"Next")+'</button>'; }
-function skip(r){ return r.optional ? '<button class="btn-quiet" onclick="YNSMock.next()">Skip this one</button>' : '<span></span>'; }
+function skip(r){ return r.optional ? '<button class="btn-quiet" onclick="YNSMock.skipStep()">'+esc(r.skipLabel||"Skip this one")+'</button>' : '<span></span>'; }
+function skipStep(){ var r=cur().rung; if (r.skipTo){ var j=run.i+1; while (j<run.steps.length && run.steps[j].slot.id!==r.skipTo) j++; run.i=j; renderStep(); } else next(); }
 function prompt(r){ var p=val(r.prompt); return p ? '<p class="am-prompt">'+esc(p)+'</p>' : ''; }
 
 /* ---------- mechanics ---------------------------------------------- */
@@ -300,6 +301,6 @@ global.YNSMock = {
   diffMark: diffMark, submitDiff: submitDiff,
   chainPick: chainPick, submitChain: submitChain,
   compareMark: compareMark, submitCompare: submitCompare,
-  finish: finish
+  finish: finish, skipStep: skipStep
 };
 })(window);
