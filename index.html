@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Next Step — hub redesign (review build)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Questrial&display=swap">
+<link rel="stylesheet" href="css/hub.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="bar">
+    <a class="brand" href="#">
+      <svg viewBox="0 0 640 640" aria-hidden="true"><rect width="640" height="640" rx="132" fill="#0057E1"/><path fill="#fff" d="M176 452h72v-72h72v-72h72v-72h72v-72h72v72h-72v72h-72v72h-72v72h-72v72h-144z"/></svg>
+      Your Next Step
+    </a>
+    <div class="acct"><span class="chip" id="youChip">Not signed in</span><a href="#">Sign in</a></div>
+  </div>
+
+  <div class="demo" id="demoStrip">
+    <b>Demo controls</b>
+    <span>13 activities play here from their real content files; your answers feed the bubble and later activities. The three quizzes and Career ABCs are separate apps, so those cards mark done and set a sample field (Health &amp; Care).</span>
+    <button class="lnk" onclick="YNS.retake()">Retake the three questions</button>
+    <button class="lnk" onclick="YNS.reset()">Reset everything</button>
+  </div>
+
+  <!-- ============================================================
+       SCREEN 1 — INTAKE
+       ============================================================ -->
+  <section class="screen is-on" id="screenIntake">
+    <div class="intake">
+      <h1>Before anything else, let's get you to the right starting place.</h1>
+      <p class="lead">Pick a face, then three quick questions. No wrong answers, and you can change them any time. This just decides which door you walk through first.</p>
+
+      <div class="steps" aria-hidden="true"><i id="st0" class="now"></i><i id="st1"></i><i id="st2"></i><i id="st3"></i></div>
+
+      <div class="q is-on" data-q="0">
+        <h2>First, pick someone to walk with you.</h2>
+        <p class="hint">This is you, in cartoon form. It starts as a blank and fills in, piece by piece, with every activity you finish. Change it any time, or skip this and we'll pick one for you.</p>
+        <div class="pick">
+          <div><div class="pick-row" role="radiogroup" id="pickBody"></div></div>
+          <div><div class="label">Skin tone</div><div class="pick-row" role="radiogroup" id="pickTone"></div></div>
+          <div class="preview"><div id="pickPreview"></div><div><b style="font-family:var(--yns-display);font-weight:500">Here's how it starts.</b><p class="small muted">Mostly blank on purpose. Every activity fills in a piece.</p></div></div>
+        </div>
+      </div>
+
+      <div class="q" data-q="1">
+        <h2>Do you know what you want yet?</h2>
+        <p class="hint">Honest answer. Most people who land here are somewhere in the middle.</p>
+        <div class="opts" role="radiogroup" id="q1"></div>
+      </div>
+
+      <div class="q" data-q="2">
+        <h2>What brought you here right now?</h2>
+        <p class="hint">Something usually shifts before someone opens a page like this.</p>
+        <div class="opts" role="radiogroup" id="q2"></div>
+      </div>
+
+      <div class="q" data-q="3">
+        <h2>Where are you with work?</h2>
+        <p class="hint">This only changes how we talk to you. Nothing here is a disadvantage.</p>
+        <div class="opts" role="radiogroup" id="q3"></div>
+      </div>
+
+      <div class="intake-nav">
+        <button class="skip" onclick="YNS.skip()">Skip this and just browse</button>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-ghost" id="backBtn" onclick="YNS.back()" style="display:none">Back</button>
+          <button class="btn btn-primary" id="nextBtn" onclick="YNS.next()" disabled>Next</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SCREEN 2 — HUB
+       ============================================================ -->
+  <section class="screen" id="screenHub">
+    <div class="hub">
+      <div class="hub__main">
+
+        <div class="hero">
+          <div>
+            <div class="avatar" id="avatarBox" data-stage="1">
+              <div class="art" id="avatarArt" aria-label="Your character, coming into focus as you go"></div>
+              <span class="pct" id="avatarPct">0%</span>
+            </div>
+            <p class="avatar-caption" id="avatarCaption">A blank page. That's fine, that's where everyone starts.</p>
+          </div>
+          <div class="hero-text">
+            <div>
+              <h1 id="heroH1">What should you do with your life?</h1>
+              <p class="lead" id="heroLead">You didn't get this far just to feel stuck. Every short activity you finish fills in a piece of the picture, and gives your character one more thing to say about you.</p>
+            </div>
+            <div class="bubble" id="bubble" aria-live="polite"><span class="lead-in" id="bubbleLead"></span><span class="say" id="bubbleSay"></span><div class="dots" id="bubbleDots"></div></div>
+          </div>
+        </div>
+
+        <!-- the starting door -->
+        <article class="door" id="doorPanel"></article>
+
+        <!-- the other doors -->
+        <section class="doors">
+          <h2>The other four doors</h2>
+          <p class="lead">All open. The one above is only where we think you'd get the most out of starting. Walk through any of them.</p>
+          <div class="door-grid" id="doorGrid"></div>
+        </section>
+
+      </div>
+
+      <aside class="hub__rail">
+        <div class="rail-card">
+          <h3>Where you are</h3>
+          <div class="you" id="youSummary"></div>
+          <button class="btn-quiet" onclick="YNS.retake()">Change my answers</button> <button class="btn-quiet" onclick="YNS.pickAvatar()">Change my character</button>
+        </div>
+        <div class="rail-card">
+          <h3>Your staircase</h3>
+          <div class="stair" id="stair" aria-hidden="true"></div>
+          <p class="small muted" id="stairCaption"></p>
+        </div>
+        <div class="rail-card">
+          <h3>One good next step</h3>
+          <div class="next" id="nextStep"></div>
+        </div>
+        <div class="rail-card">
+          <h3>What we know so far</h3>
+          <ul id="facts"></ul>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="foot">
+      <span class="brand" style="font-size:.9rem"><svg viewBox="0 0 640 640" style="width:20px;height:20px"><rect width="640" height="640" rx="132" fill="#0057E1"/><path fill="#fff" d="M176 452h72v-72h72v-72h72v-72h72v-72h72v72h-72v72h-72v72h-72v72h-72v72h-144z"/></svg>Your Next Step</span>
+      <a href="#">Your data</a><a href="#">Privacy</a><a href="#">Terms</a>
+    </footer>
+  </section>
+
+</div>
+<div id="actModal" role="dialog" aria-modal="true"></div>
+<div class="toast" id="toast"></div>
+
+<script src="vendor/yns-taxonomy.js"></script>
+<script src="vendor/quiz-shared.js"></script>
+<script src="js/mock-runtime.js"></script>
+<script src="activities/why.js"></script>
+<script src="activities/proof.js"></script>
+<script src="activities/hours168.js"></script>
+<script src="activities/constraints.js"></script>
+<script src="activities/floor.js"></script>
+<script src="activities/doors.js"></script>
+<script src="activities/conversations.js"></script>
+<script src="activities/premortem.js"></script>
+<script src="activities/stilltrue.js"></script>
+<script src="activities/grit.js"></script>
+<script src="activities/bounce.js"></script>
+<script src="activities/money101.js"></script>
+<script src="activities/smart6.js"></script>
+<script src="js/hub.js"></script>
+</body>
+</html>

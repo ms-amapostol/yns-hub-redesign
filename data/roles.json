@@ -1,0 +1,1096 @@
+{
+  "generated_at": "2026-08-10T18:43:32.648Z",
+  "source": "CareerOneStop Web API (comparesalaries/wage)",
+  "wage_year": "2025",
+  "location": "United States",
+  "citation": "This data is delivered by an API from CareerOneStop, sponsored by U.S. Department of Labor, Employment and Training Administration.  \nwww.careeronestop.org\nSalary data are from U.S. Department of Labor, Bureau of Labor Statistics, Occupational Employment and Wage Statistics program (www.bls.gov/oes).\nFind more information including data update schedules at CareerOneStop’s Data Sources (https://www.careeronestop.org/Help/data-sources.aspx).\n",
+  "band_definition": {
+    "early": [
+      "Pct10",
+      "Pct25"
+    ],
+    "some": [
+      "Pct25",
+      "Median"
+    ],
+    "experienced": [
+      "Median",
+      "Pct75"
+    ],
+    "leader": [
+      "Pct75",
+      "Pct90"
+    ]
+  },
+  "crosswalk_version": 1,
+  "categories": {
+    "social": {
+      "name": "Social & Community Work",
+      "early": [
+        {
+          "soc": "21-1093",
+          "title": "Social & Human Service Assistant",
+          "soc_title": "Social and Human Service Assistants",
+          "low": 34200,
+          "high": 38150,
+          "percentiles": {
+            "low": "Pct10",
+            "high": "Pct25"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "21-1094",
+          "title": "Community Health Worker",
+          "soc_title": "Community Health Workers",
+          "low": 38810,
+          "high": 45640,
+          "percentiles": {
+            "low": "Pct10",
+            "high": "Pct25"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "some": [
+        {
+          "soc": "21-1093",
+          "title": "Social & Human Service Assistant",
+          "soc_title": "Social and Human Service Assistants",
+          "low": 38150,
+          "high": 45930,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "21-1094",
+          "title": "Community Health Worker",
+          "soc_title": "Community Health Workers",
+          "low": 45640,
+          "high": 51850,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "21-1021",
+          "title": "Child, Family & School Social Worker",
+          "soc_title": "Child, Family, and School Social Workers",
+          "low": 48270,
+          "high": 59550,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "experienced": [
+        {
+          "soc": "21-1021",
+          "title": "Child, Family & School Social Worker",
+          "soc_title": "Child, Family, and School Social Workers",
+          "low": 59550,
+          "high": 76070,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "21-1022",
+          "title": "Healthcare Social Worker",
+          "soc_title": "Healthcare Social Workers",
+          "low": 67880,
+          "high": 82240,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "leader": [
+        {
+          "soc": "11-9151",
+          "title": "Social & Community Service Manager",
+          "soc_title": "Social and Community Service Managers",
+          "low": 64290,
+          "high": 103200,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ]
+    },
+    "edu": {
+      "name": "Education & Training",
+      "early": [
+        {
+          "soc": "25-9045",
+          "title": "Teaching Assistant",
+          "soc_title": "Teaching Assistants, Except Postsecondary",
+          "low": 27150,
+          "high": 31060,
+          "percentiles": {
+            "low": "Pct10",
+            "high": "Pct25"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "13-1151",
+          "title": "Training & Development Specialist",
+          "soc_title": "Training and Development Specialists",
+          "low": 38760,
+          "high": 50110,
+          "percentiles": {
+            "low": "Pct10",
+            "high": "Pct25"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "some": [
+        {
+          "soc": "13-1151",
+          "title": "Training & Development Specialist",
+          "soc_title": "Training and Development Specialists",
+          "low": 50110,
+          "high": 69280,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "25-2021",
+          "title": "Elementary School Teacher",
+          "soc_title": "Elementary School Teachers, Except Special Education",
+          "low": 57710,
+          "high": 63970,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "experienced": [
+        {
+          "soc": "25-2021",
+          "title": "Elementary School Teacher",
+          "soc_title": "Elementary School Teachers, Except Special Education",
+          "low": 63970,
+          "high": 81450,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "13-1151",
+          "title": "Training & Development Specialist",
+          "soc_title": "Training and Development Specialists",
+          "low": 69280,
+          "high": 95050,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "25-9031",
+          "title": "Instructional Coordinator",
+          "soc_title": "Instructional Coordinators",
+          "low": 77440,
+          "high": 98820,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "leader": [
+        {
+          "soc": "11-9032",
+          "title": "School Principal",
+          "soc_title": "Education Administrators, Kindergarten through Secondary",
+          "low": 86040,
+          "high": 134630,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "11-3131",
+          "title": "Training & Development Manager",
+          "soc_title": "Training and Development Managers",
+          "low": 101850,
+          "high": 176870,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ]
+    },
+    "health": {
+      "name": "Health & Care",
+      "early": [
+        {
+          "soc": "31-1131",
+          "title": "Nursing Assistant",
+          "soc_title": "Nursing Assistants",
+          "low": 33940,
+          "high": 37260,
+          "percentiles": {
+            "low": "Pct10",
+            "high": "Pct25"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "31-9092",
+          "title": "Medical Assistant",
+          "soc_title": "Medical Assistants",
+          "low": 36050,
+          "high": 38470,
+          "percentiles": {
+            "low": "Pct10",
+            "high": "Pct25"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "some": [
+        {
+          "soc": "29-2061",
+          "title": "Licensed Practical Nurse",
+          "soc_title": "Licensed Practical and Licensed Vocational Nurses",
+          "low": 59000,
+          "high": 64400,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "29-2034",
+          "title": "Radiologic Technologist",
+          "soc_title": "Radiologic Technologists and Technicians",
+          "low": 64810,
+          "high": 80110,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "experienced": [
+        {
+          "soc": "29-2034",
+          "title": "Radiologic Technologist",
+          "soc_title": "Radiologic Technologists and Technicians",
+          "low": 80110,
+          "high": 98750,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "29-1141",
+          "title": "Registered Nurse",
+          "soc_title": "Registered Nurses",
+          "low": 97550,
+          "high": 112350,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "29-1071",
+          "title": "Physician Assistant",
+          "soc_title": "Physician Assistants",
+          "low": 135880,
+          "high": 163980,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "leader": [
+        {
+          "soc": "11-9111",
+          "title": "Medical & Health Services Manager",
+          "soc_title": "Medical and Health Services Managers",
+          "low": 94700,
+          "high": 166100,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ]
+    },
+    "gov": {
+      "name": "Government & Public Service",
+      "early": [
+        {
+          "soc": "43-4061",
+          "title": "Eligibility Interviewer, Government Programs",
+          "soc_title": "Eligibility Interviewers, Government Programs",
+          "low": 38900,
+          "high": 45910,
+          "percentiles": {
+            "low": "Pct10",
+            "high": "Pct25"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "some": [
+        {
+          "soc": "43-4061",
+          "title": "Eligibility Interviewer, Government Programs",
+          "soc_title": "Eligibility Interviewers, Government Programs",
+          "low": 45910,
+          "high": 54210,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "13-1041",
+          "title": "Compliance Officer",
+          "soc_title": "Compliance Officers",
+          "low": 61280,
+          "high": 80730,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "19-3051",
+          "title": "Urban & Regional Planner",
+          "soc_title": "Urban and Regional Planners",
+          "low": 72020,
+          "high": 89320,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "experienced": [
+        {
+          "soc": "13-1041",
+          "title": "Compliance Officer",
+          "soc_title": "Compliance Officers",
+          "low": 80730,
+          "high": 109010,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "19-3051",
+          "title": "Urban & Regional Planner",
+          "soc_title": "Urban and Regional Planners",
+          "low": 89320,
+          "high": 110030,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "13-1111",
+          "title": "Management Analyst",
+          "soc_title": "Management Analysts",
+          "low": 101860,
+          "high": 133370,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "leader": [
+        {
+          "soc": "11-1021",
+          "title": "General & Operations Manager",
+          "soc_title": "General and Operations Managers",
+          "low": 72320,
+          "high": 167280,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ]
+    },
+    "creative": {
+      "name": "Creative & Media",
+      "early": [
+        {
+          "soc": "27-1024",
+          "title": "Graphic Designer",
+          "soc_title": "Graphic Designers",
+          "low": 39520,
+          "high": 49040,
+          "percentiles": {
+            "low": "Pct10",
+            "high": "Pct25"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "27-3043",
+          "title": "Writer",
+          "soc_title": "Writers and Authors",
+          "low": 44310,
+          "high": 58230,
+          "percentiles": {
+            "low": "Pct10",
+            "high": "Pct25"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "some": [
+        {
+          "soc": "27-1024",
+          "title": "Graphic Designer",
+          "soc_title": "Graphic Designers",
+          "low": 49040,
+          "high": 62960,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "27-4032",
+          "title": "Film & Video Editor",
+          "soc_title": "Film and Video Editors",
+          "low": 52720,
+          "high": 75420,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "27-3043",
+          "title": "Writer",
+          "soc_title": "Writers and Authors",
+          "low": 58230,
+          "high": 76910,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "experienced": [
+        {
+          "soc": "27-4032",
+          "title": "Film & Video Editor",
+          "soc_title": "Film and Video Editors",
+          "low": 75420,
+          "high": 105310,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "27-1021",
+          "title": "Commercial & Industrial Designer",
+          "soc_title": "Commercial and Industrial Designers",
+          "low": 83910,
+          "high": 109050,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "27-1011",
+          "title": "Art Director",
+          "soc_title": "Art Directors",
+          "low": 114850,
+          "high": 162640,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "leader": [
+        {
+          "soc": "27-1011",
+          "title": "Art Director",
+          "soc_title": "Art Directors",
+          "low": 82480,
+          "high": 162640,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "11-2011",
+          "title": "Advertising & Promotions Manager",
+          "soc_title": "Advertising and Promotions Managers",
+          "low": 91370,
+          "high": 201050,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ]
+    },
+    "trades": {
+      "name": "Skilled Trades",
+      "early": [
+        {
+          "soc": "49-9071",
+          "title": "Maintenance & Repair Worker",
+          "soc_title": "Maintenance and Repair Workers, General",
+          "low": 35350,
+          "high": 40840,
+          "percentiles": {
+            "low": "Pct10",
+            "high": "Pct25"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "49-9021",
+          "title": "HVAC Technician",
+          "soc_title": "Heating, Air Conditioning, and Refrigeration Mechanics and Installers",
+          "low": 40050,
+          "high": 48360,
+          "percentiles": {
+            "low": "Pct10",
+            "high": "Pct25"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "some": [
+        {
+          "soc": "49-9021",
+          "title": "HVAC Technician",
+          "soc_title": "Heating, Air Conditioning, and Refrigeration Mechanics and Installers",
+          "low": 48360,
+          "high": 61010,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "47-2111",
+          "title": "Electrician",
+          "soc_title": "Electricians",
+          "low": 49430,
+          "high": 63190,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "47-2152",
+          "title": "Plumber / Pipefitter",
+          "soc_title": "Plumbers, Pipefitters, and Steamfitters",
+          "low": 50190,
+          "high": 63800,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "experienced": [
+        {
+          "soc": "47-2111",
+          "title": "Electrician",
+          "soc_title": "Electricians",
+          "low": 63190,
+          "high": 83940,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "47-2152",
+          "title": "Plumber / Pipefitter",
+          "soc_title": "Plumbers, Pipefitters, and Steamfitters",
+          "low": 63800,
+          "high": 85110,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "49-9041",
+          "title": "Industrial Machinery Mechanic",
+          "soc_title": "Industrial Machinery Mechanics",
+          "low": 64520,
+          "high": 78780,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "leader": [
+        {
+          "soc": "47-1011",
+          "title": "Construction Trades Supervisor",
+          "soc_title": "First-Line Supervisors of Construction Trades and Extraction Workers",
+          "low": 63400,
+          "high": 101460,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ]
+    },
+    "biz": {
+      "name": "Business & Operations",
+      "early": [
+        {
+          "soc": "43-9061",
+          "title": "Office Clerk",
+          "soc_title": "Office Clerks, General",
+          "low": 30310,
+          "high": 36350,
+          "percentiles": {
+            "low": "Pct10",
+            "high": "Pct25"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "41-3091",
+          "title": "Sales Representative, Services",
+          "soc_title": "Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel",
+          "low": 37980,
+          "high": 47670,
+          "percentiles": {
+            "low": "Pct10",
+            "high": "Pct25"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "some": [
+        {
+          "soc": "41-3091",
+          "title": "Sales Representative, Services",
+          "soc_title": "Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel",
+          "low": 47670,
+          "high": 69990,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "13-1082",
+          "title": "Project Management Specialist",
+          "soc_title": "Project Management Specialists",
+          "low": 78440,
+          "high": 102320,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "experienced": [
+        {
+          "soc": "13-1111",
+          "title": "Management Analyst",
+          "soc_title": "Management Analysts",
+          "low": 101860,
+          "high": 133370,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "13-1082",
+          "title": "Project Management Specialist",
+          "soc_title": "Project Management Specialists",
+          "low": 102320,
+          "high": 133100,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "leader": [
+        {
+          "soc": "11-1021",
+          "title": "General & Operations Manager",
+          "soc_title": "General and Operations Managers",
+          "low": 72320,
+          "high": 167280,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ]
+    },
+    "tech": {
+      "name": "Technology",
+      "early": [
+        {
+          "soc": "15-1232",
+          "title": "Computer User Support Specialist",
+          "soc_title": "Computer User Support Specialists",
+          "low": 40980,
+          "high": 49000,
+          "percentiles": {
+            "low": "Pct10",
+            "high": "Pct25"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "some": [
+        {
+          "soc": "15-1211",
+          "title": "Computer Systems Analyst",
+          "soc_title": "Computer Systems Analysts",
+          "low": 82860,
+          "high": 105850,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "15-1252",
+          "title": "Software Developer",
+          "soc_title": "Software Developers",
+          "low": 105210,
+          "high": 135980,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "experienced": [
+        {
+          "soc": "15-1211",
+          "title": "Computer Systems Analyst",
+          "soc_title": "Computer Systems Analysts",
+          "low": 105850,
+          "high": 134110,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "15-2051",
+          "title": "Data Scientist",
+          "soc_title": "Data Scientists",
+          "low": 120230,
+          "high": 158880,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "15-1212",
+          "title": "Information Security Analyst",
+          "soc_title": "Information Security Analysts",
+          "low": 129180,
+          "high": 163500,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "15-1252",
+          "title": "Software Developer",
+          "soc_title": "Software Developers",
+          "low": 135980,
+          "high": 171980,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "leader": [
+        {
+          "soc": "11-3021",
+          "title": "Computer & Information Systems Manager",
+          "soc_title": "Computer and Information Systems Managers",
+          "low": 138060,
+          "high": 220730,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ]
+    },
+    "finance": {
+      "name": "Finance & Data",
+      "early": [
+        {
+          "soc": "43-3031",
+          "title": "Bookkeeping & Accounting Clerk",
+          "soc_title": "Bookkeeping, Accounting, and Auditing Clerks",
+          "low": 36000,
+          "high": 43520,
+          "percentiles": {
+            "low": "Pct10",
+            "high": "Pct25"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "some": [
+        {
+          "soc": "13-2053",
+          "title": "Insurance Underwriter",
+          "soc_title": "Insurance Underwriters",
+          "low": 64620,
+          "high": 81370,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "13-2011",
+          "title": "Accountant / Auditor",
+          "soc_title": "Accountants and Auditors",
+          "low": 67020,
+          "high": 83680,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "13-2051",
+          "title": "Financial & Investment Analyst",
+          "soc_title": "Financial and Investment Analysts",
+          "low": 79290,
+          "high": 102740,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Median"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "experienced": [
+        {
+          "soc": "13-2011",
+          "title": "Accountant / Auditor",
+          "soc_title": "Accountants and Auditors",
+          "low": 83680,
+          "high": 109810,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        },
+        {
+          "soc": "13-2051",
+          "title": "Financial & Investment Analyst",
+          "soc_title": "Financial and Investment Analysts",
+          "low": 102740,
+          "high": 133340,
+          "percentiles": {
+            "low": "Median",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ],
+      "leader": [
+        {
+          "soc": "11-3031",
+          "title": "Financial Manager",
+          "soc_title": "Financial Managers",
+          "low": 125490,
+          "high": 219980,
+          "percentiles": {
+            "low": "Pct25",
+            "high": "Pct75"
+          },
+          "scope": "national",
+          "area": "United States"
+        }
+      ]
+    }
+  },
+  "wage_growth": {
+    "occupations": 24,
+    "median_pct": 64,
+    "min_pct": 31,
+    "max_pct": 145,
+    "note": "Growth from an occupation's lowest published band to its highest, as a percentage of the lowest, across occupations appearing at more than one experience level. Selected percentiles only."
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "_readme": "Append these four blocks to the `activities` array in data/activities.json. Sort numbers leave gaps. Purposes reuse the existing keys; add 'prepare' door mapping later if the hub moves to doors.",
+  "activities": [
+    {
+      "slug": "grit",
+      "name": "Bounce Back",
+      "tagline": "The last time it went wrong, and what you did next.",
+      "description": "You pick one setback from the last year or two and say what you actually did after it. The activity names your pattern, gives you one idea about how the story you tell shapes the next move, and has you rewrite the setback the second way. Six minutes.",
+      "href": "activity.html?a=grit",
+      "purpose": "reflect",
+      "minutes": 6,
+      "status": "live",
+      "tier": "free",
+      "sort": 95,
+      "tags": ["Six minutes", "No wrong answers"],
+      "keywords": ["resilience", "grit", "gave up", "failed", "setback", "rejected", "quit", "growth mindset", "mindset", "keep going", "discouraged"],
+      "provides": ["setback_response"]
+    },
+    {
+      "slug": "bounce",
+      "name": "The Week It's Hard",
+      "tagline": "A plan for the week you want to quit.",
+      "description": "Written on a good week, read on a bad one. You name your warning sign, the person you'll text, and walk one real problem through the ABLE method from the class. It ends as a short note to future you, saved to your profile. Five minutes.",
+      "href": "activity.html?a=bounce",
+      "purpose": "reflect",
+      "minutes": 8,
+      "status": "live",
+      "tier": "free",
+      "sort": 96,
+      "tags": ["Eight minutes", "ABLE method"],
+      "keywords": ["want to quit", "burnt out", "bad week", "motivation", "give up", "hard", "overwhelmed", "support", "accountability"],
+      "provides": ["hard_week_plan", "hard_week_person"]
+    },
+    {
+      "slug": "money101",
+      "name": "Money, Plainly",
+      "tagline": "Paycheck, rent, the gap. No jargon.",
+      "description": "Three numbers you already know: what comes in, what's spoken for, and what's left. You tap them out, name what most months feel like, and get one idea about the only number a budget is really about. If you did The Floor, it reuses your number. Eight minutes.",
+      "href": "activity.html?a=money101",
+      "purpose": "decide",
+      "minutes": 8,
+      "status": "live",
+      "tier": "free",
+      "sort": 97,
+      "tags": ["Eight minutes", "Numbers"],
+      "keywords": ["budget", "money", "paycheck", "rent", "broke", "bills", "debt", "savings", "can't afford", "financial", "paycheck to paycheck"],
+      "provides": ["money_in", "money_fixed", "money_gap"]
+    },
+    {
+      "slug": "smart6",
+      "name": "Your Six Months",
+      "tagline": "One goal, with dates on it.",
+      "description": "You start from one line of your five-year picture, write what has to be true six months from today, say what someone could check, decide whether it's the right size, tie it to your why, and pick the smallest first step for this week. It reads your top category, your route and your why if you have them. Twelve minutes.",
+      "href": "activity.html?a=smart6",
+      "purpose": "prepare",
+      "minutes": 15,
+      "status": "live",
+      "tier": "free",
+      "sort": 98,
+      "tags": ["Fifteen minutes", "Free text"],
+      "keywords": ["goal", "plan", "six months", "smart goal", "next step", "commit", "roadmap", "what now", "action plan", "deadline"],
+      "provides": ["smart_goal", "smart_first_step"]
+    }
+  ]
+}
