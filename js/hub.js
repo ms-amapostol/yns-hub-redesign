@@ -608,7 +608,9 @@
             }).join("")
           + "</section>"
         : "")
-      +'<div class="am-foot"><span class="small muted">Signed out, this lives in this browser only.</span><button class="btn btn-ghost" onclick="YNS.portfolio()">Save as PDF</button><button class="btn btn-primary" onclick="YNS.closeList()">Close</button></div></div>';
+      /* Saving lives in Portfolio, which already includes this list. One
+         place for one job. */
+      +'<div class="am-foot"><span class="small muted">Signed out, this lives in this browser only. Everything here is in your Portfolio too, which is the one you can save.</span><button class="btn btn-primary" onclick="YNS.closeList()">Close</button></div></div>';
   };
 
   /* Editing is not a big deal and does not need a warning: it is their
