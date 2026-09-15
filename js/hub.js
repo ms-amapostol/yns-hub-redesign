@@ -433,6 +433,122 @@
     toggle(slug);
   }
 
+  /* ---------- the portfolio ------------------------------------------
+
+     Everything they have done, on paper. Built into a hidden container
+     and printed with a stylesheet that hides the rest of the page, so
+     there is no popup to be blocked and no library to load. Every
+     browser's print dialog offers Save as PDF, including on a phone.
+
+     This is the artefact someone takes to an interview, a careers
+     adviser, a parent, or a college application. It is also, bluntly,
+     the best argument for making an account: it is everything that
+     would otherwise disappear with the browser cache. */
+  function fmtDate(ts){
+    try { return new Date(ts).toLocaleDateString(undefined,{ day:"numeric", month:"long", year:"numeric" }); }
+    catch(e){ return ""; }
+  }
+  function money2(n){ return "$" + Math.round(n||0).toLocaleString("en-US"); }
+
+  function portfolioHTML(){
+    var f=state.facts, out=[];
+    var doneNames=[];
+    DOORS.forEach(function(d){
+      var got=d.acts.filter(function(sl){ return state.done[sl]; }).map(function(sl){ return ACTS[sl].name; });
+      if (got.length) doneNames.push({ door:d.title, items:got });
+    });
+    var total=Object.keys(ACTS).filter(function(k){ return !ACTS[k].soon; }).length;
+    var n=doneCount();
+
+    out.push('<header class="pp-head"><img src="assets/yns-lockup.svg" alt="Your Next Step" class="pp-logo">'
+      +'<h1>What I\u2019ve worked out so far</h1>'
+      +'<p class="pp-sub">'+n+" of "+total+" activities \u00b7 "+fmtDate(Date.now())+"</p></header>");
+
+    /* 1. Direction */
+    if (f.top_category){
+      var roles=[];
+      try {
+        var band=window.YNS_ROLES.categories[f.top_category][f.level||"early"] || window.YNS_ROLES.categories[f.top_category].early;
+        roles=(band||[]).slice(0,3).map(function(r){ return "<li>"+r.title+" \u00b7 "+money2(r.low)+"\u2013"+money2(r.high)+"</li>"; });
+      } catch(e){}
+      out.push('<section class="pp-sec"><h2>Where I\u2019m pointing</h2>'
+        +"<p class=\"pp-big\">"+catLabel(f.top_category)+"</p>"
+        +(f.interest_top?"<p>"+f.interest_top+"</p>":"")
+        +(roles.length?"<p class=\"pp-label\">Roles at my level</p><ul>"+roles.join("")+"</ul>":"")
+        +((state.evidence||[]).length?'<p class="pp-note">Based on '+(state.evidence||[]).length+" activity"+((state.evidence||[]).length>1?" results":" result")+", weighed together.</p>":"")
+        +"</section>");
+    }
+
+    /* 2. Their own words */
+    var own=[];
+    if (f.why_statement) own.push(["Why I\u2019m doing this", "\u201c"+f.why_statement+"\u201d"]);
+    if (f.why_test) own.push(["How I\u2019ll know it worked", f.why_test]);
+    var st=Array.isArray(f.strengths)?f.strengths:[];
+    if (st.length) own.push(["What I\u2019m good at", st.map(function(x){return x.moment;}).filter(Boolean).join("<br>")]);
+    if (f.setback_story) own.push(["A setback, and what I did", f.setback_story]);
+    if (own.length){
+      out.push('<section class="pp-sec"><h2>In my own words</h2>'
+        + own.map(function(r){ return '<div class="pp-row"><div class="pp-t">'+r[0]+"</div><div>"+r[1]+"</div></div>"; }).join("")
+        + "</section>");
+    }
+
+    /* 3. The plan */
+    if (f.smart_goal || f.smart_month1 || f.smart_months){
+      out.push('<section class="pp-sec"><h2>My plan</h2>'
+        +(f.vision_line?'<div class="pp-row"><div class="pp-t">Five years</div><div>'+f.vision_line+"</div></div>":"")
+        +(f.smart_goal?'<div class="pp-row"><div class="pp-t">Six months</div><div>'+f.smart_goal+"</div></div>":"")
+        +(f.smart_measure?'<div class="pp-row"><div class="pp-t">How I\u2019ll know</div><div>'+f.smart_measure+"</div></div>":"")
+        +(f.smart_month1?'<div class="pp-row"><div class="pp-t">Month one</div><div style="white-space:pre-line">'+f.smart_month1+"</div></div>":"")
+        +(f.smart_months?'<div class="pp-row"><div class="pp-t">Month by month</div><div style="white-space:pre-line">'+f.smart_months+"</div></div>":"")
+        +(f.route_preference?'<div class="pp-row"><div class="pp-t">How I get in</div><div>'+(ROUTE_WORD[f.route_preference]||f.route_preference)+"</div></div>":"")
+        +(f.premortem_risk?'<div class="pp-row"><div class="pp-t">What might trip me up</div><div>'+f.premortem_risk+"</div></div>":"")
+        +"</section>");
+    }
+
+    /* 4. Commitments */
+    var open=openSteps(), doneSteps=steps().filter(function(x){return x.done;});
+    if (open.length || doneSteps.length){
+      out.push('<section class="pp-sec"><h2>What I said I\u2019d do</h2>'
+        +(open.length?"<ul>"+open.map(function(s2){ return "<li>"+s2.text+' <span class="pp-note">'+s2.from+"</span></li>"; }).join("")+"</ul>":"")
+        +(doneSteps.length?'<p class="pp-label">Already done</p><ul>'+doneSteps.map(function(s2){ return "<li>"+s2.text+"</li>"; }).join("")+"</ul>":"")
+        +"</section>");
+    }
+
+    /* 5. Money */
+    var mon=[];
+    if (f.floor_monthly) mon.push(["What I need to earn", money2(f.floor_monthly)+" a month"]);
+    if (f.money_in) mon.push(["What comes in", money2(f.money_in)+" a month"]);
+    if (f.budget_plan){
+      var a=f.budget_plan, tot=0, save=(a.save||0)+(a.buffer||0);
+      Object.keys(a).forEach(function(k){ tot+=a[k]||0; });
+      mon.push(["Budgeted", money2(tot)+" a month, all assigned"]);
+      if (save) mon.push(["Going to me", money2(save)+" a month"]);
+    }
+    if (f.training_appetite) mon.push(["Training I\u2019m up for", APPETITE_WORD[f.training_appetite]||f.training_appetite]);
+    if (mon.length){
+      out.push('<section class="pp-sec"><h2>My numbers</h2>'
+        + mon.map(function(r){ return '<div class="pp-row"><div class="pp-t">'+r[0]+"</div><div>"+r[1]+"</div></div>"; }).join("")
+        + "</section>");
+    }
+
+    /* 6. What was completed */
+    if (doneNames.length){
+      out.push('<section class="pp-sec"><h2>What I\u2019ve finished</h2>'
+        + doneNames.map(function(d){ return '<div class="pp-row"><div class="pp-t">'+d.door+"</div><div>"+d.items.join(" \u00b7 ")+"</div></div>"; }).join("")
+        + "</section>");
+    }
+
+    out.push('<footer class="pp-foot"><p>Made with Your Next Step. Pay ranges are national bands from the US Bureau of Labor Statistics via CareerOneStop, narrowed to the experience level stated above. They are not starting salaries or offers.</p></footer>');
+    return out.join("");
+  }
+
+  YNS.portfolio=function(){
+    var root=$("printRoot");
+    root.innerHTML=portfolioHTML();
+    /* Give the browser a tick to lay it out before the dialog opens. */
+    setTimeout(function(){ window.print(); }, 60);
+  };
+
   /* ---------- the Planner ------------------------------------------
 
      Every activity ends by asking for one thing to do this week. Until
@@ -492,7 +608,7 @@
             }).join("")
           + "</section>"
         : "")
-      +'<div class="am-foot"><span class="small muted">Signed out, this lives in this browser only.</span><button class="btn btn-primary" onclick="YNS.closeList()">Close</button></div></div>';
+      +'<div class="am-foot"><span class="small muted">Signed out, this lives in this browser only.</span><button class="btn btn-ghost" onclick="YNS.portfolio()">Save as PDF</button><button class="btn btn-primary" onclick="YNS.closeList()">Close</button></div></div>';
   };
 
   /* Editing is not a big deal and does not need a warning: it is their
@@ -648,7 +764,7 @@
       +'<h1>What we know about you</h1>'
       +'<p class="am-scene">Your own words, the direction they add up to, and the facts worth having to hand. Take any of it straight into an application or a message.</p>'
       +body
-      +'<div class="am-foot"><button class="btn btn-ghost" onclick="YNS.copyProfile(this)">Copy it all as text</button><button class="btn btn-primary" onclick="YNS.closeList()">Close</button></div></div>';
+      +'<div class="am-foot"><button class="btn btn-ghost" onclick="YNS.copyProfile(this)">Copy it all as text</button><button class="btn btn-ghost" onclick="YNS.portfolio()">Save as PDF</button><button class="btn btn-primary" onclick="YNS.closeList()">Close</button></div></div>';
   };
   YNS.closeList=function(){ $("actModal").style.display="none"; $("actModal").innerHTML=""; document.body.classList.remove("modal-open"); };
   YNS.copyProfile=function(btn){
