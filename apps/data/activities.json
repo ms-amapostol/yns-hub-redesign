@@ -1,0 +1,525 @@
+{
+  "_readme": [
+    "The activity registry. Adding an activity should mean adding a block here",
+    "and writing the content — nothing else.",
+    "",
+    "Previously the list lived in three places (a CHECK constraint in the database,",
+    "a JS array, and label maps in the admin dashboard) and had already drifted.",
+    "This is the single source for anything user-facing.",
+    "",
+    "  slug      Must match activity_runs.activity and the Quiz.init() argument.",
+    "  purpose   Drives the filter buttons on the hub. One of the keys in",
+    "            `purposes` below. Pick the one the person would pick, not the",
+    "            one that is technically most accurate.",
+    "  tags      Shown on the card. Short, human, max ~3 or the card gets noisy.",
+    "  keywords  NOT shown. Searched. This is where you put the words people",
+    "            actually type — 'don't know what to do', 'stuck', 'career change'",
+    "            — including phrasings you would never print on a card.",
+    "  minutes   Honest estimate. People decide on this more than anything else.",
+    "  status    live | soon | retired. Only `live` is startable; `soon` renders",
+    "            greyed with no link; `retired` is hidden entirely.",
+    "  tier      free | paid. Cosmetic today (a lock badge). Real gating has to",
+    "            happen server-side — see DYNAMIC-ACTIVITIES.md.",
+    "  sort      Ascending. Leave gaps of 10 so you can insert without renumbering.",
+    "  description  Two or three sentences. Shown when somebody opens a locked",
+    "            card, and it is the only pitch that activity gets to make while",
+    "            they cannot start it. Say what happens in it, not why it matters.",
+    "  provides  Fact keys this activity is a good way to establish. EDITORIAL,",
+    "            not mechanical: every quiz that scores axes technically feeds",
+    "            top_category, so listing all of them would name six activities",
+    "            and help nobody. List the ones whose job it actually is.",
+    "            Used to turn a `requires` into 'complete X, Y or Z to unlock'.",
+    "  requires  OPTIONAL. Natural prerequisites only: an activity that CANNOT",
+    "            work without prior data, never one locked to manufacture",
+    "            progression. {facts:[...], runs:n, distinctActivities:n, because}.",
+    "            `because` is mandatory and is shown on the locked card.",
+    "            Gating is motivational, not security: it resolves client-side.",
+    "            See ACTIVITY-SPEC.md."
+  ],
+  "version": 3,
+  "purposes": [
+    {
+      "key": "explore",
+      "label": "Explore options",
+      "blurb": "Work out what's out there and what fits"
+    },
+    {
+      "key": "decide",
+      "label": "Narrow it down",
+      "blurb": "Choose between things you're weighing up"
+    },
+    {
+      "key": "prepare",
+      "label": "Get ready to apply",
+      "blurb": "Turn a direction into something you can send"
+    },
+    {
+      "key": "reflect",
+      "label": "Check in",
+      "blurb": "Revisit where you are as things change"
+    }
+  ],
+  "activities": [
+    {
+      "slug": "why",
+      "name": "Your Why",
+      "tagline": "The reason underneath all of it, in your own words.",
+      "description": "Two minutes and mostly your own words. Why you're looking at all, who it's for, and how long it's been true. What you write goes to the top of your profile, so it's there on the week you can't remember why you started.",
+      "href": "activity.html?a=why",
+      "purpose": "explore",
+      "minutes": 2,
+      "status": "live",
+      "tier": "free",
+      "sort": 5,
+      "tags": [
+        "Two minutes",
+        "Free text"
+      ],
+      "keywords": [
+        "why",
+        "motivation",
+        "purpose",
+        "meaning",
+        "reason",
+        "what's the point",
+        "stuck",
+        "tired",
+        "burnt out",
+        "why bother",
+        "goals",
+        "what do i want"
+      ],
+      "provides": [
+        "why_statement",
+        "why_who"
+      ]
+    },
+    {
+      "slug": "cyoa",
+      "name": "The Story",
+      "tagline": "Seven chapters of a life eighteen months from now.",
+      "description": "Seven short chapters set eighteen months from now. You pick what your day looks like, what you'd stay late for, what you'd want to be able to point at. At the end it reads back the shape of the answers and names the kinds of work that fit it.",
+      "href": "prototype-1-choose-your-own-adventure.html",
+      "purpose": "explore",
+      "minutes": 5,
+      "status": "live",
+      "tier": "free",
+      "sort": 10,
+      "tags": [
+        "Quiz",
+        "No wrong answers"
+      ],
+      "keywords": [
+        "career change",
+        "what should i do with my life",
+        "direction",
+        "lost",
+        "stuck",
+        "starting over",
+        "future",
+        "imagine",
+        "story",
+        "quiz",
+        "don't know what i want",
+        "first job"
+      ],
+      "provides": [
+        "top_category",
+        "level"
+      ]
+    },
+    {
+      "slug": "hours168",
+      "name": "168 Hours",
+      "tagline": "Where your week actually goes.",
+      "description": "There are 168 hours in a week and everybody gets the same number. You divide yours up, per day for the things you know per day and per week for the rest, and see what's left over once work, getting there and keeping life running have taken their share.",
+      "href": "activity.html?a=hours168",
+      "purpose": "explore",
+      "minutes": 4,
+      "status": "live",
+      "tier": "free",
+      "sort": 15,
+      "tags": [
+        "Sliders",
+        "Eye-opening"
+      ],
+      "keywords": [
+        "time",
+        "work life balance",
+        "busy",
+        "no time",
+        "overwhelmed",
+        "hours",
+        "week",
+        "commute",
+        "burnout",
+        "schedule",
+        "free time",
+        "exhausted"
+      ],
+      "provides": [
+        "time_drain",
+        "time_protected"
+      ]
+    },
+    {
+      "slug": "proof",
+      "name": "Proof",
+      "tagline": "Three things you're good at, with the evidence.",
+      "description": "Not what appeals to you. What you've already done. You write down moments where something worked out and you were the reason, tag what the skill was, and leave with a sentence you can paste straight into an application.",
+      "href": "activity.html?a=proof",
+      "purpose": "explore",
+      "minutes": 8,
+      "status": "live",
+      "tier": "free",
+      "sort": 18,
+      "tags": [
+        "Free text",
+        "You keep this"
+      ],
+      "keywords": [
+        "strengths",
+        "what am i good at",
+        "skills",
+        "no experience",
+        "transferable",
+        "confidence",
+        "imposter",
+        "resume bullets",
+        "achievements",
+        "evidence",
+        "nothing to put on a cv"
+      ],
+      "provides": [
+        "strengths"
+      ]
+    },
+    {
+      "slug": "dayinlife",
+      "name": "A Day In The Life",
+      "tagline": "Six moments in a day you'd actually want.",
+      "description": "Six moments from a single working day. Who's around, what the pressure feels like, what you do when it goes wrong. It's the same nine categories as The Story, reached from the texture of the day instead of the shape of the year.",
+      "href": "prototype-2-day-in-the-life.html",
+      "purpose": "explore",
+      "minutes": 5,
+      "status": "live",
+      "tier": "free",
+      "sort": 20,
+      "tags": [
+        "Quiz",
+        "Day to day"
+      ],
+      "keywords": [
+        "what job suits me",
+        "work life",
+        "routine",
+        "daily",
+        "typical day",
+        "hours",
+        "shift",
+        "office",
+        "remote",
+        "hands on",
+        "quiz",
+        "personality"
+      ],
+      "provides": [
+        "top_category",
+        "level"
+      ]
+    },
+    {
+      "slug": "floor",
+      "name": "The Floor",
+      "tagline": "The number you need, not the number you want.",
+      "description": "You build up what your month costs, line by line, and get the number a job has to clear before anything else about it matters. Then you guess what the work pays and see the published figure next to your guess.",
+      "href": "activity.html?a=floor",
+      "purpose": "decide",
+      "minutes": 6,
+      "status": "live",
+      "tier": "free",
+      "sort": 25,
+      "tags": [
+        "Calculator",
+        "Real wage data"
+      ],
+      "keywords": [
+        "salary",
+        "money",
+        "how much do i need",
+        "afford",
+        "pay cut",
+        "budget",
+        "cost of living",
+        "rent",
+        "bills",
+        "can i afford to change careers",
+        "what does it pay",
+        "wages"
+      ],
+      "provides": [
+        "floor_monthly",
+        "floor_gap",
+        "runway_months"
+      ]
+    },
+    {
+      "slug": "budget",
+      "name": "Spend Your 100",
+      "tagline": "What you'd really pay for in a job.",
+      "description": "A hundred points and six things you might want from a job. You can't have all of them, so you spend. What's left tells you which of them you'd defend and which you were only saying.",
+      "href": "prototype-3-budget-allocation.html",
+      "purpose": "decide",
+      "minutes": 4,
+      "status": "live",
+      "tier": "free",
+      "sort": 30,
+      "tags": [
+        "Trade-offs",
+        "Quick"
+      ],
+      "keywords": [
+        "priorities",
+        "what matters",
+        "salary vs",
+        "money or happiness",
+        "pay",
+        "flexibility",
+        "work life balance",
+        "trade off",
+        "compromise",
+        "values",
+        "decide",
+        "choose"
+      ],
+      "provides": [
+        "value_ranking",
+        "top_category",
+        "level"
+      ]
+    },
+    {
+      "slug": "constraints",
+      "name": "Fixed or Assumed",
+      "tagline": "Which of your reasons are actually true.",
+      "description": "Ten cards, each one a reason a change isn't possible. You sort them into what's genuinely fixed and what you've never actually checked. Then you pick the one you'd least like to be wrong about.",
+      "href": "activity.html?a=constraints",
+      "purpose": "decide",
+      "minutes": 5,
+      "status": "live",
+      "tier": "free",
+      "sort": 35,
+      "tags": [
+        "Card sort",
+        "Uncomfortable"
+      ],
+      "keywords": [
+        "stuck",
+        "can't",
+        "impossible",
+        "too old",
+        "no qualifications",
+        "excuses",
+        "blockers",
+        "trapped",
+        "no options",
+        "childcare",
+        "can't move",
+        "too late"
+      ],
+      "provides": [
+        "constraints_fixed",
+        "constraints_assumed"
+      ]
+    },
+    {
+      "slug": "career_abcs",
+      "name": "Career ABCs",
+      "tagline": "Build the resume, the cover letter and the interview.",
+      "description": "The long one. Turns what you've got into a resume, a cover letter and answers to the questions you'll be asked, one section at a time, with everything saved as you go.",
+      "href": "career-abcs_v2.html",
+      "purpose": "prepare",
+      "minutes": 20,
+      "status": "live",
+      "tier": "free",
+      "sort": 40,
+      "tags": [
+        "Builder",
+        "Longer"
+      ],
+      "keywords": [
+        "resume",
+        "cv",
+        "cover letter",
+        "interview",
+        "apply",
+        "application",
+        "job search",
+        "practice",
+        "questions",
+        "experience",
+        "skills",
+        "how do i write",
+        "no experience"
+      ],
+      "provides": []
+    },
+    {
+      "slug": "premortem",
+      "name": "What Might Trip You Up",
+      "tagline": "Find the thing most likely to knock this off course, while you can still plan for it.",
+      "description": "A few minutes imagining that the change didn't work out, so you can spot what would most likely get in the way while there's still time to do something about it. It's a trick people who plan difficult things for a living use all the time, and it works because we're all better at explaining a problem that has already happened than at seeing one coming. Nothing you pick is a prediction, and none of it is shared.",
+      "href": "activity.html?a=premortem",
+      "purpose": "decide",
+      "minutes": 7,
+      "status": "live",
+      "tier": "free",
+      "sort": 45,
+      "tags": [
+        "Gentle start",
+        "Practical"
+      ],
+      "keywords": [
+        "scared",
+        "afraid",
+        "risk",
+        "what if it goes wrong",
+        "fear",
+        "failure",
+        "worried",
+        "second thoughts",
+        "doubt",
+        "should i",
+        "cold feet",
+        "nervous",
+        "anxious",
+        "overwhelmed",
+        "pre-mortem",
+        "premortem",
+        "plan b",
+        "what could go wrong",
+        "stuck between"
+      ],
+      "provides": [
+        "premortem_risk"
+      ],
+      "requires": {
+        "facts": [
+          "top_category"
+        ],
+        "because": "It walks through how a move into one particular field might go wrong, so it needs to know which field you're weighing up."
+      }
+    },
+    {
+      "slug": "doors",
+      "name": "Three Doors",
+      "tagline": "Every realistic route in, side by side.",
+      "description": "Every realistic way into the field your answers point to, side by side, with how long each takes, what it costs and what you need to get in. You mark the ones you could start within a year and the ones you couldn't.",
+      "href": "activity.html?a=doors",
+      "purpose": "prepare",
+      "minutes": 7,
+      "status": "live",
+      "tier": "free",
+      "sort": 50,
+      "tags": [
+        "Comparison",
+        "Costs and timings"
+      ],
+      "keywords": [
+        "how do i get into",
+        "training",
+        "degree",
+        "apprenticeship",
+        "certificate",
+        "college",
+        "retrain",
+        "qualifications",
+        "course",
+        "school",
+        "how long does it take",
+        "cost of training"
+      ],
+      "provides": [
+        "route_preference",
+        "route_blocker"
+      ],
+      "requires": {
+        "facts": [
+          "top_category"
+        ],
+        "because": "It compares the ways into one specific field — degree, apprenticeship, certificate, sideways move — so it needs to know which field."
+      }
+    },
+    {
+      "slug": "conversations",
+      "name": "Two Conversations",
+      "tagline": "Who to talk to, and the message already written.",
+      "description": "Fifteen minutes with somebody who does the work will tell you more than anything else here. This works out who that person is, writes the message for you, and gives you the one question worth asking.",
+      "href": "activity.html?a=conversations",
+      "purpose": "prepare",
+      "minutes": 6,
+      "status": "live",
+      "tier": "free",
+      "sort": 60,
+      "tags": [
+        "Composer",
+        "Copy and send"
+      ],
+      "keywords": [
+        "networking",
+        "who do i ask",
+        "informational interview",
+        "reach out",
+        "message",
+        "linkedin",
+        "contacts",
+        "don't know anyone",
+        "shy",
+        "cold email",
+        "introductions"
+      ],
+      "provides": [
+        "contact_named"
+      ],
+      "requires": {
+        "facts": [
+          "top_category"
+        ],
+        "because": "It writes you a message to someone doing the work you're considering — which needs to know what that work is."
+      }
+    },
+    {
+      "slug": "stilltrue",
+      "name": "Still True?",
+      "tagline": "What's changed since last time, and whether it still holds.",
+      "description": "Everything you've told us, in your words, with the date on it. You go through and say what still holds. Things you mark as changed are recorded as a change rather than quietly overwritten, and your confidence score can go down as a result.",
+      "href": "activity.html?a=stilltrue",
+      "purpose": "reflect",
+      "minutes": 4,
+      "status": "live",
+      "tier": "free",
+      "sort": 70,
+      "tags": [
+        "Check-in",
+        "Uses your history"
+      ],
+      "keywords": [
+        "check in",
+        "changed my mind",
+        "update",
+        "revisit",
+        "review",
+        "progress",
+        "still",
+        "months later",
+        "come back",
+        "has anything changed"
+      ],
+      "provides": [],
+      "requires": {
+        "distinctActivities": 2,
+        "because": "It works by comparing what you said before against what's true now, so it needs at least two activities to compare."
+      }
+    }
+  ]
+}

@@ -1,0 +1,143 @@
+{
+  "_readme": [
+    "The editorial heart of the salary pipeline: which real occupations sit behind",
+    "each of the nine YNS categories, and at which experience levels each one is a",
+    "sensible thing to show someone.",
+    "",
+    "This is the ONE part no script can do for you. Everything downstream is",
+    "mechanical. Read it as a careers adviser, not as a developer.",
+    "",
+    "  soc     A Standard Occupational Classification code. CareerOneStop also",
+    "          accepts O*NET codes and plain titles, but SOC is the stable key.",
+    "  title   What YNS shows the person. Deliberately allowed to differ from the",
+    "          official SOC title, which is often bureaucratic ('Social and Human",
+    "          Service Assistants'). The official title is preserved in the output",
+    "          as soc_title so the mapping stays auditable.",
+    "  levels  Which of early | some | experienced | leader this role should appear",
+    "          for. A role can appear at several. Wage bands come from percentiles",
+    "          of the SAME occupation, so 'early' is not a different job — it is",
+    "          the bottom of this one.",
+    "  manager Set true when the occupation IS the step up to management. At the",
+    "          'leader' level those get the interquartile range (p25-p75) instead",
+    "          of p75-p90, because taking the top band of an already-senior job",
+    "          counts the seniority twice and badly overstates the number. Ignored",
+    "          at every other level.",
+    "  band    Optional [lowPercentile, highPercentile] override for one occupation,",
+    "          e.g. [\"Pct10\",\"Median\"]. Use sparingly and say why in review.",
+    "",
+    "THE CODES BELOW ARE A STARTING POINT I DRAFTED, NOT A VETTED CROSSWALK.",
+    "Review every line. The build script validates that each code resolves to real",
+    "wage data and will list anything that does not, but it cannot tell you that a",
+    "code is real and still the wrong choice for the category."
+  ],
+
+  "version": 1,
+  "soc_revision": "2018",
+
+  "categories": {
+    "social": {
+      "name": "Social & Community Work",
+      "occupations": [
+        { "soc": "21-1093", "title": "Social & Human Service Assistant", "levels": ["early", "some"] },
+        { "soc": "21-1094", "title": "Community Health Worker",         "levels": ["early", "some"] },
+        { "soc": "21-1021", "title": "Child, Family & School Social Worker", "levels": ["some", "experienced"] },
+        { "soc": "21-1022", "title": "Healthcare Social Worker",        "levels": ["experienced"] },
+        { "soc": "11-9151", "title": "Social & Community Service Manager", "levels": ["leader"], "manager": true }
+      ]
+    },
+
+    "edu": {
+      "name": "Education & Training",
+      "occupations": [
+        { "soc": "25-9045", "title": "Teaching Assistant",              "levels": ["early"] },
+        { "soc": "13-1151", "title": "Training & Development Specialist", "levels": ["early", "some", "experienced"] },
+        { "soc": "25-2021", "title": "Elementary School Teacher",       "levels": ["some", "experienced"] },
+        { "soc": "25-9031", "title": "Instructional Coordinator",       "levels": ["experienced"] },
+        { "soc": "11-3131", "title": "Training & Development Manager",  "levels": ["leader"], "manager": true },
+        { "soc": "11-9032", "title": "School Principal",                "levels": ["leader"], "manager": true }
+      ]
+    },
+
+    "health": {
+      "name": "Health & Care",
+      "occupations": [
+        { "soc": "31-9092", "title": "Medical Assistant",               "levels": ["early"] },
+        { "soc": "31-1131", "title": "Nursing Assistant",               "levels": ["early"] },
+        { "soc": "29-2061", "title": "Licensed Practical Nurse",        "levels": ["some"] },
+        { "soc": "29-2034", "title": "Radiologic Technologist",         "levels": ["some", "experienced"] },
+        { "soc": "29-1141", "title": "Registered Nurse",                "levels": ["experienced"] },
+        { "soc": "29-1071", "title": "Physician Assistant",             "levels": ["experienced"] },
+        { "soc": "11-9111", "title": "Medical & Health Services Manager", "levels": ["leader"], "manager": true }
+      ]
+    },
+
+    "gov": {
+      "name": "Government & Public Service",
+      "occupations": [
+        { "soc": "43-4061", "title": "Eligibility Interviewer, Government Programs", "levels": ["early", "some"] },
+        { "soc": "13-1041", "title": "Compliance Officer",              "levels": ["some", "experienced"] },
+        { "soc": "19-3051", "title": "Urban & Regional Planner",        "levels": ["some", "experienced"] },
+        { "soc": "13-1111", "title": "Management Analyst",              "levels": ["experienced"] },
+        { "soc": "11-1021", "title": "General & Operations Manager",    "levels": ["leader"], "manager": true }
+      ]
+    },
+
+    "creative": {
+      "name": "Creative & Media",
+      "occupations": [
+        { "soc": "27-1024", "title": "Graphic Designer",                "levels": ["early", "some"] },
+        { "soc": "27-3043", "title": "Writer",                          "levels": ["early", "some"] },
+        { "soc": "27-4032", "title": "Film & Video Editor",             "levels": ["some", "experienced"] },
+        { "soc": "27-1021", "title": "Commercial & Industrial Designer", "levels": ["experienced"] },
+        { "soc": "27-1011", "title": "Art Director",                    "levels": ["experienced", "leader"], "manager": true },
+        { "soc": "11-2011", "title": "Advertising & Promotions Manager", "levels": ["leader"], "manager": true }
+      ]
+    },
+
+    "trades": {
+      "name": "Skilled Trades",
+      "occupations": [
+        { "soc": "49-9071", "title": "Maintenance & Repair Worker",     "levels": ["early"] },
+        { "soc": "49-9021", "title": "HVAC Technician",                 "levels": ["early", "some"] },
+        { "soc": "47-2111", "title": "Electrician",                     "levels": ["some", "experienced"] },
+        { "soc": "47-2152", "title": "Plumber / Pipefitter",            "levels": ["some", "experienced"] },
+        { "soc": "49-9041", "title": "Industrial Machinery Mechanic",   "levels": ["experienced"] },
+        { "soc": "47-1011", "title": "Construction Trades Supervisor",  "levels": ["leader"], "manager": true }
+      ]
+    },
+
+    "biz": {
+      "name": "Business & Operations",
+      "occupations": [
+        { "soc": "43-9061", "title": "Office Clerk",                    "levels": ["early"] },
+        { "soc": "41-3091", "title": "Sales Representative, Services",  "levels": ["early", "some"] },
+        { "soc": "13-1082", "title": "Project Management Specialist",   "levels": ["some", "experienced"] },
+        { "soc": "13-1111", "title": "Management Analyst",              "levels": ["experienced"] },
+        { "soc": "11-1021", "title": "General & Operations Manager",    "levels": ["leader"], "manager": true }
+      ]
+    },
+
+    "tech": {
+      "name": "Technology",
+      "occupations": [
+        { "soc": "15-1232", "title": "Computer User Support Specialist", "levels": ["early"] },
+        { "soc": "15-1211", "title": "Computer Systems Analyst",        "levels": ["some", "experienced"] },
+        { "soc": "15-1252", "title": "Software Developer",              "levels": ["some", "experienced"] },
+        { "soc": "15-1212", "title": "Information Security Analyst",    "levels": ["experienced"] },
+        { "soc": "15-2051", "title": "Data Scientist",                  "levels": ["experienced"] },
+        { "soc": "11-3021", "title": "Computer & Information Systems Manager", "levels": ["leader"], "manager": true }
+      ]
+    },
+
+    "finance": {
+      "name": "Finance & Data",
+      "occupations": [
+        { "soc": "43-3031", "title": "Bookkeeping & Accounting Clerk",  "levels": ["early"] },
+        { "soc": "13-2011", "title": "Accountant / Auditor",            "levels": ["some", "experienced"] },
+        { "soc": "13-2053", "title": "Insurance Underwriter",           "levels": ["some"] },
+        { "soc": "13-2051", "title": "Financial & Investment Analyst",  "levels": ["some", "experienced"] },
+        { "soc": "11-3031", "title": "Financial Manager",               "levels": ["leader"], "manager": true }
+      ]
+    }
+  }
+}

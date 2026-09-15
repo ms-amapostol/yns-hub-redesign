@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Next Step: Spend Your 100</title>
+<link rel="icon" type="image/svg+xml" href="assets/yns-mark.svg">
+<link rel="apple-touch-icon" href="assets/yns-mark.svg">
+<script src="yns-theme.js?v=02f59ec1"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Questrial&display=swap">
+<link rel="stylesheet" href="yns-brand.css?v=f1642f27">
+<style>
+  :root{
+    /* Surfaces, so dark mode has something to swap. These were
+       literal var(--paper) before — correct in light, invisible in dark. */
+    --paper:#fff; --body:#3b4256; --tint-2:#dfe4fb;
+    --note-bg:var(--note-bg); --note-line:var(--note-line); --note-ink:var(--note-ink);
+    --blue:#2952e0; --blue-dark:#1b3aa8; --blue-soft:#eef1fe;
+    --ink:#101426; --muted:#6b7280; --line:#e4e7f2; --bg:#f7f8fc;
+    --warn:#c2410c; --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Poppins",ui-rounded,"Segoe UI",system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:680px;margin:0 auto;padding:28px 18px 80px}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:20px;
+    padding:32px;box-shadow:0 2px 20px rgba(20,30,80,.05)}
+
+  .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);font-weight:600;margin-bottom:10px}
+  h1{font-size:29px;line-height:1.2;margin:0 0 12px}
+  h2{font-size:24px;line-height:1.25;margin:0 0 12px}
+  .sub{font-size:15.5px;line-height:1.65;color:var(--body);margin:0 0 6px}
+
+  /* ---- the bank ---- */
+  .bank{
+    position:sticky;top:0;z-index:5;background:var(--paper);
+    display:flex;align-items:baseline;gap:10px;justify-content:center;
+    padding:16px 0 14px;margin:22px 0 6px;border-bottom:1px solid var(--line)
+  }
+  .bank .n{font-size:44px;font-weight:700;line-height:1;color:var(--blue);
+    font-variant-numeric:tabular-nums;transition:color .2s}
+  .bank .l{font-size:14px;color:var(--muted)}
+  .bank.spent .n{color:#16a34a}
+  .bank.over .n{color:var(--warn)}
+
+  /* ---- allocation rows ---- */
+  .row{padding:16px 0;border-bottom:1px solid var(--line)}
+  .row:last-of-type{border-bottom:none}
+  .rowtop{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px}
+  .rname{font-weight:600;font-size:15.5px}
+  .rval{font-size:19px;font-weight:700;color:var(--blue);font-variant-numeric:tabular-nums;min-width:34px;text-align:right}
+  .rdesc{font-size:13.5px;color:var(--muted);line-height:1.55;margin-bottom:10px}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:99px;
+    background:var(--line);outline:none;margin:0
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:24px;height:24px;border-radius:50%;
+    background:var(--blue);cursor:grab;border:3px solid var(--paper);
+    box-shadow:0 1px 6px rgba(41,82,224,.45)
+  }
+  input[type=range]::-webkit-slider-thumb:active{cursor:grabbing}
+  input[type=range]::-moz-range-thumb{
+    width:24px;height:24px;border-radius:50%;background:var(--blue);
+    cursor:grab;border:3px solid var(--paper);box-shadow:0 1px 6px rgba(41,82,224,.45)
+  }
+  .react{font-size:13px;color:var(--blue-dark);background:var(--blue-soft);
+    border-radius:8px;padding:8px 11px;margin-top:10px;line-height:1.5;display:none}
+  .react.on{display:block}
+
+  /* ---- stacked bar ---- */
+  .stack{display:flex;height:12px;border-radius:99px;overflow:hidden;background:var(--line);margin:18px 0 6px}
+  .stack span{transition:width .18s}
+  .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted);margin-bottom:4px}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+  /* ---- choices ---- */
+  .choice{display:block;width:100%;text-align:left;cursor:pointer;background:var(--paper);
+    border:1.5px solid var(--line);border-radius:var(--radius);padding:15px 18px;
+    margin-bottom:10px;font:inherit;color:inherit;transition:.15s}
+  .choice:hover{border-color:var(--blue);background:var(--blue-soft);transform:translateY(-1px)}
+  .choice .t{font-weight:600;font-size:15.5px;display:block}
+  .choice .s{display:block;color:var(--muted);font-size:13.5px;margin-top:3px;line-height:1.5}
+
+  .btn{display:block;width:100%;background:var(--blue);color:#fff;border:none;border-radius:12px;
+    padding:15px;font:inherit;font-weight:600;font-size:16px;cursor:pointer;margin-top:22px}
+  .btn:hover{background:#3a61f0}
+  .btn:disabled{background:#c9cfe4;cursor:not-allowed}
+
+  /* ---- results ---- */
+  .result-card{border:1.5px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:14px}
+  .result-card.best{border-color:var(--blue);background:var(--blue-soft)}
+  .tag{display:inline-block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    font-weight:700;padding:5px 10px;border-radius:99px;background:var(--blue);color:#fff;margin-bottom:10px}
+  .tag.alt{background:var(--tint-2);color:var(--blue-dark)}
+  .result-card h3{margin:0 0 6px;font-size:20px}
+  .result-card .why{font-size:14px;color:var(--body);line-height:1.6;margin:0 0 8px}
+  .fitline{font-size:13px;color:var(--blue-dark);font-weight:600;margin:0 0 14px}
+  .roles{border-top:1px solid rgba(41,82,224,.15);padding-top:12px}
+  .roles .rh{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--blue-dark);font-weight:700;margin-bottom:8px}
+  .role{display:flex;justify-content:space-between;padding:7px 0;font-size:14.5px;
+    border-bottom:1px solid rgba(41,82,224,.08)}
+  .role:last-child{border-bottom:none}
+  .role .pay{font-weight:600;color:var(--blue-dark)}
+
+  .cta{margin-top:28px;padding:24px;background:var(--ink);border-radius:var(--radius);color:#fff;text-align:center}
+  .cta h3{margin:0 0 8px;font-size:19px}
+  .cta p{margin:0 0 16px;font-size:14px;color:#b9bfd4;line-height:1.6}
+  .emailrow{display:flex;gap:8px;margin-bottom:14px}
+  .emailrow input{flex:1;padding:13px 14px;border-radius:10px;border:1px solid #39405c;
+    background:#1b2138;color:#fff;font:inherit;font-size:14px}
+  .emailrow input::placeholder{color:#7a8199}
+  .cta .btn{margin-top:0;width:auto;padding:13px 22px;font-size:14px}
+
+  .back{background:none;border:none;color:var(--muted);font:inherit;font-size:13.5px;
+    cursor:pointer;padding:10px 0;margin-top:12px}
+  .back:hover{color:var(--blue)}
+  .fade{animation:fade .35s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .note{max-width:680px;margin:0 auto 18px;padding:12px 16px;background:var(--note-bg);
+    border:1px solid var(--note-line);border-radius:10px;font-size:13px;color:var(--note-ink);line-height:1.6}
+
+  /* ---- dark ----------------------------------------------------------
+     These three pages predate yns-brand.css and carry their own palette,
+     so they need their own swap. Same rules as the brand sheet: the
+     media query must lose to an explicit light choice, the attribute
+     selector must beat an OS that says light, hence both.
+
+     The results panel is left alone on purpose. It is already dark by
+     design in both themes — that inversion is what makes the result feel
+     like an arrival rather than another question. */
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --blue:#6E9BFF; --blue-dark:#9DBBFF; --blue-soft:#1E2A40;
+      --ink:#E8ECF4; --muted:#9AA6BC; --line:#2C3850; --bg:#0D1523;
+      --paper:#161F30; --body:#C3CCDC; --tint-2:#2A3A57;
+      --note-bg:#2E2A17; --note-line:#4A4324; --note-ink:#E4D9A6;
+    }
+  }
+  :root[data-theme="dark"]{
+    --blue:#6E9BFF; --blue-dark:#9DBBFF; --blue-soft:#1E2A40;
+    --ink:#E8ECF4; --muted:#9AA6BC; --line:#2C3850; --bg:#0D1523;
+    --paper:#161F30; --body:#C3CCDC; --tint-2:#2A3A57;
+    --note-bg:#2E2A17; --note-line:#4A4324; --note-ink:#E4D9A6;
+  }
+  /* Text that sat on the blue button/badge: the blue is light now. */
+  :root[data-theme="dark"] .btn, :root[data-theme="dark"] button.btn { color:#0D1523 }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .btn { color:#0D1523 }
+  }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <div id="resume"></div>
+  <div class="card" id="app" role="region" aria-live="polite" aria-label="Career quiz"></div>
+</div>
+
+<script src="yns-config.js?v=3ceff94a"></script>
+<script src="yns-supabase.js?v=d872a971"></script>
+<script src="yns-taxonomy.js?v=4bb570b3"></script>
+<script src="yns-profile.js?v=a23328d5"></script>
+<script src="quiz-shared.js?v=ee3e8651"></script>
+<script>
+if(!window.Quiz){
+  document.getElementById('app').innerHTML =
+    '<h2>quiz-shared.js didn\'t load</h2><p class="sub">Keep this file in the same folder as <b>quiz-shared.js</b> and reload.</p>';
+  throw new Error('quiz-shared.js missing');
+}
+/* Resolves once prior signals are in. render() waits on it below. */
+const READY = Quiz.init('budget');
+
+
+
+/* ---- the six things you can buy ---- */
+const VALUES = [
+  {k:"pay",   name:"Pay ceiling",       color:"#2952e0", avg:24,
+   desc:"How high the number can go if you're good at it.",
+   w:{finance:.79,biz:.77,tech:.62,trades:.43,health:.38,gov:.22,creative:.21,edu:.11,social:0},
+   hi:"Pay is your loudest signal. That's allowed, and it just means we'll rule out paths with low ceilings, even meaningful ones.",
+   lo:"You've priced money low. That opens doors most people close on themselves."},
+
+  {k:"flex",  name:"Flexibility & time", color:"#0ea5a4", avg:22,
+   desc:"Where you work, when you work, and whether evenings are yours.",
+   w:{creative:.93,tech:.69,biz:.48,social:.43,finance:.35,gov:.33,edu:.32,trades:.21,health:.09},
+   hi:"Time is the thing you're really buying. Worth knowing: this rules out most shift-based and on-site work, whatever else you say.",
+   lo:"You'll trade your calendar for the right work. That widens the field a lot."},
+
+  {k:"impact",name:"Impact on people",   color:"#e11d48", avg:19,
+   desc:"Whether a specific human is better off because you showed up.",
+   w:{social:1.43,edu:.96,health:.84,gov:.78,creative:.31,trades:.21,biz:.19,tech:.15,finance:.09},
+   hi:"You need the work to land on someone. That's a real filter, and it points somewhere specific.",
+   lo:"You don't need the job to be the meaning. That's honest, and it's more common than people admit."},
+
+  {k:"stable",name:"Stability & security",color:"#7c3aed", avg:17,
+   desc:"Predictable hours, predictable paycheck, low chance of a bad surprise.",
+   w:{gov:1.11,edu:.75,health:.75,finance:.71,trades:.64,biz:.48,social:.43,tech:.31,creative:.10},
+   hi:"You want solid ground. That's a legitimate strategy and it favours licensed, regulated, and public-sector paths.",
+   lo:"You can tolerate volatility. That's the entry fee for the highest-upside paths."},
+
+  {k:"growth",name:"Growth & advancement",color:"#ea580c", avg:12,
+   desc:"A ladder that keeps going, and a job that looks different in five years.",
+   w:{biz:.87,finance:.71,tech:.69,creative:.52,edu:.43,social:.43,trades:.43,health:.38,gov:.33},
+   hi:"You're optimising for the next job rather than this one. That changes which first step is right.",
+   lo:"You're not chasing a ladder. That makes craft-based and steady-state work a better fit than management tracks."},
+
+  {k:"craft", name:"Craft & mastery",     color:"#65a30d", avg:6,
+   desc:"Getting genuinely, provably good at one hard thing.",
+   w:{trades:1.07,creative:.93,health:.56,tech:.54,edu:.43,finance:.35,social:.29,gov:.22,biz:.19},
+   hi:"You want to be good at something, more than you want to be senior in it. That points at a different kind of career.",
+   lo:"You'd rather be broad than deep. That points toward generalist and management paths."}
+];
+
+
+/* The "most people spend about N" comparison is OFF until you have real data.
+   The v.avg numbers below are invented placeholders — do not ship them as fact.
+   Once you've collected a few hundred real budgets, compute the true medians,
+   put them in v.avg, and flip this to true. */
+const SHOW_BENCHMARKS = false;
+
+const TOTAL = 100;
+let alloc = {pay:0,flex:0,impact:0,stable:0,growth:0,craft:0};
+let won = null, lost = null, level = "early", screen = 0;
+const app = document.getElementById('app');
+
+const spent = ()=> VALUES.reduce((s,v)=>s+alloc[v.k],0);
+const left  = ()=> TOTAL - spent();
+
+/* ---------- screen 0: the allocation ---------- */
+function renderAlloc(){
+  app.className='card fade';
+  app.innerHTML = `
+    <div class="eyebrow">One question, no wrong answers</div>
+    <h1>You have 100 points. Spend them on the career you actually want.</h1>
+    <p class="sub">Go with the one you'd take, rather than the one that sounds good out loud. You can't have everything at 100, which is the whole point.</p>
+
+    <div class="bank" id="bank" role="status" aria-live="polite" aria-atomic="true">
+      <span class="n" id="bankn">100</span>
+      <span class="l" id="bankl">points left to spend</span>
+    </div>
+
+    <div class="stack" id="stack"></div>
+    <div class="legend" id="legend"></div>
+
+    <div id="rows"></div>
+    <button class="btn" id="go" disabled>Spend all 100 to continue</button>
+  `;
+
+  const rows = document.getElementById('rows');
+  rows.innerHTML = VALUES.map(v=>`
+    <div class="row">
+      <div class="rowtop">
+        <label class="rname" for="sl-${v.k}">${v.name}</label>
+        <span class="rval" id="val-${v.k}" aria-hidden="true">0</span>
+      </div>
+      <div class="rdesc" id="desc-${v.k}">${v.desc}</div>
+      <input type="range" min="0" max="100" step="1" value="0" id="sl-${v.k}"
+             aria-describedby="desc-${v.k}" aria-valuetext="0 of 100 points">
+      <div class="react" id="rx-${v.k}" role="status" aria-live="polite"></div>
+    </div>`).join('');
+
+  VALUES.forEach(v=>{
+    const sl = document.getElementById('sl-'+v.k);
+    sl.addEventListener('input', ()=>{
+      const others = spent() - alloc[v.k];
+      const capped = Math.min(+sl.value, TOTAL - others);
+      sl.value = capped; alloc[v.k] = capped;
+      sl.setAttribute('aria-valuetext', capped + ' of 100 points');
+      paint();
+    });
+  });
+  paint();
+
+  document.getElementById('go').onclick = ()=>{ Quiz.trackStep(0,'allocation',JSON.stringify(alloc)); screen=1; render(); window.scrollTo({top:0,behavior:'smooth'}); };
+}
+
+function paint(){
+  const l = left();
+  const bank = document.getElementById('bank');
+  document.getElementById('bankn').textContent = l;
+  document.getElementById('bankl').textContent = l===0 ? "all spent, nice" : (l===1?"point left to spend":"points left to spend");
+  bank.className = 'bank' + (l===0?' spent':'');
+
+  VALUES.forEach(v=>{
+    document.getElementById('val-'+v.k).textContent = alloc[v.k];
+    const rx = document.getElementById('rx-'+v.k);
+    if(alloc[v.k] >= 30){ rx.textContent = v.hi; rx.className='react on'; }
+    else if(alloc[v.k] === 0 && spent() >= 60){ rx.textContent = v.lo; rx.className='react on'; }
+    else rx.className='react';
+  });
+
+  document.getElementById('stack').innerHTML =
+    VALUES.map(v=>`<span style="width:${alloc[v.k]}%;background:${v.color}"></span>`).join('') +
+    (l>0?`<span style="width:${l}%;background:transparent"></span>`:'');
+  document.getElementById('legend').innerHTML =
+    VALUES.filter(v=>alloc[v.k]>0).map(v=>`<span><i style="background:${v.color}"></i>${v.name} ${alloc[v.k]}</span>`).join('');
+
+  const go = document.getElementById('go');
+  go.disabled = l !== 0;
+  go.textContent = l===0 ? "That's my 100 →" : `Spend ${l} more to continue`;
+}
+
+/* ---------- screen 1: the head-to-head ----------
+   The allocation already tells us their #1 and their #6 with confidence.
+   The genuine ambiguity is in the middle, so we force a choice between
+   their 2nd and 3rd funded values — the one place the data is undecided.
+   Both options cost money they actually committed, so there is no free
+   answer available (which was the flaw in the old "what could you live
+   without" version: you could discard something you'd already zeroed). */
+function contenders(){
+  const funded = VALUES.filter(v=>alloc[v.k] > 0)
+                       .sort((a,b)=>alloc[b.k]-alloc[a.k]);
+  if(funded.length < 3) return funded.slice(0,2);   // e.g. all-in on one or two
+  return [funded[1], funded[2]];
+}
+
+function renderTradeoff(){
+  const pair = contenders();
+  if(pair.length < 2){                 // everything on a single value
+    screen = 2; return render();
+  }
+  const [a,b] = pair;
+  const topName = VALUES.filter(v=>alloc[v.k]>0)
+                        .sort((x,y)=>alloc[y.k]-alloc[x.k])[0].name.toLowerCase();
+
+  const gap = Math.abs(alloc[a.k] - alloc[b.k]);
+  const tight = gap <= 8;
+
+  app.className='card fade';
+  app.innerHTML = `
+    <div class="eyebrow">The follow-up</div>
+    <h2>${tight ? "These two are almost tied." : "Both of these got real money."}</h2>
+    <p class="sub">Your budget was clear about <b>${topName}</b>.</p>
+    <p class="sub" style="margin-top:10px">You put <b>${alloc[a.k]}</b> on ${a.name.toLowerCase()} and <b>${alloc[b.k]}</b> on ${b.name.toLowerCase()}. ${
+      tight ? "Close enough that we can't call it."
+            : "A job will rarely hand you both of them properly." }</p>
+    <p class="sub" style="margin-top:14px"><b>A job comes along with one of them, properly, and not the other. Which do you take?</b></p>
+    <div style="height:18px"></div>
+    ${[a,b].map(v=>`
+      <button type="button" class="choice" data-k="${v.k}">
+        <span class="t">${v.name}</span>
+        <span class="s">${v.desc}</span>
+      </button>`).join('')}
+    <button type="button" class="back" id="back">← redo my budget</button>
+  `;
+  app.querySelectorAll('[data-k]').forEach(el=>el.onclick=()=>{
+    won  = el.dataset.k;
+    lost = (won === a.k) ? b.k : a.k;
+    Quiz.trackStep(1,'tradeoff', won + '_over_' + lost);
+    screen=2; render(); window.scrollTo({top:0,behavior:'smooth'});
+  });
+  document.getElementById('back').onclick = ()=>{ screen=0; render(); };
+}
+
+/* ---------- screen 2: the one boring question ---------- */
+function renderLevel(){
+  /* If another activity already asked this, confirm it instead of
+     asking cold — and mark which one they picked last time. */
+  const prior = Quiz.priorLevel();
+  app.className='card fade';
+  app.innerHTML = `
+    <div class="eyebrow">Last one</div>
+    <h2>${prior ? "Still standing in the same place?" : "Where are you standing today?"}</h2>
+    <p class="sub">${prior
+      ? "You've told us this before, so this is just a confirmation. Tap the same one if nothing's changed."
+      : "This is the boring question, and it decides which roles we show you. A budget is no use if it points at jobs you can't reach yet."}</p>
+    <div style="height:18px"></div>
+    ${Quiz.LEVELS.map(l=>`<button type="button" class="choice" data-l="${l.k}"><span class="t">${l.t}</span><span class="s">${l.s}${
+      l.k === prior ? ". This is what you told us last time" : ""}</span></button>`).join('')}
+  `;
+  app.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{
+    level = b.dataset.l; Quiz.trackStep(2,'level',level); screen=3; render(); window.scrollTo({top:0,behavior:'smooth'});
+  });
+}
+
+/* ---------- screen 3: results ---------- */
+/* Cosine similarity between the budget you spent and each category's
+   profile — shape, not magnitude, so a spiky profile can't win by default.
+   The head-to-head TRANSFERS points from the value they passed over to the
+   one they chose. A transfer (rather than a subtraction) keeps the budget at
+   100 and breaks the near-tie in the direction they just told us, without
+   inventing a preference they never expressed. */
+const TRANSFER = 8;
+function score(){
+  const vec = {};
+  VALUES.forEach(v => {
+    let n = alloc[v.k] || 0;
+    if(v.k === won)  n += TRANSFER;
+    if(v.k === lost) n  = Math.max(0, n - TRANSFER);
+    vec[v.k] = n;
+  });
+  const profiles = {};
+  Object.keys(Quiz.CATS).forEach(c => {
+    profiles[c] = {};
+    VALUES.forEach(v => { profiles[c][v.k] = v.w[c]||0; });
+  });
+  return Quiz.cosineAgainst(vec, profiles, VALUES.map(v=>v.k));
+}
+
+function renderResults(){
+  const s = score();
+  const all = Object.keys(Quiz.CATS).map(k=>({k,v:s[k]})).sort((a,b)=>b.v-a.v);
+  const max = all[0].v, min = all[all.length-1].v;
+  const span = (max - min) || 1;
+  /* stretch across the full 9-category range so 2nd and 3rd don't read as
+     near-ties with the winner — best match lands at 100, worst at 50 */
+  const pctOf = v => Math.round(50 + 50*Math.pow((v - min)/span, 2.5));
+  const ranked = all.slice(0,3);
+  const top = ranked[0].k;
+  const labels = ['Best match','Strong fit','Worth exploring'];
+  const levelWord = Quiz.LEVEL_WORD[level];
+
+  /* only ever name values they actually funded — otherwise an all-in budget
+     reads back a second value they spent nothing on */
+  const sorted = VALUES.filter(v=>alloc[v.k] > 0).sort((a,b)=>alloc[b.k]-alloc[a.k]);
+  const t1 = sorted[0], t2 = sorted[1];
+  const wonName  = won  ? VALUES.find(v=>v.k===won).name.toLowerCase()  : null;
+  const lostName = lost ? VALUES.find(v=>v.k===lost).name.toLowerCase() : null;
+
+  /* Real, computed-from-their-own-input observations. No invented comparisons. */
+  const zeros = VALUES.filter(v=>alloc[v.k]===0);
+  const obs = [];
+  if(t1 && alloc[t1.k] >= 40) obs.push(`you put <b>${alloc[t1.k]} of your 100</b> on ${t1.name.toLowerCase()} alone`);
+  if(zeros.length){
+    const n = zeros.map(v=>v.name.toLowerCase());
+    const list = n.length===1 ? n[0]
+      : n.slice(0,-1).join(', ') + (n.length>2?',':'') + ' or ' + n[n.length-1];
+    obs.push(`you spent nothing at all on ${list}`);
+  }
+  if(VALUES.every(v=>alloc[v.k]>=10 && alloc[v.k]<=25)) obs.push(`you spread it almost evenly, so you're not willing to give any of it up yet`);
+
+  const benchmarks = SHOW_BENCHMARKS
+    ? VALUES.filter(v=>alloc[v.k] - v.avg >= 12)
+        .map(v=>`you spent <b>${alloc[v.k]}</b> on ${v.name.toLowerCase()} where most people spend about ${v.avg}`)
+    : obs;
+
+  const cards = ranked.map((r,n)=>{
+    const c = Quiz.CATS[r.k];
+    const roles = Quiz.rolesFor(r.k, level);
+    const pct = pctOf(r.v);
+    return `
+      <div class="result-card ${n===0?'best':''}">
+        <span class="tag ${n===0?'':'alt'}">${labels[n]}</span>
+        <h3>${c.name}</h3>
+        <p class="why">${c.blurb}</p>
+        <p class="fitline">${pct}% match to how you spent your budget</p>
+        <div class="roles">
+          <div class="rh">Roles matched to your ${levelWord} experience</div>
+          ${roles.map(x=>`<div class="role"><span>${x[0]}</span><span class="pay">${x[1]}</span></div>`).join('')}
+        </div>
+      </div>`;
+  }).join('');
+
+  app.className='card fade';
+  app.innerHTML = `
+    <div class="eyebrow">Your budget, read back</div>
+    <h1>You're ${Quiz.ARCHETYPE[top]}.</h1>
+    <p class="sub">${ t2
+        ? `You put most of your money on <b>${t1.name.toLowerCase()}</b> and <b>${t2.name.toLowerCase()}</b>.`
+        : `You put every one of your 100 points on <b>${t1.name.toLowerCase()}</b>. That's not a budget, that's a conviction.` }${
+      wonName ? ` Then, made to choose between them, you took <b>${wonName}</b> over <b>${lostName}</b>, which is the part your budget alone couldn't tell us.` : ''
+    }</p>
+    ${benchmarks.length?`<p class="sub" style="margin-top:12px">What stands out: ${benchmarks.join(', and ')}.</p>`:''}
+    <div class="stack" style="margin-top:20px">${VALUES.map(v=>`<span style="width:${alloc[v.k]}%;background:${v.color}"></span>`).join('')}</div>
+    <div class="legend">${VALUES.filter(v=>alloc[v.k]>0).map(v=>`<span><i style="background:${v.color}"></i>${v.name} ${alloc[v.k]}</span>`).join('')}</div>
+    <div style="height:24px"></div>
+    ${cards}
+    ${Quiz.continuityHTML(top)}
+    ${Quiz.salaryNote()}
+    <div class="cta">
+      <h3>Want the full map?</h3>
+      <p>The 90-day plan for getting from where you are to any of these, plus what to learn first.</p>
+      ${Quiz.emailFormHTML()}
+      <p style="margin:0;font-size:12.5px">Or start the program, $9.99/month</p>
+    </div>
+    ${Quiz.shareHTML()}
+    <button type="button" class="back" id="restart" style="margin-left:18px">↺ spend it differently</button>
+  `;
+
+  Quiz.wireEmailForm(app, {result: top, level: level, allocation: alloc, chose: won, over: lost});
+  Quiz.wireShare(app, top);
+  document.getElementById('restart').onclick = ()=>{ Quiz.track('restart',{}); Quiz.clear(); location.reload(); };
+  Quiz.finish({
+    top: top,
+    level: level,
+    allocation: alloc,
+    scores: s,
+    ranked: all.map(r=>r.k),
+    answers: {chose: won, over: lost}
+  });
+  Quiz.clear();
+}
+
+function render(){
+  if(screen===0) renderAlloc();
+  else if(screen===1) renderTradeoff();
+  else if(screen===2) renderLevel();
+  else renderResults();
+}
+
+READY.then(function(){
+  const prior = Quiz.priorLevel();
+  if(prior) level = prior;   // still confirmed on screen 2, just pre-set
+  render();
+});
+</script>
+<script>/* review-build bridge: tell the hub when a run is saved */(function(){try{var o=localStorage.setItem.bind(localStorage);localStorage.setItem=function(k,v){o(k,v);if(k==="yns_pending_runs"&&window.parent!==window)window.parent.postMessage({yns:"run",key:k},"*");};}catch(e){}})();</script>
+</body>
+</html>

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Next Step: The Story of Your Next Job</title>
+<link rel="icon" type="image/svg+xml" href="assets/yns-mark.svg">
+<link rel="apple-touch-icon" href="assets/yns-mark.svg">
+<script src="yns-theme.js?v=02f59ec1"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Questrial&display=swap">
+<link rel="stylesheet" href="yns-brand.css?v=f1642f27">
+<style>
+  :root{
+    /* Surfaces, so dark mode has something to swap. These were
+       literal var(--paper) before — correct in light, invisible in dark. */
+    --paper:#fff; --body:#3b4256; --tint-2:#dfe4fb;
+    --note-bg:var(--note-bg); --note-line:var(--note-line); --note-ink:var(--note-ink);
+    --blue:#2952e0; --blue-dark:#1b3aa8; --blue-soft:#eef1fe;
+    --ink:#101426; --muted:#6b7280; --line:#e4e7f2; --bg:#f7f8fc; --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Poppins",ui-rounded,"Segoe UI",system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:660px;margin:0 auto;padding:28px 18px 80px}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:20px;
+    padding:34px 32px;box-shadow:0 2px 20px rgba(20,30,80,.05)}
+
+  .chapters{display:flex;gap:6px;margin-bottom:26px}
+  .chapters div{height:4px;flex:1;background:var(--line);border-radius:99px;transition:background .4s}
+  .chapters div.done{background:var(--blue)}
+
+  .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);font-weight:600;margin-bottom:10px}
+  h1{font-size:30px;line-height:1.2;margin:0 0 14px}
+  h2{font-size:25px;line-height:1.25;margin:0 0 14px}
+  .scene{font-size:16px;line-height:1.65;color:var(--body);margin:0 0 8px}
+  .scene em{color:var(--ink);font-style:normal;font-weight:600}
+  .prompt{font-size:16px;font-weight:600;margin:22px 0 14px}
+
+  .choice{display:block;width:100%;text-align:left;cursor:pointer;background:var(--paper);
+    border:1.5px solid var(--line);border-radius:var(--radius);padding:16px 18px;
+    margin-bottom:10px;font:inherit;color:inherit;
+    transition:border-color .15s, background .15s, transform .12s}
+  .choice:hover{border-color:var(--blue);background:var(--blue-soft);transform:translateY(-1px)}
+  .choice .t{font-weight:600;font-size:15.5px;display:block}
+  .choice .s{display:block;color:var(--muted);font-size:13.5px;margin-top:4px;line-height:1.5}
+
+  .offers{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .offer{cursor:pointer;background:var(--paper);border:1.5px solid var(--line);border-radius:var(--radius);
+    padding:20px 18px;font:inherit;color:inherit;text-align:left;transition:.15s}
+  .offer:hover{border-color:var(--blue);background:var(--blue-soft)}
+  .offer .co{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .offer .sal{font-size:26px;font-weight:700;color:var(--blue);margin:8px 0 10px}
+  .offer ul{margin:0;padding-left:16px;font-size:13.5px;color:var(--body);line-height:1.8}
+
+  .echo{margin-top:26px;padding-top:18px;border-top:1px dashed var(--line);
+    font-size:13px;color:var(--muted);line-height:1.7}
+  .echo b{color:var(--body);font-weight:600}
+
+  .back{background:none;border:none;color:var(--muted);font:inherit;font-size:13.5px;
+    cursor:pointer;padding:8px 0;margin-top:14px}
+  .back:hover{color:var(--blue)}
+
+  .result-card{border:1.5px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:14px}
+  .result-card.best{border-color:var(--blue);background:var(--blue-soft)}
+  .tag{display:inline-block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    font-weight:700;padding:5px 10px;border-radius:99px;background:var(--blue);color:#fff;margin-bottom:10px}
+  .tag.alt{background:var(--tint-2);color:var(--blue-dark)}
+  .result-card h3{margin:0 0 6px;font-size:20px}
+  .result-card .why{font-size:14px;color:var(--body);line-height:1.6;margin:0 0 8px}
+  .fitline{font-size:13px;color:var(--blue-dark);font-weight:600;margin:0 0 14px}
+  .roles{border-top:1px solid rgba(41,82,224,.15);padding-top:12px}
+  .roles .rh{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--blue-dark);font-weight:700;margin-bottom:8px}
+  .role{display:flex;justify-content:space-between;padding:7px 0;font-size:14.5px;
+    border-bottom:1px solid rgba(41,82,224,.08)}
+  .role:last-child{border-bottom:none}
+  .role .pay{font-weight:600;color:var(--blue-dark)}
+
+  .cta{margin-top:28px;padding:24px;background:var(--ink);border-radius:var(--radius);color:#fff;text-align:center}
+  .cta h3{margin:0 0 8px;font-size:19px}
+  .cta p{margin:0 0 16px;font-size:14px;color:#b9bfd4;line-height:1.6}
+  .btn{background:var(--blue);color:#fff;border:none;border-radius:10px;
+    padding:13px 26px;font:inherit;font-weight:600;font-size:15px;cursor:pointer}
+  .btn:hover{background:#3a61f0}
+  .btn:disabled{background:#4a5273;cursor:not-allowed}
+
+  .fade{animation:fade .35s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .note{max-width:660px;margin:0 auto 18px;padding:12px 16px;background:var(--note-bg);
+    border:1px solid var(--note-line);border-radius:10px;font-size:13px;color:var(--note-ink);line-height:1.6}
+
+  /* ---- dark ----------------------------------------------------------
+     These three pages predate yns-brand.css and carry their own palette,
+     so they need their own swap. Same rules as the brand sheet: the
+     media query must lose to an explicit light choice, the attribute
+     selector must beat an OS that says light, hence both.
+
+     The results panel is left alone on purpose. It is already dark by
+     design in both themes — that inversion is what makes the result feel
+     like an arrival rather than another question. */
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --blue:#6E9BFF; --blue-dark:#9DBBFF; --blue-soft:#1E2A40;
+      --ink:#E8ECF4; --muted:#9AA6BC; --line:#2C3850; --bg:#0D1523;
+      --paper:#161F30; --body:#C3CCDC; --tint-2:#2A3A57;
+      --note-bg:#2E2A17; --note-line:#4A4324; --note-ink:#E4D9A6;
+    }
+  }
+  :root[data-theme="dark"]{
+    --blue:#6E9BFF; --blue-dark:#9DBBFF; --blue-soft:#1E2A40;
+    --ink:#E8ECF4; --muted:#9AA6BC; --line:#2C3850; --bg:#0D1523;
+    --paper:#161F30; --body:#C3CCDC; --tint-2:#2A3A57;
+    --note-bg:#2E2A17; --note-line:#4A4324; --note-ink:#E4D9A6;
+  }
+  /* Text that sat on the blue button/badge: the blue is light now. */
+  :root[data-theme="dark"] .btn, :root[data-theme="dark"] button.btn { color:#0D1523 }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .btn { color:#0D1523 }
+  }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <div id="resume"></div>
+  <div class="card" id="app" role="region" aria-live="polite" aria-label="Career quiz"></div>
+</div>
+
+<script src="yns-config.js?v=3ceff94a"></script>
+<script src="yns-supabase.js?v=d872a971"></script>
+<script src="yns-taxonomy.js?v=4bb570b3"></script>
+<script src="yns-profile.js?v=a23328d5"></script>
+<script src="quiz-shared.js?v=ee3e8651"></script>
+<script>
+if(!window.Quiz){
+  document.getElementById('app').innerHTML =
+    '<h2>quiz-shared.js didn\'t load</h2><p class="scene">Keep this file in the same folder as ' +
+    '<b>quiz-shared.js</b> and reload.</p>';
+  throw new Error('quiz-shared.js missing');
+}
+/* Resolves once we know whether this person has done anything before.
+   Everything below renders off the back of it, so Chapter One can
+   already reflect what a previous activity learned. */
+const READY = Quiz.init('cyoa');
+
+/* ------------------------------------------------------------------
+   THE STORY — seven beats.
+   Each option scores the six shared axes (people / analysis / making /
+   leading / hands / order). Cosine matching against the category
+   profiles happens in quiz-shared.js, so this file is pure content.
+-------------------------------------------------------------------*/
+const BEATS = [
+{
+  id:"wake", eyebrow:"Chapter One", title:"Eighteen months from now.",
+  scene:[
+    "You wake up before your alarm, and not because you're anxious. Because you're <em>ready</em>.",
+    "Something changed this year. You can't quite point to the day it happened, but the version of you lying here is not the version who took a career quiz on a Tuesday night.",
+    "You open your eyes. Where are you?"
+  ],
+  prompt:"Pick the one that gives you a small, involuntary yes.",
+  options:[
+    {t:"Your own place, coffee already brewing, no commute",
+     s:"The day is yours to shape. You'll be working by 8, in whatever you slept in.",
+     echo:"you build your day around freedom", a:{making:2, analysis:2}},
+    {t:"A locker room, pulling on boots",
+     s:"You're on site by 7. By tonight something will exist that didn't this morning.",
+     echo:"you want the day to leave evidence", a:{hands:3, order:1}},
+    {t:"A building where people are already waiting for you",
+     s:"Someone needs you at 8:30 sharp. The day has a shape and you're part of it.",
+     echo:"you want to be needed at a specific time and place", a:{people:3, order:1}},
+    {t:"An office you actually like walking into",
+     s:"There's a team, a whiteboard, and a problem that's been bugging everyone for a week.",
+     echo:"you want a team around you", a:{leading:2, people:1, analysis:1}}
+  ]
+},
+{
+  id:"first_hour", eyebrow:"Chapter Two", title:"The first real hour.",
+  scene:[
+    "You've cleared the small stuff. There's a stretch of the morning that belongs to you, and one thing on the list you're actually looking forward to.",
+    "This is the part you'd do for free. This is the part you'd stay late for."
+  ],
+  prompt:"What is it?",
+  options:[
+    {t:"Sitting with someone who's stuck, until they aren't",
+     s:"One conversation. They walk out different than they walked in.",
+     echo:"you're energized by unsticking people", a:{people:3}},
+    {t:"Taking apart a mess until you find the actual cause",
+     s:"Everyone's been treating the symptom. You want the root.",
+     echo:"you chase root causes", a:{analysis:3, order:1}},
+    {t:"Making something and then making it better",
+     s:"A draft, a design, a prototype. It's rough. You're going to fix it.",
+     echo:"you need to make things", a:{making:3}},
+    {t:"Getting five moving pieces to line up",
+     s:"Three people, two deadlines, one plan. You're the reason it works.",
+     echo:"you orchestrate", a:{leading:3, order:1}},
+    {t:"Working with your hands until it's right",
+     s:"There's a physical thing in front of you and a clear standard for done.",
+     echo:"you want to work with your hands", a:{hands:3}}
+  ]
+},
+{
+  id:"breaks", eyebrow:"Chapter Three", title:"Then it goes wrong.",
+  scene:[
+    "11:40am. Something breaks. A person, a plan, a number that doesn't add up. Everyone's looking around to see who's going to handle it.",
+    "You realize, with a little surprise, that it's you."
+  ],
+  prompt:"What's the first thing you do?",
+  options:[
+    {t:"Get the people in a room and talk it through",
+     s:"Half of this is a communication problem. You start there.",
+     echo:"you lead through people", a:{people:3, leading:1}},
+    {t:"Pull the data and find out what actually happened",
+     s:"Opinions are cheap. You want the record.",
+     echo:"you go to the evidence first", a:{analysis:3, order:2}},
+    {t:"Start fixing it yourself, right now",
+     s:"Analysis later. Something needs to work again in the next twenty minutes.",
+     echo:"you move first and think while moving", a:{hands:3, making:1}},
+    {t:"Rethink the whole approach, because this was going to break eventually",
+     s:"You're not interested in patching it. You want to redesign it.",
+     echo:"you'd rather redesign than patch", a:{making:2, analysis:2, order:1}}
+  ]
+},
+{
+  id:"offers", eyebrow:"Chapter Four", title:"Two envelopes.",
+  scene:[
+    "That afternoon, two offers land. Same start date. You have to pick one and you can't negotiate.",
+    "Read them fast and go with your stomach, not your spreadsheet."
+  ],
+  prompt:"", type:"offers",
+  options:[
+    {t:"OFFER A", sal:"$60,000",
+     bullets:["On site, 5 days a week","45–50 hour weeks","Bigger company, clear ladder","Someone above you to learn from"],
+     echo:"you'd trade time for the bigger number",
+     a:{leading:2, order:2}, meta:{money:2}},
+    {t:"OFFER B", sal:"$50,000",
+     bullets:["Remote or hybrid, your call","Real 40 hour weeks","Small team, wide scope","Work you'd describe at a party"],
+     echo:"you'd give up $10k to get your evenings back",
+     a:{making:2, people:1, analysis:1}, meta:{money:0}}
+  ]
+},
+{
+  id:"why", eyebrow:"Chapter Five", title:"Someone asks you why.",
+  scene:[
+    "Dinner, a few weeks in. A friend who knew the old you leans back and asks the annoying question: <em>so what's the point of all this?</em>",
+    "You surprise yourself by having an answer."
+  ],
+  prompt:"What do you say?",
+  options:[
+    {t:"\"People get to be healthier because I show up.\"", echo:"your point is people's wellbeing", a:{people:3, order:1}},
+    {t:"\"I build the things everything else runs on.\"", echo:"your point is building what others rely on", a:{analysis:2, making:2, order:1}},
+    {t:"\"I make broken organizations work.\"", echo:"your point is making things run", a:{leading:3, order:2}},
+    {t:"\"I help people figure out what they're capable of.\"", echo:"your point is unlocking people", a:{people:3, leading:1}},
+    {t:"\"I make things that didn't exist before.\"", echo:"your point is creating", a:{making:3}},
+    {t:"\"I'm trying to make it fairer than I found it.\"", echo:"your point is fairness", a:{people:2, leading:2, order:1}},
+    {t:"\"I keep the physical world standing up.\"", echo:"your point is keeping things running", a:{hands:3, order:1}},
+    {t:"\"I help people stop being scared of money.\"", echo:"your point is financial clarity", a:{analysis:2, order:2, people:1}},
+    {t:"\"I make the system work for the people stuck in it.\"", echo:"your point is making the system work", a:{order:3, people:2, leading:1}}
+  ]
+},
+{
+  id:"keep", eyebrow:"Chapter Six", title:"The moment you'd keep.",
+  scene:["If this whole year got compressed into one thirty-second clip you could keep forever, which moment makes the cut?"],
+  prompt:"",
+  options:[
+    {t:"Someone thanking you, and meaning it", s:"They tracked you down specifically to say it.",
+     echo:"you keep the thank-you", a:{people:3}},
+    {t:"The thing you built, working, without you touching it", s:"It runs. It just runs.",
+     echo:"you keep the thing that works", a:{analysis:2, making:2, order:1}},
+    {t:"Seeing your work out in the world with your name off it", s:"Strangers using it, not knowing you made it.",
+     echo:"you keep the work itself", a:{making:3}},
+    {t:"The number going the right direction, finally", s:"Six months of work in one green line.",
+     echo:"you keep the result", a:{analysis:3, order:1}},
+    {t:"A room of people who wouldn't have been in that room without you", s:"You made the thing happen. You're standing at the back.",
+     echo:"you keep the room you built", a:{people:2, leading:2}},
+    {t:"A rule you changed that will outlast you", s:"Nobody will know it was you. It'll still be true in twenty years.",
+     echo:"you keep what outlasts you", a:{order:3, leading:1}}
+  ]
+},
+{
+  id:"level", eyebrow:"Chapter Seven", title:"Now rewind.",
+  scene:[
+    "That was eighteen months from now. Come back to today, because the map only works if we know where you're standing.",
+    "This is the only boring question. It's also the one that keeps your results honest, because it decides which roles are actually within reach."
+  ],
+  prompt:"Where are you right now, really?", type:"level",
+  options: Quiz.LEVELS.map(function(l){ return {t:l.t, s:l.s, level:l.k}; })
+}
+];
+
+/* ------------------------------------------------------------------ */
+let state = { i:0, axes:{}, echoes:[], level:"early", money:1 };
+let history = [];
+const app = document.getElementById('app');
+const snapshot = ()=> JSON.parse(JSON.stringify({state:state, history:history}));
+
+function persist(){ Quiz.save({state:state, history:history}); }
+
+function chapters(){
+  return '<div class="chapters" role="progressbar" aria-valuemin="1" aria-valuemax="'+BEATS.length+
+    '" aria-valuenow="'+Math.min(state.i+1,BEATS.length)+'" aria-label="Chapter '+
+    Math.min(state.i+1,BEATS.length)+' of '+BEATS.length+'">' +
+    BEATS.map((_,n)=>`<div class="${n < state.i ? 'done':''}"></div>`).join('') + '</div>';
+}
+
+/* Only the last three, so it stops becoming a wall of text by Chapter Six */
+function echoBlock(){
+  if(!state.echoes.length) return '';
+  const shown = state.echoes.slice(-3);
+  const more = state.echoes.length - shown.length;
+  return `<div class="echo"><b>So far:</b> ${shown.join(' · ')}${more?` <span>(+${more} earlier)</span>`:''}</div>`;
+}
+
+function render(){
+  if(state.i >= BEATS.length) return renderResults();
+  const b = BEATS[state.i];
+
+  let opts;
+  if(b.type === 'offers'){
+    opts = '<div class="offers">' + b.options.map((o,n)=>`
+      <button type="button" class="offer" data-n="${n}">
+        <span class="co">${o.t}</span>
+        <span class="sal">${o.sal}</span>
+        <ul>${o.bullets.map(x=>`<li>${x}</li>`).join('')}</ul>
+      </button>`).join('') + '</div>';
+  } else {
+    opts = b.options.map((o,n)=>`
+      <button type="button" class="choice" data-n="${n}">
+        <span class="t">${o.t}</span>${o.s ? `<span class="s">${o.s}</span>` : ''}
+      </button>`).join('');
+  }
+
+  app.className = 'card fade';
+  app.innerHTML = `
+    ${chapters()}
+    <div class="eyebrow">${b.eyebrow}</div>
+    <h2>${b.title}</h2>
+    ${b.scene.map(s=>`<p class="scene">${s}</p>`).join('')}
+    ${b.prompt ? `<div class="prompt">${b.prompt}</div>` : '<div style="height:14px"></div>'}
+    ${opts}
+    ${state.i>0 ? '<button type="button" class="back" id="back">← back a chapter</button>' : ''}
+    ${echoBlock()}
+  `;
+
+  app.querySelectorAll('[data-n]').forEach(el=>{
+    el.onclick = ()=>{
+      const o = b.options[+el.dataset.n];
+      history.push(JSON.parse(JSON.stringify(state)));
+      if(o.a) for(const k in o.a) state.axes[k] = (state.axes[k]||0) + o.a[k];
+      if(o.echo) state.echoes.push(o.echo);
+      if(o.level) state.level = o.level;
+      if(o.meta && typeof o.meta.money === 'number') state.money = o.meta.money;
+      Quiz.trackStep(state.i, b.id, o.t);
+      state.i++;
+      persist();
+      render();
+      window.scrollTo({top:0,behavior:'smooth'});
+    };
+  });
+
+  const back = document.getElementById('back');
+  if(back) back.onclick = goBack;
+}
+
+/* Lets the account bar's Back button step within the quiz instead of
+   leaving it. Same two-function contract yns-activity.js publishes. */
+window.YNSStepBack = {
+  can: function(){ return history.length > 0 && state.i > 0; },
+  go:  function(){ goBack(); }
+};
+
+function goBack(){
+  if(!history.length) return;
+  Quiz.track('back', {from_step: state.i});
+  state = history.pop();
+  persist();
+  render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderResults(){
+  const scores = Quiz.score(state.axes);
+  const all = Quiz.rank(scores);
+  const pctOf = Quiz.pctScaler(all);
+  const ranked = all.slice(0,3);
+  const top = ranked[0].k;
+  const labels = ['Best match','Strong fit','Worth exploring'];
+  const levelWord = Quiz.LEVEL_WORD[state.level];
+
+  const cards = ranked.map((r,n)=>{
+    const c = Quiz.CATS[r.k];
+    const roles = Quiz.rolesFor(r.k, state.level);
+    return `
+      <div class="result-card ${n===0?'best':''}">
+        <span class="tag ${n===0?'':'alt'}">${labels[n]}</span>
+        <h3>${c.name}</h3>
+        <p class="why">${c.blurb}</p>
+        <p class="fitline">${pctOf(r.v)}% match to the story you told</p>
+        <div class="roles">
+          <div class="rh">Roles matched to your ${levelWord} experience</div>
+          ${roles.map(x=>`<div class="role"><span>${x[0]}</span><span class="pay">${x[1]}</span></div>`).join('')}
+        </div>
+      </div>`;
+  }).join('');
+
+  app.className = 'card fade';
+  app.innerHTML = `
+    ${chapters()}
+    <div class="eyebrow">Your result</div>
+    <h1>You're ${Quiz.ARCHETYPE[top]}.</h1>
+    <p class="scene">${Quiz.ARCHETYPE_LINE[top]}</p>
+    <p class="scene" style="margin-top:14px">
+      Across your story you told us <b>${state.echoes.slice(0,3).join('</b>, <b>')}</b>${state.echoes.length>3?', and more':''}.
+      ${state.money>=2
+        ? "You also took the bigger number over the shorter week, so we've weighted toward paths with real earning ceilings."
+        : "You also took the shorter week over the bigger number, so we've weighted toward paths with room to breathe."}
+    </p>
+    ${Quiz.continuityHTML(top)}
+    ${Quiz.shareHTML()}
+    <div style="height:22px"></div>
+    ${cards}
+    ${Quiz.salaryNote()}
+    <div class="cta">
+      <h3>Want the full map?</h3>
+      <p>The 90-day plan for getting from where you are to any of these, plus what to learn first.</p>
+      ${Quiz.emailFormHTML()}
+      <p style="margin:10px 0 0;font-size:12.5px">Or start the program, $9.99/month</p>
+    </div>
+    <button type="button" class="back" id="rback">← change my last answer</button>
+    <button type="button" class="back" id="restart" style="margin-left:18px">↺ start over</button>
+  `;
+
+  Quiz.wireEmailForm(app, {result: top, level: state.level, answers: state.echoes});
+  Quiz.wireShare(app, top);
+  document.getElementById('rback').onclick = goBack;
+  document.getElementById('restart').onclick = ()=>{
+    Quiz.track('restart', {}); Quiz.clear(); location.reload();
+  };
+  /* Saves the run when they're signed in, and queues it for adoption on
+     sign-in when they're not. Also fires the completion event. */
+  Quiz.finish({
+    top: top,
+    level: state.level,
+    axes: state.axes,
+    scores: scores,
+    ranked: all.map(r=>r.k),
+    answers: {echoes: state.echoes, money: state.money, history_len: history.length}
+  });
+  Quiz.clear();
+}
+
+/* If a previous activity already asked where they're standing, don't ask
+   it cold — ask them to confirm, with their old answer marked. */
+function applyPriorLevel(){
+  const prior = Quiz.priorLevel();
+  if(!prior) return;
+  state.level = prior;
+  const b = BEATS[BEATS.length-1];
+  b.title = "Still standing in the same place?";
+  b.scene = [
+    "You've told us this before, so this is a confirmation rather than a question.",
+    "Tap the same one if nothing's changed, or pick the new one if it has."
+  ];
+  b.prompt = "Where are you right now, really?";
+  b.options = b.options.map(o =>
+    o.level === prior ? {...o, s: (o.s||'') + ". This is what you told us last time"} : o);
+}
+
+/* ---- resume an interrupted run ---- */
+function offerResume(){
+  const saved = Quiz.load(1000*60*60*24);
+  if(saved && saved.state && saved.state.i > 0 && saved.state.i < BEATS.length){
+    document.getElementById('resume').innerHTML =
+      '<div class="q-resume">You were partway through. Chapter ' + (saved.state.i+1) + '. ' +
+      '<button type="button" id="r-yes">Pick up where I left off</button>' +
+      '<button type="button" id="r-no">Start again</button></div>';
+    document.getElementById('r-yes').onclick = ()=>{
+      state = saved.state; history = saved.history || [];
+      document.getElementById('resume').innerHTML='';
+      Quiz.track('resume', {step: state.i});
+      render();
+    };
+    document.getElementById('r-no').onclick = ()=>{
+      Quiz.clear(); document.getElementById('resume').innerHTML='';
+    };
+  }
+}
+
+READY.then(function(){
+  applyPriorLevel();
+  offerResume();
+  render();
+});
+</script>
+<script>/* review-build bridge: tell the hub when a run is saved */(function(){try{var o=localStorage.setItem.bind(localStorage);localStorage.setItem=function(k,v){o(k,v);if(k==="yns_pending_runs"&&window.parent!==window)window.parent.postMessage({yns:"run",key:k},"*");};}catch(e){}})();</script>
+</body>
+</html>

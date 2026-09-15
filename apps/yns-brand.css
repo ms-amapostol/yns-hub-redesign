@@ -1,0 +1,1145 @@
+/* =====================================================================
+   YNS — shared brand layer.
+
+   The tokens below are lifted verbatim from career-abcs_v2.html, which
+   is where the design system actually lives. Every other page now pulls
+   from here instead of re-deciding, so the account bar, the profile
+   panel and the admin dashboard look like one product.
+
+   Pair with the fonts:
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Questrial&display=swap">
+     <link rel="stylesheet" href="yns-brand.css">
+
+   The three quiz prototypes were built against an earlier, bluer palette
+   (#2952e0 / Poppins). They keep their own look inside the card; only
+   the shared chrome around it is branded, so the two do not fight.
+   ===================================================================== */
+
+:root {
+  /* brand */
+  --yns-blue:          #0057E1;
+  --yns-blue-deep:     #2859B6;
+  --yns-blue-press:    #0046B8;
+  --yns-gold:          #E1CC00;
+  --yns-gold-deep:     #6B5F00;
+
+  /* surfaces */
+  --yns-warm:          #E8E6E6;
+  --yns-paper:         #FFFFFF;
+  --yns-tint:          #EEF2FB;
+  --yns-tint-2:        #DCE5F7;
+  --yns-gold-tint:     #FBF4C4;
+  --yns-sunk:          #F4F6FA;
+
+  /* ink */
+  --yns-ink:           #14203A;
+  --yns-muted:         #5B6478;
+  --yns-line:          #D5DAE3;
+  --yns-line-soft:     #E6EAF1;
+
+  /* status */
+  --yns-ok:            #1F7A4D;
+  --yns-ok-tint:       #E7F5EE;
+  --yns-warn:          #9E4614;
+  --yns-warn-tint:     #FCF0E7;
+  --yns-stop:          #A32020;
+  --yns-stop-tint:     #FBE9E9;
+
+  /* type
+     Verified against www.yournextstepai.com (Aug 2026). Two findings that
+     matter, because getting either wrong makes this look like a different
+     product:
+
+     1. Headings are Space Grotesk at weight 400 — REGULAR, never bold.
+        The live site has no bold headings anywhere. Weight 700 reads as
+        heavy and dense next to it.
+     2. Headings alternate colour by role: the page title and feature
+        headings are black; section headings are blue-deep (#2859B6).
+        That alternation is the most recognisable thing about the site. */
+  --yns-display: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --yns-body:    'Questrial', 'Segoe UI', system-ui, sans-serif;
+  --yns-display-weight: 400;
+  --yns-heading:         #000000;   /* page titles, feature headings */
+  --yns-heading-section: #2859B6;   /* section headings — the blue rhythm */
+  --yns-lh-display: 1.2;
+  --yns-lh-section: 1.4;
+  --yns-t-xs:   0.80rem;
+  --yns-t-sm:   0.88rem;
+  --yns-t-base: 1.00rem;
+  --yns-t-lg:   1.15rem;
+  --yns-t-xl:   1.40rem;
+  --yns-t-2xl:  1.75rem;
+  --yns-t-3xl:  2.25rem;
+
+  /* space */
+  --yns-s1: 4px;  --yns-s2: 8px;  --yns-s3: 12px; --yns-s4: 16px;
+  --yns-s5: 24px; --yns-s6: 32px; --yns-s7: 48px; --yns-s8: 64px;
+
+  /* shape */
+  --yns-r-sm: 8px;
+  --yns-r:    12px;
+  --yns-r-lg: 18px;
+  --yns-shadow:    0 2px 10px rgba(20,32,58,.06);
+  --yns-shadow-lg: 0 10px 34px rgba(20,32,58,.13);
+  --yns-focus:     0 0 0 3px rgba(0,87,225,.34);
+  --yns-max: 940px;
+}
+
+/* =====================================================================
+   DARK
+
+   Only the tokens are redefined — every component below this block is
+   already written against them, which is what makes a palette swap a
+   palette swap rather than a second stylesheet.
+
+   Defined twice on purpose:
+
+     @media (prefers-color-scheme: dark) :root:not([data-theme="light"])
+       the default. Follows the device, unless someone has explicitly
+       chosen light, in which case their choice has to win over the OS.
+
+     :root[data-theme="dark"]
+       the explicit choice. Has to win in the other direction too — over
+       an OS that says light — so it cannot live inside the media query.
+
+   Four decisions worth not undoing:
+
+   1. **The surfaces are not neutral grey.** They are the brand navy
+      (#14203A) pulled down toward black. A pure-grey dark mode next to a
+      blue brand reads as a different product; a tinted one reads as the
+      same product with the lights off.
+
+   2. **Nothing is pure black and nothing is pure white.** #000 on an OLED
+      panel makes every scroll edge shimmer, and #fff text on a dark field
+      haloes at small sizes. Text tops out at #E8ECF4.
+
+   3. **Blue gets lighter, not darker.** #0057E1 on a dark surface fails
+      contrast badly — it is a colour designed to sit on white. The dark
+      blue is lifted to #6E9BFF, which holds AA on every surface here.
+      This is the change people most often skip, and it is the one that
+      makes a dark mode unreadable.
+
+   4. **The tints invert their job.** In light, --yns-tint is a pale wash
+      *lighter* than the page. In dark it has to be *lighter than the
+      card* to read as raised, which means a completely different value
+      rather than a darkened one. Same for the status tints: they become
+      low-saturation washes, because a light pastel on dark glows.
+   ===================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --yns-btn:       #3568D0;
+    --yns-btn-hover: #3D72E0;
+    --yns-btn-ink:   #FFFFFF;
+    --yns-invert:    #E8ECF4;
+    --yns-on-invert: #0D1523;
+    --yns-blue:          #6E9BFF;
+    --yns-blue-deep:     #9DBBFF;
+    --yns-blue-press:    #8FB0FF;
+    --yns-gold:          #E8D44A;
+    --yns-gold-deep:     #F0E08A;
+
+    --yns-warm:          #0D1523;
+    --yns-paper:         #161F30;
+    --yns-tint:          #1E2A40;
+    --yns-tint-2:        #2A3A57;
+    --yns-gold-tint:     #2E2A17;
+    --yns-sunk:          #1B2434;
+
+    --yns-ink:           #E8ECF4;
+    --yns-muted:         #9AA6BC;
+    --yns-line:          #2C3850;
+    --yns-line-soft:     #232E42;
+
+    --yns-ok:            #63C795;
+    --yns-ok-tint:       #14291F;
+    --yns-warn:          #E0A26A;
+    --yns-warn-tint:     #2B2018;
+    --yns-stop:          #F08A8A;
+    --yns-stop-tint:     #2E1A1C;
+
+    --yns-heading:         #F3F6FB;
+    --yns-heading-section: #9DBBFF;
+
+    --yns-shadow:    0 2px 10px rgba(0,0,0,.4);
+    --yns-shadow-lg: 0 10px 34px rgba(0,0,0,.55);
+    --yns-focus:     0 0 0 3px rgba(110,155,255,.45);
+  }
+}
+
+:root[data-theme="dark"] {
+    --yns-btn:       #3568D0;
+    --yns-btn-hover: #3D72E0;
+    --yns-btn-ink:   #FFFFFF;
+    --yns-invert:    #E8ECF4;
+    --yns-on-invert: #0D1523;
+  --yns-blue:          #6E9BFF;
+  --yns-blue-deep:     #9DBBFF;
+  --yns-blue-press:    #8FB0FF;
+  --yns-gold:          #E8D44A;
+  --yns-gold-deep:     #F0E08A;
+
+  --yns-warm:          #0D1523;
+  --yns-paper:         #161F30;
+  --yns-tint:          #1E2A40;
+  --yns-tint-2:        #2A3A57;
+  --yns-gold-tint:     #2E2A17;
+  --yns-sunk:          #1B2434;
+
+  --yns-ink:           #E8ECF4;
+  --yns-muted:         #9AA6BC;
+  --yns-line:          #2C3850;
+  --yns-line-soft:     #232E42;
+
+  --yns-ok:            #63C795;
+  --yns-ok-tint:       #14291F;
+  --yns-warn:          #E0A26A;
+  --yns-warn-tint:     #2B2018;
+  --yns-stop:          #F08A8A;
+  --yns-stop-tint:     #2E1A1C;
+
+  --yns-heading:         #F3F6FB;
+  --yns-heading-section: #9DBBFF;
+
+  --yns-shadow:    0 2px 10px rgba(0,0,0,.4);
+  --yns-shadow-lg: 0 10px 34px rgba(0,0,0,.55);
+  --yns-focus:     0 0 0 3px rgba(110,155,255,.45);
+}
+
+/* ---------------------------------------------------------------------
+   --yns-invert: a surface that is always the opposite of the page.
+
+   Several components are deliberately inverted blocks: a toast, a hero,
+   a chart tooltip, the Seven Days panel. In light mode they were painted
+   with --yns-ink, which was correct by accident, because ink was the
+   darkest colour available.
+
+   In dark mode ink becomes near-white, so every one of those turned into
+   white text on a white panel. Invisible, and reported as "some text is
+   still black" because that is what it looks like from the outside.
+
+   So the intent gets its own token. --yns-invert is dark in light mode
+   and light in dark mode; --yns-on-invert is the text that goes on it.
+   Anything meaning "stand out from the page" uses these and keeps
+   working in both themes.
+   --------------------------------------------------------------------- */
+:root {
+  --yns-invert:    #14203A;
+  --yns-on-invert: #FFFFFF;
+
+  /* A filled button, as one decision rather than a colour pair repeated
+     in nine rules. The text on a filled button is WHITE in both themes.
+
+     Dark mode originally reused --yns-blue as the fill, which is lifted
+     to #6E9BFF there so that blue TEXT stays readable. A pale fill needs
+     dark text, so every button quietly inverted: pale blue with navy
+     lettering, which is legible but is not what the product looks like,
+     and is the opposite of "clickable text is light".
+
+     So the fill gets its own token, dark enough in either theme to carry
+     white, and the button looks like the same button in both. */
+  --yns-btn:       #0057E1;
+  --yns-btn-hover: #0046B8;
+  --yns-btn-ink:   #FFFFFF;
+}
+
+/* ---------------------------------------------------------------------
+   The handful of places the token swap is not enough.
+
+   Each of these hardcodes a colour because in LIGHT mode it sits on a
+   blue or ink field where #fff was simply correct. In dark, the field
+   underneath has changed and the text has to change with it.
+   --------------------------------------------------------------------- */
+:root[data-theme="dark"] .yns-track .mark.done { border-color: #2f5c45; }
+:root[data-theme="dark"] .yns-btn--danger { color: #2E1A1C; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .yns-track .mark.done { border-color: #2f5c45; }
+  :root:not([data-theme="light"]) .yns-btn--danger { color: #2E1A1C; }
+}
+
+/* =====================================================================
+   Account bar — the strip that sits above every activity
+   ===================================================================== */
+
+.yns-bar {
+  font-family: var(--yns-body);
+  max-width: var(--yns-max);
+  margin: 0 auto var(--yns-s4);
+  padding: 10px var(--yns-s4);
+  display: flex;
+  align-items: center;
+  gap: var(--yns-s3);
+  background: var(--yns-paper);
+  border: 1px solid var(--yns-line);
+  border-radius: var(--yns-r);
+  box-shadow: var(--yns-shadow);
+  color: var(--yns-ink);
+  font-size: var(--yns-t-sm);
+}
+
+.yns-bar__brand {
+  font-family: var(--yns-display);
+  font-weight: 500;
+  font-size: var(--yns-t-base);
+  color: var(--yns-blue-deep);
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.yns-bar__spacer { flex: 1 1 auto; }
+
+/* Inline variant — for dropping into a page that already has its own
+   header, like the Career ABCs app bar. No card of its own, and light
+   ink because it sits on the blue. */
+.yns-bar--inline {
+  background: none;
+  border: none;
+  box-shadow: none;
+  margin: 0;
+  padding: 0;
+  max-width: none;
+  width: auto;
+  color: #fff;
+}
+.yns-bar--inline .yns-bar__hint { color: rgba(255,255,255,.78); }
+.yns-bar--inline .yns-dots i { background: rgba(255,255,255,.32); }
+.yns-bar--inline .yns-dots i.on { background: #fff; }
+.yns-bar--inline .yns-dots i.here { background: var(--yns-gold); box-shadow: 0 0 0 3px rgba(225,204,0,.28); }
+.yns-bar--inline .yns-btn--quiet {
+  color: #fff;
+  border-color: rgba(255,255,255,.45);
+  background: rgba(255,255,255,.08);
+}
+.yns-bar--inline .yns-btn--quiet:hover:not(:disabled) {
+  background: rgba(255,255,255,.18);
+  border-color: #fff;
+}
+.yns-bar--inline .yns-avatar {
+  background: #fff;
+  color: var(--yns-blue-deep);
+}
+.yns-bar--inline .yns-avatar:hover { background: var(--yns-gold-tint); }
+
+.yns-bar__hint {
+  color: var(--yns-muted);
+  font-size: var(--yns-t-sm);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 620px) { .yns-bar__hint { display: none; } }
+
+/* progress dots — one per activity, filled when complete */
+.yns-dots { display: flex; gap: 5px; align-items: center; }
+.yns-dots i {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--yns-line); display: block;
+}
+.yns-dots i.on   { background: var(--yns-blue); }
+.yns-dots i.here { background: var(--yns-gold); box-shadow: 0 0 0 3px var(--yns-gold-tint); }
+
+/* =====================================================================
+   Buttons
+   ===================================================================== */
+
+.yns-btn {
+  font-family: var(--yns-body);
+  font-size: var(--yns-t-sm);
+  line-height: 1;
+  padding: 10px 16px;
+  border-radius: var(--yns-r-sm);
+  border: 1px solid transparent;
+  background: var(--yns-btn);
+  color: var(--yns-btn-ink);
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+  white-space: nowrap;
+}
+.yns-btn:hover:not(:disabled) { background: var(--yns-btn-hover); }
+.yns-btn:focus-visible { outline: none; box-shadow: var(--yns-focus); }
+.yns-btn:disabled { opacity: .55; cursor: not-allowed; }
+
+.yns-btn--quiet {
+  background: transparent;
+  color: var(--yns-blue-deep);
+  border-color: var(--yns-line);
+}
+.yns-btn--quiet:hover:not(:disabled) { background: var(--yns-tint); border-color: var(--yns-tint-2); }
+
+.yns-btn--bare {
+  background: none; border: none; color: var(--yns-muted);
+  padding: 8px 4px; text-decoration: underline;
+}
+.yns-btn--bare:hover:not(:disabled) { color: var(--yns-blue); background: none; }
+
+.yns-btn--danger { background: var(--yns-stop); }
+.yns-btn--danger:hover:not(:disabled) { background: #8a1a1a; }
+
+/* =====================================================================
+   Avatar
+   ===================================================================== */
+
+.yns-avatar {
+  width: 32px; height: 32px; flex: none;
+  border-radius: 50%;
+  background: var(--yns-btn);
+  color: var(--yns-btn-ink);
+  font-family: var(--yns-display);
+  font-weight: 600;
+  font-size: var(--yns-t-sm);
+  display: flex; align-items: center; justify-content: center;
+  border: none; cursor: pointer; padding: 0;
+}
+.yns-avatar:hover { background: var(--yns-btn-hover); }
+.yns-avatar:focus-visible { outline: none; box-shadow: var(--yns-focus); }
+
+/* =====================================================================
+   Modal + drawer
+   ===================================================================== */
+
+.yns-scrim {
+  position: fixed; inset: 0; z-index: 900;
+  background: rgba(20,32,58,.42);
+  display: flex; justify-content: center;
+  /* Centre when it fits, scroll from the top when it does not. With
+     align-items:center a taller-than-viewport dialog gets clipped at BOTH
+     ends and the overflow is unreachable — which is how the sign-out
+     button became impossible to get to on a short window. */
+  align-items: safe center;
+  overflow-y: auto;
+  padding: var(--yns-s4);
+  animation: yns-fade .18s ease;
+}
+@keyframes yns-fade { from { opacity: 0 } to { opacity: 1 } }
+
+.yns-modal {
+  font-family: var(--yns-body);
+  color: var(--yns-ink);
+  background: var(--yns-paper);
+  border-radius: var(--yns-r-lg);
+  box-shadow: var(--yns-shadow-lg);
+  width: 100%;
+  /* Never taller than the viewport; scroll inside if the content is.
+     dvh tracks mobile browser chrome as it hides and shows — with plain
+     vh the last control sits under the address bar on a phone. */
+  max-height: calc(100vh - (2 * var(--yns-s4)));
+  max-height: calc(100dvh - (2 * var(--yns-s4)));
+  overflow-y: auto;
+  /* Stop the page behind scrolling once the dialog hits its end. */
+  overscroll-behavior: contain;
+  max-width: 420px;
+  padding: var(--yns-s6);
+  animation: yns-rise .2s ease;
+}
+@keyframes yns-rise { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+
+.yns-modal--wide { max-width: 560px; }
+
+.yns-modal h2 {
+  font-family: var(--yns-display);
+  font-weight: var(--yns-display-weight);
+  font-size: var(--yns-t-xl);
+  line-height: var(--yns-lh-display);
+  margin: 0 0 var(--yns-s2);
+  color: var(--yns-heading);
+}
+.yns-modal p { margin: 0 0 var(--yns-s4); color: var(--yns-muted); line-height: 1.6; font-size: var(--yns-t-sm); }
+
+.yns-field {
+  width: 100%;
+  font-family: var(--yns-body);
+  font-size: var(--yns-t-base);
+  padding: 12px 14px;
+  border: 1px solid var(--yns-line);
+  border-radius: var(--yns-r-sm);
+  background: var(--yns-paper);
+  color: var(--yns-ink);
+  margin-bottom: var(--yns-s3);
+}
+.yns-field:focus { outline: none; border-color: var(--yns-blue); box-shadow: var(--yns-focus); }
+
+.yns-modal__actions { display: flex; gap: var(--yns-s2); align-items: center; flex-wrap: wrap; }
+
+/* Long dialogs (the profile panel) split into a scrolling body and a
+   footer that never scrolls. Sign out is the thing people open that panel
+   to find; making them scroll a readout of their own data to reach it is
+   the wrong way round.
+
+   Done with flex rather than position:sticky — sticky needs the element to
+   have room inside its container to stick against, which a full-bleed
+   negative-margin footer does not. Flex is unambiguous. */
+.yns-modal--split {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;            /* the body scrolls, not the shell */
+}
+.yns-modal--split .yns-modal__body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--yns-s6) var(--yns-s6) var(--yns-s4);
+  flex: 1 1 auto;
+  min-height: 0;               /* without this flex refuses to shrink */
+}
+.yns-modal--split .yns-modal__foot {
+  flex: none;
+  padding: var(--yns-s4) var(--yns-s6);
+  border-top: 1px solid var(--yns-line-soft);
+  background: var(--yns-paper);
+  box-shadow: 0 -6px 14px rgba(20,32,58,.05);
+}
+.yns-modal--split .yns-modal__foot .yns-modal__actions { margin: 0 !important; }
+.yns-modal__close {
+  float: right; background: none; border: none; cursor: pointer;
+  color: var(--yns-muted); font-size: 20px; line-height: 1; padding: 0 0 0 var(--yns-s3);
+}
+.yns-modal__close:hover { color: var(--yns-ink); }
+
+.yns-msg {
+  margin-top: var(--yns-s3);
+  padding: 10px 12px;
+  border-radius: var(--yns-r-sm);
+  font-size: var(--yns-t-sm);
+  line-height: 1.55;
+  background: var(--yns-tint);
+  color: var(--yns-blue-deep);
+}
+.yns-msg--ok   { background: var(--yns-ok-tint);   color: var(--yns-ok); }
+.yns-msg--err  { background: var(--yns-stop-tint); color: var(--yns-stop); }
+.yns-msg--warn { background: var(--yns-warn-tint); color: var(--yns-warn); }
+
+/* =====================================================================
+   Profile panel
+   ===================================================================== */
+
+.yns-profile__id {
+  display: flex; align-items: center; gap: var(--yns-s3);
+  padding-bottom: var(--yns-s4); margin-bottom: var(--yns-s4);
+  border-bottom: 1px solid var(--yns-line-soft);
+}
+.yns-profile__id .yns-avatar { width: 44px; height: 44px; font-size: var(--yns-t-base); cursor: default; }
+.yns-profile__email { font-size: var(--yns-t-sm); color: var(--yns-ink); word-break: break-all; }
+.yns-profile__since { font-size: var(--yns-t-xs); color: var(--yns-muted); }
+
+/* ---------------------------------------------------------- their why
+
+   Pinned above everything else on the profile panel. It is the only
+   thing on there they wrote themselves, and the only one that answers
+   the question someone is actually asking when they open this panel on
+   a bad week. */
+.yns-why {
+  margin: 0 0 var(--yns-s4); padding: 16px 18px; border-radius: 14px;
+  background: var(--yns-gold-tint); border-left: 3px solid var(--yns-gold);
+}
+.yns-why h3 {
+  font-family: var(--yns-display); font-weight: var(--yns-display-weight);
+  font-size: var(--yns-t-sm); letter-spacing: .06em; text-transform: uppercase;
+  color: var(--yns-gold-deep); margin: 0 0 8px;
+}
+.yns-why blockquote {
+  margin: 0; font-size: var(--yns-t-base); line-height: 1.6; color: var(--yns-ink);
+}
+.yns-why__test { margin: 10px 0 0; font-size: var(--yns-t-sm); line-height: 1.6; color: var(--yns-ink); }
+.yns-why__go { display: inline-block; margin-top: 10px; font-size: var(--yns-t-xs); color: var(--yns-blue); text-decoration: none; }
+.yns-why__go:hover { text-decoration: underline; }
+.yns-why--empty { background: var(--yns-sunk); border-left-color: var(--yns-line); }
+.yns-why--empty h3 { color: var(--yns-muted); }
+.yns-why--empty p { margin: 0; font-size: var(--yns-t-sm); line-height: 1.6; color: var(--yns-muted); }
+
+.yns-track { list-style: none; margin: 0 0 var(--yns-s4); padding: 0; }
+.yns-track li {
+  display: flex; align-items: center; gap: var(--yns-s3);
+  padding: 11px 0; border-bottom: 1px solid var(--yns-line-soft);
+}
+.yns-track li:last-child { border-bottom: none; }
+.yns-track .mark {
+  width: 22px; height: 22px; flex: none; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  background: var(--yns-sunk); color: var(--yns-muted);
+  border: 1px solid var(--yns-line);
+}
+.yns-track .mark.done { background: var(--yns-ok-tint); color: var(--yns-ok); border-color: #b9e0cb; }
+.yns-track .name { flex: 1; font-size: var(--yns-t-sm); }
+.yns-track .meta { font-size: var(--yns-t-xs); color: var(--yns-muted); }
+.yns-track a { color: var(--yns-blue); text-decoration: none; font-size: var(--yns-t-xs); }
+.yns-track a:hover { text-decoration: underline; }
+
+.yns-readout {
+  background: var(--yns-sunk);
+  border: 1px solid var(--yns-line-soft);
+  border-radius: var(--yns-r);
+  padding: var(--yns-s4);
+  margin-bottom: var(--yns-s4);
+  font-size: var(--yns-t-sm);
+  line-height: 1.65;
+}
+.yns-readout h3 {
+  font-family: var(--yns-display);
+  font-weight: 600;
+  font-size: var(--yns-t-sm);
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: var(--yns-muted);
+  margin: 0 0 var(--yns-s2);
+  font-weight: 600;
+}
+.yns-readout b { color: var(--yns-blue-deep); }
+
+/* horizontal affinity bars */
+.yns-bars { display: grid; gap: 7px; margin-top: var(--yns-s3); }
+.yns-bars > div { display: grid; grid-template-columns: 130px 1fr 34px; align-items: center; gap: var(--yns-s2); font-size: var(--yns-t-xs); }
+.yns-bars .rail { height: 7px; border-radius: 99px; background: var(--yns-line-soft); overflow: hidden; }
+.yns-bars .rail i { display: block; height: 100%; background: var(--yns-blue); border-radius: 99px; }
+.yns-bars .pct { text-align: right; color: var(--yns-muted); font-variant-numeric: tabular-nums; }
+
+/* =====================================================================
+   Log in / Create account tabs
+   ===================================================================== */
+
+.yns-tabs {
+  display: flex;
+  gap: 2px;
+  /* clear the floated close button in the corner */
+  margin: 0 var(--yns-s5) var(--yns-s5) 0;
+  background: var(--yns-sunk);
+  border: 1px solid var(--yns-line);
+  border-radius: var(--yns-r-sm);
+  padding: 3px;
+}
+.yns-tabs button {
+  flex: 1;
+  font-family: var(--yns-body);
+  font-size: var(--yns-t-sm);
+  padding: 9px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--yns-muted);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.yns-tabs button:hover { color: var(--yns-ink); }
+.yns-tabs button[aria-selected="true"] {
+  background: var(--yns-paper);
+  color: var(--yns-ink);
+  font-weight: 600;
+  box-shadow: var(--yns-shadow);
+}
+.yns-tabs button:focus-visible { outline: none; box-shadow: var(--yns-focus); }
+
+/* Back and Home — present on every activity, absent on the hub itself.
+
+   Back steps within the activity where there is a step; Home is
+   unconditional. Two controls rather than one because a person who is
+   lost needs at least one button whose behaviour they can predict. */
+.yns-bar__back,
+.yns-bar__home {
+  font-size: var(--yns-t-sm);
+  color: var(--yns-muted);
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 5px 9px;
+  border: 1px solid transparent;
+  border-radius: var(--yns-r-sm);
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.yns-bar__back:hover,
+.yns-bar__home:hover { color: var(--yns-blue); background: var(--yns-tint); border-color: var(--yns-tint-2); }
+.yns-bar__back:focus-visible,
+.yns-bar__home:focus-visible { outline: none; box-shadow: var(--yns-focus); }
+.yns-bar__home { font-weight: 600; }
+
+.yns-bar--inline .yns-bar__back,
+.yns-bar--inline .yns-bar__home { color: rgba(255,255,255,.85); }
+.yns-bar--inline .yns-bar__back:hover,
+.yns-bar--inline .yns-bar__home:hover { color: #fff; background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.24); }
+
+/* On a phone the labels go and the glyphs carry it, so the bar still
+   fits the wordmark, both controls and the avatar. */
+@media (max-width: 520px) {
+  .yns-bar__back, .yns-bar__home { font-size: 0; padding: 6px 8px; }
+  .yns-bar__back span, .yns-bar__home span { font-size: 1rem; }
+}
+
+/* =====================================================================
+   Activity browser — filters, search, cards
+   ===================================================================== */
+
+.yns-browse { margin-bottom: var(--yns-s5); }
+.yns-browse__controls {
+  display: flex; gap: var(--yns-s3); align-items: center; flex-wrap: wrap;
+  margin-bottom: var(--yns-s4);
+}
+.yns-search {
+  flex: 1; min-width: 210px; position: relative;
+}
+.yns-search input {
+  width: 100%; font-family: var(--yns-body); font-size: var(--yns-t-sm);
+  padding: 11px 34px 11px 14px;
+  border: 1px solid var(--yns-line); border-radius: var(--yns-r-sm);
+  background: var(--yns-paper); color: var(--yns-ink);
+}
+.yns-search input:focus { outline: none; border-color: var(--yns-blue); box-shadow: var(--yns-focus); }
+.yns-search button {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: var(--yns-muted);
+  font-size: 17px; line-height: 1; padding: 4px 6px; border-radius: 4px;
+}
+.yns-search button:hover { color: var(--yns-ink); }
+
+.yns-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.yns-filters button {
+  font-family: var(--yns-body); font-size: var(--yns-t-sm);
+  padding: 9px 14px; border-radius: 99px;
+  border: 1px solid var(--yns-line); background: var(--yns-paper);
+  color: var(--yns-muted); cursor: pointer; transition: .12s;
+}
+.yns-filters button:hover { border-color: var(--yns-blue); color: var(--yns-ink); }
+.yns-filters button[aria-pressed="true"] {
+  background: var(--yns-blue); border-color: var(--yns-blue); color: #fff;
+}
+.yns-filters button:focus-visible { outline: none; box-shadow: var(--yns-focus); }
+
+.yns-browse__count { font-size: var(--yns-t-sm); color: var(--yns-muted); margin-bottom: var(--yns-s3); }
+
+.yns-acts { display: grid; grid-template-columns: repeat(auto-fill, minmax(262px, 1fr)); gap: var(--yns-s4); }
+
+.yns-act {
+  display: flex; flex-direction: column;
+  background: var(--yns-paper); border: 1px solid var(--yns-line);
+  border-radius: var(--yns-r-lg); padding: var(--yns-s5);
+  box-shadow: var(--yns-shadow); text-decoration: none; color: inherit;
+  transition: border-color .15s, transform .12s, box-shadow .15s;
+}
+.yns-act:hover { border-color: var(--yns-blue); transform: translateY(-2px); box-shadow: var(--yns-shadow-lg); }
+.yns-act--soon { opacity: .62; pointer-events: none; }
+
+.yns-act__top { display: flex; align-items: center; gap: 8px; margin-bottom: var(--yns-s2); flex-wrap: wrap; }
+.yns-act__mins { font-size: var(--yns-t-xs); color: var(--yns-muted); }
+.yns-act__badge {
+  font-size: var(--yns-t-xs); padding: 2px 8px; border-radius: 99px;
+  background: var(--yns-ok-tint); color: var(--yns-ok);
+}
+.yns-act__badge--soon { background: var(--yns-sunk); color: var(--yns-muted); }
+.yns-act__badge--paid { background: var(--yns-gold-tint); color: var(--yns-gold-deep); }
+.yns-act__badge--locked { background: var(--yns-sunk); color: var(--yns-muted); }
+
+/* A locked card recedes: greyed, flat, no lift on hover. It reads as
+   part of the background of the page rather than as an option.
+
+   It is still a control, and it is still clickable. What it opens is an
+   explanation, not the activity. A card you cannot click at all is a
+   mystery box, and mystery boxes are the wrong thing to hand somebody
+   who is stuck and low on momentum. */
+.yns-act--locked {
+  background: var(--yns-sunk); border-color: var(--yns-line-soft);
+  box-shadow: none; text-align: left; font: inherit; cursor: pointer;
+}
+.yns-act--locked h3, .yns-act--locked p { color: var(--yns-muted); }
+.yns-act--locked .yns-act__mins { opacity: .8; }
+.yns-act--locked .yns-act__go { color: var(--yns-muted); }
+.yns-act--locked:hover {
+  border-color: var(--yns-line); transform: none;
+  box-shadow: var(--yns-shadow); background: var(--yns-paper);
+}
+.yns-act--locked:hover .yns-act__go { color: var(--yns-blue); }
+.yns-act--locked:focus-visible { outline: none; box-shadow: var(--yns-focus); }
+
+.yns-act__why {
+  margin: 0 0 var(--yns-s3) !important; padding: 10px 12px; border-radius: 10px;
+  background: var(--yns-paper); border: 1px solid var(--yns-line-soft);
+  color: var(--yns-muted) !important;
+  font-size: var(--yns-t-xs) !important; line-height: 1.55; flex: 1;
+}
+
+/* ---------------------------------------------- the locked dialog */
+
+.yns-locked__top { display: flex; align-items: center; gap: 10px; margin-bottom: var(--yns-s3); }
+.yns-locked__lead {
+  font-size: var(--yns-t-base) !important; line-height: 1.65 !important;
+  color: var(--yns-ink) !important; margin-bottom: var(--yns-s4) !important;
+}
+.yns-locked__why {
+  padding: 14px 16px; border-radius: 12px; margin-bottom: var(--yns-s4);
+  background: var(--yns-tint); border: 1px solid var(--yns-tint-2);
+}
+.yns-locked__why h3 {
+  font-family: var(--yns-display); font-weight: var(--yns-display-weight);
+  font-size: var(--yns-t-sm); color: var(--yns-blue-deep); margin: 0 0 6px;
+}
+.yns-locked__why p {
+  margin: 0 0 8px !important; font-size: var(--yns-t-sm) !important;
+  line-height: 1.6 !important; color: var(--yns-ink) !important;
+}
+.yns-locked__why p:last-child { margin-bottom: 0 !important; }
+
+.yns-locked__list { list-style: none; margin: 0 0 var(--yns-s4); padding: 0; }
+.yns-locked__list a {
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  padding: 12px 14px; border-radius: 12px; text-decoration: none;
+  border: 1px solid var(--yns-line); margin-bottom: 8px; background: var(--yns-paper);
+}
+.yns-locked__list a:hover { border-color: var(--yns-blue); background: var(--yns-tint); }
+.yns-locked__list .n { font-weight: 600; color: var(--yns-blue-deep); font-size: var(--yns-t-sm); }
+.yns-locked__list .t { flex: 1; min-width: 140px; color: var(--yns-muted); font-size: var(--yns-t-xs); }
+.yns-locked__list .m { color: var(--yns-muted); font-size: var(--yns-t-xs); white-space: nowrap; }
+
+.yns-locked__note {
+  margin: 0 !important; font-size: var(--yns-t-xs) !important;
+  color: var(--yns-muted) !important; line-height: 1.6 !important;
+}
+
+.yns-act h3 {
+  font-family: var(--yns-display);
+  font-weight: var(--yns-display-weight);
+  font-size: var(--yns-t-lg);
+  margin: 0 0 6px;
+  line-height: var(--yns-lh-display);
+  color: var(--yns-heading);
+}
+.yns-act p { margin: 0 0 var(--yns-s4); color: var(--yns-muted); font-size: var(--yns-t-sm); flex: 1; }
+.yns-act__tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--yns-s3); }
+.yns-act__tag {
+  font-size: var(--yns-t-xs); padding: 3px 9px; border-radius: 99px;
+  background: var(--yns-sunk); color: var(--yns-muted); border: 1px solid var(--yns-line-soft);
+}
+.yns-act__go { font-size: var(--yns-t-sm); font-weight: 600; color: var(--yns-blue); }
+
+.yns-browse__empty {
+  padding: var(--yns-s6); text-align: center; color: var(--yns-muted);
+  background: var(--yns-paper); border: 1px dashed var(--yns-line); border-radius: var(--yns-r-lg);
+}
+
+/* Wordmark. Inlined SVG so fill="currentColor" picks up the bar's colour
+   — the same asset serves blue-on-white and white-on-blue. */
+.yns-bar__brand svg { height: 30px; width: auto; display: block; }
+.yns-bar__brand { display: flex; align-items: center; color: var(--yns-blue); }
+.yns-bar--inline .yns-bar__brand { color: #fff; }
+@media (max-width: 520px) { .yns-bar__brand svg { height: 26px; } }
+
+/* Google button — the four-colour mark must stay unmodified per Google's
+   brand guidelines, so the button is white with a neutral border. */
+.yns-btn--google {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: var(--yns-paper);
+  color: var(--yns-ink);
+  border: 1px solid var(--yns-line);
+  padding: 12px 16px;
+  font-size: var(--yns-t-base);
+  margin-bottom: var(--yns-s3);
+}
+.yns-btn--google:hover:not(:disabled) { background: var(--yns-sunk); border-color: var(--yns-muted); }
+.yns-btn--google svg { flex: none; }
+
+/* Secondary methods, tucked away so one method reads as one button */
+.yns-alt { margin-top: var(--yns-s3); }
+.yns-alt summary {
+  cursor: pointer; font-size: var(--yns-t-sm); color: var(--yns-muted);
+  padding: 6px 0; list-style: none;
+}
+.yns-alt summary::-webkit-details-marker { display: none; }
+.yns-alt summary:hover { color: var(--yns-blue); }
+.yns-alt summary::before { content: "▸ "; }
+.yns-alt[open] summary::before { content: "▾ "; }
+.yns-alt__body { padding-top: var(--yns-s3); }
+
+/* Meta / Facebook button — brand blue, per Meta's brand guidelines */
+.yns-btn--meta {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: #1877F2; color: #fff; border: 1px solid #1877F2;
+  padding: 12px 16px; font-size: var(--yns-t-base);
+  margin-bottom: var(--yns-s3);
+}
+.yns-btn--meta:hover:not(:disabled) { background: #1466d6; border-color: #1466d6; }
+.yns-btn--meta svg { flex: none; }
+
+/* =====================================================================
+   The next step, and the ones already done
+   ===================================================================== */
+
+.yns-step {
+  margin: 0 0 var(--yns-s4); padding: 16px 18px; border-radius: 14px;
+  background: var(--yns-tint); border: 1px solid var(--yns-tint-2);
+}
+.yns-step.is-overdue { background: var(--yns-warn-tint); border-color: #f0d6c2; }
+
+.yns-step__head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.yns-step h3 {
+  font-family: var(--yns-display); font-weight: var(--yns-display-weight);
+  font-size: var(--yns-t-sm); letter-spacing: .06em; text-transform: uppercase;
+  color: var(--yns-blue-deep); margin: 0 0 10px;
+}
+.yns-step.is-overdue h3 { color: var(--yns-warn); }
+.yns-step__count {
+  font-size: var(--yns-t-xs); font-weight: 700; color: var(--yns-ok);
+  background: var(--yns-ok-tint); border-radius: 99px; padding: 3px 9px;
+}
+
+.yns-step__tick {
+  flex: 0 0 auto; position: relative; width: 46px; height: 46px; padding: 0;
+  border: none; background: none; cursor: pointer; border-radius: 50%;
+}
+.yns-step__tick:focus-visible { outline: none; box-shadow: var(--yns-focus); }
+.yns-step__box {
+  display: block; width: 30px; height: 30px; margin: 8px; border-radius: 9px;
+  border: 2px solid var(--yns-blue); background: var(--yns-paper);
+  transition: background .18s, border-color .18s, transform .18s;
+}
+.yns-step__tick:hover .yns-step__box { background: var(--yns-tint-2); }
+.yns-step__box::after {
+  content: ""; position: absolute; left: 17px; top: 16px;
+  width: 7px; height: 13px; border: solid var(--yns-paper);
+  border-width: 0 3px 3px 0; transform: rotate(45deg) scale(0);
+  transition: transform .22s cubic-bezier(.2, 1.5, .4, 1);
+}
+.yns-step__tick.is-done .yns-step__box { background: var(--yns-ok); border-color: var(--yns-ok); }
+.yns-step__tick.is-done .yns-step__box::after { transform: rotate(45deg) scale(1); }
+
+/* Eight dots, outward, once. */
+.yns-step__burst { position: absolute; inset: 0; pointer-events: none; }
+.yns-step__burst i {
+  position: absolute; left: 50%; top: 50%; width: 5px; height: 5px;
+  margin: -2.5px; border-radius: 50%; background: var(--yns-ok);
+  animation: yns-burst .6s ease-out forwards;
+}
+@keyframes yns-burst {
+  0%   { opacity: 1; translate: 0 0; scale: 1; }
+  100% { opacity: 0; translate: 0 -26px; scale: .4; }
+}
+
+.yns-step__msg { font-size: var(--yns-t-xs); color: var(--yns-ok); margin-top: 9px; min-height: 1em; }
+
+/* ---------------------------------------------------- Open / Done tabs
+
+   The counts are the reason these are tabs at all: they tell you there
+   is something in the other list without making you go and look. */
+.yns-step__tabs {
+  display: flex; gap: 4px; margin: 0 0 12px;
+  background: var(--yns-paper); border: 1px solid var(--yns-line);
+  border-radius: 10px; padding: 3px;
+}
+.yns-step__tab {
+  flex: 1; cursor: pointer; font: inherit; font-size: var(--yns-t-xs); font-weight: 600;
+  padding: 7px 8px; border: none; border-radius: 7px;
+  background: none; color: var(--yns-muted);
+}
+.yns-step__tab:hover { color: var(--yns-ink); }
+.yns-step__tab.is-on { background: var(--yns-btn); color: var(--yns-btn-ink); }
+.yns-step__tab:focus-visible { outline: none; box-shadow: var(--yns-focus); }
+.yns-step__tab .n {
+  display: inline-block; min-width: 17px; padding: 0 4px; margin-left: 4px;
+  border-radius: 99px; background: var(--yns-sunk); color: var(--yns-muted);
+  font-size: 11px; line-height: 16px;
+}
+.yns-step__tab.is-on .n { background: rgba(255,255,255,.24); color: #fff; }
+
+/* -------------------------------------------------------- the stack
+
+   Sorted by due date with the top item rendered larger. A stack of
+   equal-weight tasks is a backlog; one clear next thing with the rest
+   beneath it is a list. */
+.yns-step__list { list-style: none; margin: 0; padding: 0; }
+.yns-step__item {
+  display: flex; gap: 11px; align-items: flex-start;
+  padding: 9px 0; border-bottom: 1px solid var(--yns-line-soft);
+}
+.yns-step__item:last-child { border-bottom: none; }
+.yns-step__item.is-lead { padding-top: 2px; }
+.yns-step__item.is-lead .yns-step__what { font-size: var(--yns-t-base); font-weight: 600; }
+.yns-step__item .yns-step__what { font-size: var(--yns-t-sm); font-weight: 400; }
+.yns-step__item.is-overdue .yns-step__when { color: var(--yns-warn); }
+.yns-step__item.is-done .yns-step__what { color: var(--yns-muted); text-decoration: line-through; }
+
+.yns-step__body { flex: 1; min-width: 0; }
+.yns-step__what { margin: 0; line-height: 1.45; color: var(--yns-ink); }
+.yns-step__when { margin: 3px 0 0; font-size: var(--yns-t-xs); color: var(--yns-muted); }
+.yns-step__when button {
+  background: none; border: none; padding: 0 0 0 6px; font: inherit;
+  font-size: var(--yns-t-xs); color: var(--yns-blue); text-decoration: underline; cursor: pointer;
+}
+
+.yns-step__empty {
+  margin: 4px 0 0; font-size: var(--yns-t-sm); line-height: 1.6; color: var(--yns-muted);
+}
+.yns-step__empty a { color: var(--yns-blue); }
+
+.yns-step__more {
+  font-style: normal; font-size: var(--yns-t-xs); color: var(--yns-muted); white-space: nowrap;
+}
+
+/* A completed tick is filled; pressing it puts the step back. */
+.yns-step__tick.is-done .yns-step__box { background: var(--yns-ok); border-color: var(--yns-ok); }
+.yns-step__tick.is-done .yns-step__box::after { transform: rotate(45deg) scale(1); }
+
+.yns-step__done { margin-top: 12px; }
+.yns-step__done summary {
+  cursor: pointer; font-size: var(--yns-t-xs); font-weight: 600; color: var(--yns-muted);
+}
+.yns-step__done ul { list-style: none; margin: 10px 0 0; padding: 0; }
+.yns-step__done li {
+  display: flex; gap: 9px; align-items: baseline;
+  font-size: var(--yns-t-xs); color: var(--yns-muted); padding: 4px 0; line-height: 1.5;
+}
+.yns-step__done li > span:first-child { color: var(--yns-ok); font-weight: 700; }
+.yns-step__done li i { display: block; font-style: normal; opacity: .75; margin-top: 1px; }
+.yns-step__done p { margin: 8px 0 0; font-size: var(--yns-t-xs); color: var(--yns-muted); }
+
+.yns-step--empty { background: var(--yns-sunk); border-color: var(--yns-line); }
+.yns-step--empty h3 { color: var(--yns-muted); }
+.yns-step--empty p { margin: 0; font-size: var(--yns-t-sm); line-height: 1.6; color: var(--yns-muted); }
+.yns-step__go {
+  display: inline-block; margin-top: 10px; font-size: var(--yns-t-xs);
+  color: var(--yns-blue); text-decoration: none;
+}
+.yns-step__go:hover { text-decoration: underline; }
+
+@media (prefers-reduced-motion: reduce) {
+  .yns-step__box, .yns-step__box::after { transition: none; }
+  .yns-step__burst { display: none; }
+}
+
+/* ------------------------------------------------- the collapsed rail
+
+   One row: tick, the step in short, the count, the toggle. The tick is
+   still here on purpose. The reason for pinning this to the screen at
+   all is that finishing a step should be one tap from wherever you are,
+   not one tap after an expand. */
+.yns-step--sum {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px 8px 6px; margin: 0;
+}
+.yns-step--sum .yns-step__msg { display: none; }
+.yns-step--sum .yns-step__msg:not(:empty) {
+  display: block; position: absolute; left: 12px; bottom: 100%;
+  padding: 6px 12px; border-radius: 10px 10px 0 0;
+  background: var(--yns-ok-tint); font-size: var(--yns-t-xs);
+}
+
+.yns-step__tick--sm { width: 38px; height: 38px; }
+.yns-step__tick--sm .yns-step__box { width: 24px; height: 24px; margin: 7px; border-radius: 7px; }
+.yns-step__tick--sm .yns-step__box::after { left: 14px; top: 13px; width: 6px; height: 11px; border-width: 0 2.5px 2.5px 0; }
+
+.yns-step__sum {
+  flex: 1; min-width: 0; font-size: var(--yns-t-sm); line-height: 1.4;
+  color: var(--yns-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.yns-step__sum--none { color: var(--yns-muted); }
+.yns-step--sum .yns-step__tabs { display: none; }
+
+.yns-step__toggle {
+  flex: 0 0 auto; width: 34px; height: 34px; padding: 0; cursor: pointer;
+  border: none; background: none; border-radius: 9px;
+  color: var(--yns-muted); font-size: 1.15rem; line-height: 1;
+}
+.yns-step__toggle:hover { color: var(--yns-blue); background: var(--yns-tint); }
+.yns-step__toggle:focus-visible { outline: none; box-shadow: var(--yns-focus); }
+.yns-step__head .yns-step__toggle { margin: -6px -6px 0 0; }
+
+/* The rail keeps its own card edge on a wide screen; inside the fixed
+   bottom bar the bar already provides one, so it drops the frame. */
+@media (max-width: 1079px) {
+  .hub__rail .yns-step { border: none; background: none; margin: 0; padding: 0; position: relative; }
+  .hub__rail .yns-step.is-overdue { background: none; }
+  .hub__rail .yns-step--empty { display: none; }
+  .hub__rail .yns-step:not(.yns-step--sum) { padding: 6px 4px 10px; }
+}
+
+/* =====================================================================
+   Welcome card and tour — signed-out visitors only
+   ===================================================================== */
+
+.yns-welcome {
+  margin: 0 0 var(--yns-s5); border-radius: 18px; overflow: hidden;
+  background: var(--yns-paper); border: 1px solid var(--yns-tint-2);
+  box-shadow: var(--yns-shadow);
+}
+.yns-welcome__main { padding: 22px 24px 20px; }
+.yns-welcome h2 {
+  font-family: var(--yns-display); font-weight: var(--yns-display-weight);
+  font-size: var(--yns-t-xl); color: var(--yns-heading); margin: 0 0 8px;
+}
+.yns-welcome p {
+  margin: 0 0 var(--yns-s4); color: var(--yns-muted);
+  font-size: var(--yns-t-base); line-height: 1.6; max-width: 62ch;
+}
+.yns-welcome__acts { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+/* The acknowledgement. A tinted strip rather than fine print at the
+   bottom of the page: it is a thing we are asking somebody to agree to,
+   so it should look like one. */
+.yns-terms {
+  display: flex; gap: 11px; align-items: flex-start; cursor: pointer;
+  padding: 14px 24px 16px; background: var(--yns-sunk);
+  border-top: 1px solid var(--yns-line-soft);
+}
+.yns-terms input {
+  flex: 0 0 auto; width: 19px; height: 19px; margin: 1px 0 0;
+  accent-color: var(--yns-blue); cursor: pointer;
+}
+.yns-terms span {
+  font-size: var(--yns-t-xs); line-height: 1.6; color: var(--yns-muted);
+}
+.yns-terms:hover span { color: var(--yns-ink); }
+.yns-terms input:focus-visible { outline: none; box-shadow: var(--yns-focus); }
+
+/* ------------------------------------------------------------- tour */
+
+.yns-tour { text-align: center; padding: 4px 0 0; }
+.yns-tour__dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 22px; }
+.yns-tour__dots i {
+  width: 26px; height: 4px; border-radius: 99px; background: var(--yns-line);
+  transition: background .3s;
+}
+.yns-tour__dots i.is-on { background: var(--yns-blue); }
+.yns-tour__dots i.is-done { background: var(--yns-tint-2); }
+
+.yns-tour__icon {
+  width: 54px; height: 54px; margin: 0 auto 16px; border-radius: 15px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--yns-tint); color: var(--yns-blue); font-size: 1.5rem;
+}
+.yns-tour h2 {
+  font-family: var(--yns-display); font-weight: var(--yns-display-weight);
+  font-size: var(--yns-t-xl); color: var(--yns-heading);
+  margin: 0 0 12px; text-align: center;
+}
+.yns-tour p {
+  margin: 0 0 12px; color: var(--yns-muted); font-size: var(--yns-t-sm);
+  line-height: 1.65; text-align: left;
+}
+.yns-tour__nav {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--yns-line-soft);
+}
+.yns-tour__count { font-size: var(--yns-t-xs); color: var(--yns-muted); }
+.yns-tour__nav .yns-btn:only-child { margin-left: auto; }
+
+@media (max-width: 560px) {
+  .yns-welcome__main { padding: 18px 18px 16px; }
+  .yns-terms { padding: 13px 18px 15px; }
+  .yns-welcome__acts .yns-btn { flex: 1 1 auto; text-align: center; }
+}
+
+/* A tick-the-box card is not a locked activity, so it drops the badge
+   and the mystery. Clicking one takes you to the checkbox. */
+.yns-act--locked .yns-act__why { background: var(--yns-tint); color: var(--yns-blue-deep) !important; }
+
+/* Two pulses when somebody clicks a card before ticking. Enough to find
+   the box on a long page, not enough to feel told off. */
+@keyframes yns-asking {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,87,225,0); }
+  50%      { box-shadow: 0 0 0 6px rgba(0,87,225,.28); }
+}
+.yns-terms input.is-asking { animation: yns-asking .7s ease-in-out 2; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) { .yns-terms input.is-asking { animation: none; outline: 2px solid var(--yns-blue); } }
