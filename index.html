@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Questrial&display=swap">
-<link rel="stylesheet" href="css/hub.css">
+<link rel="stylesheet" href="css/hub.css?v=8">
 </head>
 <body>
 <div class="wrap">
@@ -25,6 +25,7 @@
     <button class="lnk" onclick="YNS.retake()">Retake the three questions</button>
     <button class="lnk" onclick="YNS.reset()">Reset everything</button>
     <button class="lnk" onclick="document.getElementById('demoStrip').remove()">Hide this bar</button>
+    <span class="small" style="margin-left:auto">build v8</span>
   </div>
 
   <!-- ============================================================
@@ -143,24 +144,24 @@
 <div id="actModal" role="dialog" aria-modal="true"></div>
 <div class="toast" id="toast"></div>
 
-<script src="vendor/yns-taxonomy.js"></script>
+<script src="vendor/yns-taxonomy.js?v=8"></script>
 <script>/* real wage bands, used by the interest profiler results */fetch("data/roles.json").then(function(r){return r.json();}).then(function(d){window.YNS_ROLES=d;}).catch(function(){});</script>
-<script src="vendor/quiz-shared.js"></script>
-<script src="js/mock-runtime.js"></script>
-<script src="activities/interests.js"></script>
-<script src="activities/why.js"></script>
-<script src="activities/proof.js"></script>
-<script src="activities/hours168.js"></script>
-<script src="activities/constraints.js"></script>
-<script src="activities/floor.js"></script>
-<script src="activities/doors.js"></script>
-<script src="activities/conversations.js"></script>
-<script src="activities/premortem.js"></script>
-<script src="activities/stilltrue.js"></script>
-<script src="activities/grit.js"></script>
-<script src="activities/bounce.js"></script>
-<script src="activities/money101.js"></script>
-<script src="activities/smart6.js"></script>
-<script src="js/hub.js"></script>
+<script src="vendor/quiz-shared.js?v=8"></script>
+<script src="js/mock-runtime.js?v=8"></script>
+<script src="activities/interests.js?v=8"></script>
+<script src="activities/why.js?v=8"></script>
+<script src="activities/proof.js?v=8"></script>
+<script src="activities/hours168.js?v=8"></script>
+<script src="activities/constraints.js?v=8"></script>
+<script src="activities/floor.js?v=8"></script>
+<script src="activities/doors.js?v=8"></script>
+<script src="activities/conversations.js?v=8"></script>
+<script src="activities/premortem.js?v=8"></script>
+<script src="activities/stilltrue.js?v=8"></script>
+<script src="activities/grit.js?v=8"></script>
+<script src="activities/bounce.js?v=8"></script>
+<script src="activities/money101.js?v=8"></script>
+<script src="activities/smart6.js?v=8"></script>
+<script src="js/hub.js?v=8"></script>
 </body>
 </html>
