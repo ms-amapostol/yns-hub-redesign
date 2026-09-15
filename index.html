@@ -116,21 +116,17 @@
       <aside class="hub__rail">
         <div class="rail-card">
           <h3>Where you are</h3>
+          <div id="progress"></div>
+        </div>
+        <div class="rail-card">
+          <h3>All 17 activities</h3>
+          <p class="small muted" style="margin-bottom:8px">Closed by default, grouped by door.</p>
+          <div class="acc" id="allActs"></div>
+        </div>
+        <div class="rail-card">
+          <h3>Your answers</h3>
           <div class="you" id="youSummary"></div>
           <button class="btn-quiet" onclick="YNS.retake()">Change my answers</button> <button class="btn-quiet" onclick="YNS.pickAvatar()">Change my character</button>
-        </div>
-        <div class="rail-card">
-          <h3>Your staircase</h3>
-          <div class="stair" id="stair" aria-hidden="true"></div>
-          <p class="small muted" id="stairCaption"></p>
-        </div>
-        <div class="rail-card">
-          <h3>One good next step</h3>
-          <div class="next" id="nextStep"></div>
-        </div>
-        <div class="rail-card">
-          <h3>What we know so far</h3>
-          <ul id="facts"></ul>
         </div>
       </aside>
     </div>
