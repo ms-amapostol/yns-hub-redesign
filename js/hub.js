@@ -57,12 +57,12 @@
     proof:        { name:"Proof",                tag:"Three things you're good at, with the evidence.",   min:8, fact:"Your strengths", tile:1, play:true },
     hours168:     { name:"168 Hours",            tag:"Where your week actually goes.",                    min:4, fact:"Where your time goes", tile:2, play:true },
     constraints:  { name:"Fixed or Assumed",     tag:"Which of your reasons are actually true.",          min:5, fact:"What's really fixed", tile:3, play:true },
-    cyoa:         { name:"The Story",            tag:"Seven chapters of a life eighteen months from now.",min:5, fact:"Work that fits", tile:4, live:"https://apps.yournextstepai.com/prototype-1-choose-your-own-adventure.html" },
-    dayinlife:    { name:"A Day In The Life",    tag:"Six moments in a day you'd actually want.",         min:5, fact:"A day you'd want", tile:5, live:"https://apps.yournextstepai.com/prototype-2-day-in-the-life.html" },
-    budget:       { name:"Spend Your 100",       tag:"What you'd really pay for in a job.",               min:4, fact:"What you value in work", tile:6, live:"https://apps.yournextstepai.com/prototype-3-budget-allocation.html" },
+    cyoa:         { name:"The Story",            tag:"Seven chapters of a life eighteen months from now.",min:5, fact:"Work that fits", tile:4, live:"apps/prototype-1-choose-your-own-adventure.html" },
+    dayinlife:    { name:"A Day In The Life",    tag:"Six moments in a day you'd actually want.",         min:5, fact:"A day you'd want", tile:5, live:"apps/prototype-2-day-in-the-life.html" },
+    budget:       { name:"Spend Your 100",       tag:"What you'd really pay for in a job.",               min:4, fact:"What you value in work", tile:6, live:"apps/prototype-3-budget-allocation.html" },
     doors:        { name:"Three Doors",          tag:"Every realistic route in, side by side.",           min:7, fact:"Your route in", tile:7, play:true },
     conversations:{ name:"Two Conversations",    tag:"Who to talk to, and the message already written.",  min:6, fact:"Someone to talk to", tile:8, play:true },
-    career_abcs:  { name:"Career ABCs",          tag:"Build the resume, the cover letter and the interview.", min:20, fact:"Resume, letter, interview", tile:9, big:true, live:"https://apps.yournextstepai.com/career-abcs_v2.html" },
+    career_abcs:  { name:"Career ABCs",          tag:"Build the resume, the cover letter and the interview.", min:20, fact:"Resume, letter, interview", tile:9, big:true, live:"apps/career-abcs_v2.html" },
     floor:        { name:"The Floor",            tag:"The number you need, not the number you want.",     min:6, fact:"Your number", tile:10, play:true },
     grit:         { name:"Bounce Back",          tag:"The last time it went wrong, and what you did next.", min:6, fact:"How you recover", tile:11, play:true },
     bounce:       { name:"The Week It's Hard",   tag:"A plan for the week you want to quit.",             min:5, fact:"Your hard-week plan", tile:12, play:true },
@@ -156,6 +156,7 @@
   /* ---------- state ------------------------------------------------- */
   var state = { a:[null,null,null], q:0, done:{}, door:null, skipped:false, body:"n", tone:"3", facts: window.YNSMock.facts };
   var $ = function(id){ return document.getElementById(id); };
+  window.YNS = window.YNS || {};
 
   /* ---------- routing ----------------------------------------------
      Ordered rules. First match wins. This is the whole "starting door"
@@ -201,7 +202,7 @@
       el.onclick=function(){ state.tone=o.k; renderPicker(); };
       t.appendChild(el);
     });
-    var pv=$("pickPreview"); pv.innerHTML=""; var a=artFor(state.body,state.tone); a.style.opacity=".25"; pv.appendChild(a);
+    var pv=$("pickPreview"); pv.innerHTML='<img src="avatars/'+state.body+"-"+state.tone+'-outline.png" alt="" style="background:var(--yns-warm)">';
   }
   function renderQ(i){
     var host=$("q"+i); host.innerHTML="";
@@ -224,36 +225,140 @@
     window.scrollTo({top:0});
   }
 
+  /* ---------- the four standalone apps, in an iframe ---------------- */
+  var appOpen=null;
+  function openApp(slug, url, name){
+    appOpen=slug; var m=$("actModal"); m.style.display="block"; document.body.classList.add("modal-open");
+    m.innerHTML='<div class="am-card am-frame"><div class="am-top"><span class="am-eyebrow">'+name+'</span><span class="small muted">Runs from the real page. Finish it, then close.</span><button class="am-x" onclick="YNS.closeApp()" aria-label="Close">×</button></div><iframe src="'+url+'" title="'+name+'"></iframe></div>';
+  }
+  function readRuns(){
+    try { var q=JSON.parse(localStorage.getItem("yns_pending_runs")||"[]"); return Array.isArray(q)?q:[]; } catch(e){ return []; }
+  }
+  function absorbRun(slug){
+    var runs=readRuns().filter(function(r){ return r.activity===slug && r.status!=="in_progress"; });
+    var last=runs[runs.length-1]; if (!last) return false;
+    if (last.top_categories && last.top_categories[0]) state.facts.top_category=last.top_categories[0];
+    if (last.level) state.facts.level=last.level;
+    return true;
+  }
+  window.addEventListener("message", function(ev){ if (ev.data && ev.data.yns==="run" && appOpen) { if (absorbRun(appOpen) && !state.done[appOpen]) { state.done[appOpen]=true; render(); } } });
+  YNS.closeApp=function(){
+    var slug=appOpen; appOpen=null; $("actModal").style.display="none"; $("actModal").innerHTML=""; document.body.classList.remove("modal-open");
+    if (!slug) return;
+    var had=absorbRun(slug);
+    if (slug==="career_abcs" || had) { if (!state.done[slug]) { state.done[slug]=true; lastAdded=slug; toast("Done: "+ACTS[slug].name+". One more piece of you."); } }
+    else toast("Closed without finishing. Nothing saved for "+ACTS[slug].name+".");
+    render();
+  };
+
+  /* ---------- the scene behind her ---------------------------------
+     One small drawing per activity, placed in a fixed slot around the
+     portrait so nothing ever lands on her face and the composition holds
+     at any combination. Each drawing is authored in its own 36x36 box
+     and translated into its slot, which is why the paths below all use
+     small numbers.
+
+     Five slots across the top, five across the bottom, three down each
+     side, and the ground band, which is The Floor. Seventeen places for
+     seventeen activities. */
+  var SLOT = {
+    /* Five across the top, three down each side, five across the bottom.
+       Every box is 36 wide, so these are spaced 38 apart and the rows
+       clear each other: top 6-40, sides 46-156, bottom 156-190, ground
+       190-200. */
+    why:[6,6], dayinlife:[44,6], cyoa:[82,6], grit:[120,6], stilltrue:[158,6],
+    bounce:[6,46], constraints:[6,84], conversations:[6,122],
+    doors:[158,46], money101:[158,84], career_abcs:[158,122],
+    proof:[6,156], hours168:[44,156], budget:[82,156], smart6:[120,156], premortem:[158,156]
+  };
+  var SCENE = {
+    why:        { title:"Your why \u2014 the sun",              d:'<circle cx="18" cy="18" r="9" fill="var(--yns-gold)"/><g stroke="var(--yns-gold)" stroke-width="2" stroke-linecap="round"><path d="M18 3v-2M18 33v2M3 18H1M33 18h2M7.5 7.5l-1.5-1.5M28.5 28.5l1.5 1.5M28.5 7.5l1.5-1.5M7.5 28.5l-1.5 1.5"/></g>' },
+    dayinlife:  { title:"A Day In The Life \u2014 a window with the light on", d:'<rect x="5" y="5" width="26" height="28" rx="2" fill="var(--yns-gold-tint)" stroke="var(--yns-blue-deep)" stroke-width="2"/><path d="M18 5v28M5 19h26" stroke="var(--yns-blue-deep)" stroke-width="2"/>' },
+    cyoa:       { title:"The Story \u2014 the path out",        d:'<path d="M8 33c0-9 20-10 20-18 0-5-6-6-6-11" fill="none" stroke="var(--yns-tint-2)" stroke-width="7" stroke-linecap="round"/><path d="M8 33c0-9 20-10 20-18 0-5-6-6-6-11" fill="none" stroke="var(--yns-blue)" stroke-width="1.5" stroke-dasharray="3 4" stroke-linecap="round"/>' },
+    grit:       { title:"Bounce Back \u2014 the storm, and the light after", d:'<path d="M6 16a8 8 0 0113-6 7 7 0 019 2 6 6 0 01-2 11H10a6 6 0 01-4-7z" fill="var(--yns-tint-2)"/><path d="M20 24l-6 8h5l-4 7" fill="none" stroke="var(--yns-gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' },
+    stilltrue:  { title:"Still True? \u2014 the flag at the top", d:'<path d="M12 34V4" stroke="var(--yns-blue-deep)" stroke-width="2.5" stroke-linecap="round"/><path d="M12 5l18 6-18 6z" fill="var(--yns-gold)"/>' },
+    bounce:     { title:"The Week It\u2019s Hard \u2014 a light left on for you", d:'<circle cx="18" cy="12" r="8" fill="var(--yns-gold-tint)" stroke="var(--yns-gold)" stroke-width="2"/><path d="M13 20h10l-2 5h-6z" fill="var(--yns-gold)"/><rect x="16" y="25" width="4" height="9" rx="1" fill="var(--yns-blue-deep)"/>' },
+    constraints:{ title:"Fixed or Assumed \u2014 a wall with a door in it", d:'<rect x="3" y="6" width="30" height="28" fill="var(--yns-tint-2)"/><rect x="12" y="14" width="13" height="20" rx="1.5" fill="var(--yns-paper)" stroke="var(--yns-blue-deep)" stroke-width="2"/><circle cx="21" cy="24" r="1.6" fill="var(--yns-blue-deep)"/>' },
+    conversations:{ title:"Two Conversations \u2014 two people talking", d:'<g><path d="M2 3h20a3 3 0 013 3v9a3 3 0 01-3 3h-9l-6 5v-5H2a3 3 0 01-3-3V6a3 3 0 013-3z" transform="translate(1 0)" fill="var(--yns-paper)" stroke="var(--yns-blue-deep)" stroke-width="1.8" stroke-linejoin="round"/><path d="M13 19h20a3 3 0 013 3v8a3 3 0 01-3 3h-3v4l-5-4h-12a3 3 0 01-3-3v-8a3 3 0 013-3z" transform="translate(-1 0)" fill="var(--yns-blue)" stroke="var(--yns-blue-deep)" stroke-width="1.8" stroke-linejoin="round"/></g>' },
+    doors:      { title:"Three Doors \u2014 the routes in",     d:'<g fill="var(--yns-paper)" stroke="var(--yns-blue-deep)" stroke-width="1.8"><path d="M2 34V17a4.5 4.5 0 019 0v17z"/><path d="M14 34V12a4.5 4.5 0 019 0v22z"/><path d="M26 34V20a4 4 0 018 0v14z"/></g><g fill="var(--yns-blue-deep)"><circle cx="9" cy="26" r="1.3"/><circle cx="21" cy="24" r="1.3"/><circle cx="32" cy="28" r="1.2"/></g>' },
+    money101:   { title:"Money, Plainly \u2014 the jar with something in it", d:'<path d="M7 10h22v20a4 4 0 01-4 4H11a4 4 0 01-4-4z" fill="var(--yns-paper)" stroke="var(--yns-blue-deep)" stroke-width="2"/><path d="M7 22h22v8a4 4 0 01-4 4H11a4 4 0 01-4-4z" fill="var(--yns-gold)" opacity=".85"/><rect x="5" y="5" width="26" height="5" rx="2" fill="var(--yns-blue-deep)"/>' },
+    career_abcs:{ title:"Career ABCs \u2014 the resume in your hand", d:'<g transform="rotate(-6 18 19)"><rect x="6" y="3" width="24" height="32" rx="2" fill="var(--yns-paper)" stroke="var(--yns-blue-deep)" stroke-width="2"/><g stroke="var(--yns-blue)" stroke-width="2" stroke-linecap="round"><path d="M11 12h14M11 19h14M11 26h9"/></g></g>' },
+    proof:      { title:"Proof \u2014 three stones that hold",  d:'<g fill="var(--yns-blue-deep)"><rect x="2" y="25" width="22" height="8" rx="2"/><rect x="7" y="16" width="22" height="8" rx="2"/><rect x="12" y="7" width="20" height="8" rx="2"/></g>' },
+    hours168:   { title:"168 Hours \u2014 the week, in bars",   d:'<g fill="var(--yns-blue)" opacity=".85"><rect x="3" y="18" width="5" height="15" rx="1.5"/><rect x="12" y="10" width="5" height="23" rx="1.5"/><rect x="21" y="23" width="5" height="10" rx="1.5"/><rect x="30" y="4" width="5" height="29" rx="1.5"/></g>' },
+    budget:     { title:"Spend Your 100 \u2014 what you\u2019d pay for", d:'<g fill="none" stroke="var(--yns-gold)" stroke-width="2.5"><circle cx="12" cy="12" r="8"/><circle cx="24" cy="20" r="8"/><circle cx="11" cy="26" r="7"/></g>' },
+    smart6:     { title:"Your Six Months \u2014 the staircase", d:'<g fill="var(--yns-blue)"><rect x="1" y="26" width="9" height="7"/><rect x="10" y="19" width="9" height="14"/><rect x="19" y="12" width="9" height="21"/><rect x="28" y="5" width="8" height="28"/></g>' },
+    premortem:  { title:"What Might Trip You Up \u2014 the rock you saw coming", d:'<path d="M3 33l9-17 11-5 11 22z" fill="var(--yns-muted)"/><path d="M12 16l11-5 4 8-9 3z" fill="var(--yns-ink)" opacity=".35"/>' },
+    /* The ground everything else stands on. Full width, no slot. */
+    floor:      { title:"The Floor \u2014 solid ground", full:'<rect x="0" y="190" width="200" height="10" fill="var(--yns-blue-deep)" opacity=".9"/>' }
+  };
+  /* Back to front. The ground lands last so it sits in front of the feet
+     of everything standing on it. */
+  var SCENE_ORDER = ["why","dayinlife","cyoa","grit","stilltrue","bounce","constraints","conversations","doors","money101","career_abcs","proof","hours168","budget","smart6","premortem","floor"];
+
   /* ---------- hub render -------------------------------------------- */
   function doneCount(){ return Object.keys(state.done).length; }
   function doorProgress(d){ var n=0; d.acts.forEach(function(s){ if(state.done[s]) n++; }); return {n:n,of:d.acts.length}; }
 
-  var bubbleTimer=null, bubbleIdx=0;
+  var bubbleTimer=null, bubbleIdx=0, lastAdded=null;
   function renderAvatar(){
     var n=doneCount(), total=Object.keys(ACTS).filter(function(k){return !ACTS[k].soon;}).length;
-    var stage = n===0 ? 1 : Math.min(6, 1+Math.floor(n/total*5)+ (n>0?1:0));
-    if (stage>6) stage=6; if (n>=total) stage=6;
-    var box=$("avatarBox"); box.setAttribute("data-stage",stage);
+
+    /* The portrait. Clear from the first visit, and it never changes. */
     var art=$("avatarArt");
-    if (art.getAttribute("data-key")!==state.body+state.tone){ art.innerHTML=""; art.appendChild(artFor(state.body,state.tone)); art.setAttribute("data-key",state.body+state.tone);
-      var grid=document.createElement("div"); grid.className="tiles"; var G=6;
-      REVEAL_ORDER.forEach(function(c){ var t=document.createElement("i"); t.style.left=(c[0]*100/G)+"%"; t.style.top=(c[1]*100/G)+"%"; t.style.width=(100/G+0.3)+"%"; t.style.height=(100/G+0.3)+"%"; grid.appendChild(t); });
-      art.appendChild(grid); }
-    var tiles=art.querySelectorAll(".tiles i"); var reveal = n>=total ? tiles.length : Math.round(n/total*tiles.length);
-    tiles.forEach(function(t,k){ t.classList.toggle("off", k<reveal); });
-    $("avatarPct").textContent=Math.round(n/total*100)+"%";
+    if (art.getAttribute("data-key")!==state.body+state.tone){
+      art.innerHTML=""; art.appendChild(artFor(state.body,state.tone)); art.setAttribute("data-key",state.body+state.tone);
+    }
+
+    /* The scene around her, one drawing per finished activity. */
+    var svg=$("avatarScene"), parts="";
+    SCENE_ORDER.forEach(function(slug){
+      var sc=SCENE[slug]; if (!state.done[slug] || !sc) return;
+      if (sc.full){ parts += '<g class="sc"><title>'+sc.title+'</title>'+sc.full+'</g>'; return; }
+      var at=SLOT[slug]||[82,82];
+      parts += '<g class="sc" transform="translate('+at[0]+' '+at[1]+')"><title>'+sc.title+'</title>'+sc.d+'</g>';
+    });
+    if (svg.getAttribute("data-n")!==String(n)){ svg.innerHTML=parts; svg.setAttribute("data-n",n); }
+
+    
     var fr=n/total;
-    var cap = n===0 ? "Nothing filled in yet. That's where everyone starts."
-            : fr<.35 ? "A few pieces in."
-            : fr<.7  ? "Half the picture. You can see who this is now."
-            : n<total ? "Nearly all of it. Most of this is you, in your own words."
-            : "All of it. Every piece, filled in by you.";
-    $("avatarCaption").textContent=cap;
-    $("heroH1").textContent = n===0 ? "What should you do with your life?" : fr<.7 ? "You're filling in." : "Look who showed up.";
+    var cap = n===0 ? "Nothing around you yet. Every activity adds something."
+            : fr<.35 ? "It\u2019s starting to fill in around you."
+            : fr<.7  ? "Half a life on the page."
+            : n<total ? "Nearly the whole picture, and all of it yours."
+            : "That\u2019s the lot. Every piece of it, earned.";
+    $("avatarCaption").textContent=(n?n+" of "+total+" \u00b7 ":"")+cap;
+    $("heroH1").textContent = n===0 ? "What should you do with your life?" : fr<.7 ? "It\u2019s coming together." : "Look at what you\u2019ve built.";
+    renderLegend(n);
     renderBubble();
   }
+
+  /* The newest addition, named. The rest are in the picture's tooltips
+     and in the full list, which opens on click. Seventeen chips at once
+     was a wall of text under a small picture. */
+  function renderLegend(n){
+    var el=$("sceneLegend"); if (!el) return;
+    if (!n){ el.innerHTML='<span class="small muted">The space around you fills in as you go.</span>'; return; }
+    var items=SCENE_ORDER.filter(function(s){ return state.done[s] && SCENE[s]; });
+    var newest = (lastAdded && SCENE[lastAdded]) ? SCENE[lastAdded] : SCENE[items[items.length-1]];
+    el.innerHTML='<button class="lg" onclick="YNS.sceneList()" title="See everything in the picture">'+newest.title+'</button>'
+      + (items.length>1 ? '<span class="small muted">and '+(items.length-1)+' more</span>' : '');
+  }
+  YNS.sceneList=function(){
+    var items=SCENE_ORDER.filter(function(s){ return state.done[s] && SCENE[s]; });
+    var m=$("actModal"); m.style.display="block"; document.body.classList.add("modal-open");
+    m.innerHTML='<div class="am-card"><div class="am-top"><span class="am-eyebrow">Your picture</span><button class="am-x" onclick="YNS.closeList()" aria-label="Close">\u00d7</button></div>'
+      +'<h2>Everything in it so far</h2><p class="am-scene">One thing for every activity you\u2019ve finished.</p><div class="scene-list">'
+      +items.map(function(s){ return '<div><svg viewBox="0 0 36 36" aria-hidden="true">'+(SCENE[s].full?'<rect x="0" y="26" width="36" height="8" fill="var(--yns-blue-deep)" opacity=".9"/>':SCENE[s].d)+'</svg><span>'+SCENE[s].title+'</span></div>'; }).join("")
+      +'</div><div class="am-foot"><span></span><button class="btn btn-primary" onclick="YNS.closeList()">Close</button></div></div>';
+  };
+  YNS.closeList=function(){ $("actModal").style.display="none"; $("actModal").innerHTML=""; document.body.classList.remove("modal-open"); };
+
   var WHO = { me:"me", kids:"my kids", family:"my family", partner:"my partner", someone_specific:"one person in particular", community:"people like me" };
+  function catLabel(k){ var T=window.YNSTaxonomy; return (T&&k)?T.label(k):k; }
   var REAL = {
+    cyoa:         function(f){ return f.top_category ? {lead:"Work that fits the life I picked:", say:catLabel(f.top_category)+" came out on top."} : null; },
+    dayinlife:    function(f){ return f.top_category ? {lead:"A day I'd actually want:", say:"The one that points at "+catLabel(f.top_category)+"."} : null; },
+    budget:       function(f){ return f.top_category ? {lead:"What I'd pay for in a job:", say:"My hundred pointed at "+catLabel(f.top_category)+"."} : null; },
     why:          function(f){ return f.why_statement ? {lead:"The reason I'm doing this:", say:"\u201c"+f.why_statement+"\u201d"+(WHO[f.why_who]?" Mostly for "+WHO[f.why_who]+".":"")} : null; },
     proof:        function(f){ var s=Array.isArray(f.strengths)&&f.strengths[0]; return s&&s.moment ? {lead:"Something I'm good at:", say:s.moment} : null; },
     hours168:     function(f){ var D={commute:"the commute",work:"the job itself",chores:"keeping life running",none:"nothing, the week's the wrong shape"}, P={evenings:"my evenings",weekends:"my weekends",sleep:"sleep",own_time:"the one thing that's mine",flexible:"most of it, for the right thing"}; return f.time_drain ? {lead:"Where my week goes:", say:"I'd take hours back from "+(D[f.time_drain]||f.time_drain)+"."+(P[f.time_protected]?" I won't give up "+P[f.time_protected]+".":"")} : null; },
@@ -288,9 +393,9 @@
     var el=document.createElement("button"); el.type="button";
     el.className="act"+(done?" done":"")+(a.soon?" soon":"");
     el.innerHTML='<span class="mark" aria-hidden="true"></span><h3>'+a.name+'</h3><p>'+a.tag+'</p>'
-      +'<div class="meta"><span>'+a.min+' min</span>'+(a.soon?'<span class="tag gold">Coming soon</span>':'')+(a.play?'<span class="tag gold">Play it here</span>':'')+(a.live?'<a class="ext" href="'+a.live+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">Open the live app ↗</a><span class="ext">tap card = mark done</span>':'')+(a.big?'<span class="tag">Bigger one</span>':'')+'</div>';
+      +'<div class="meta"><span>'+a.min+' min</span>'+(a.soon?'<span class="tag gold">Coming soon</span>':'')+(a.play?'<span class="tag gold">Play it here</span>':'')+(a.live?'<span class="tag gold">Play it here</span>':'')+(a.big?'<span class="tag">Bigger one</span>':'')+'</div>';
     if (a.play) el.onclick=function(){ if (state.done[slug]) toggle(slug); else window.YNSMock.play(slug); };
-    else if (a.live) el.onclick=function(){ if (!state.done[slug]) { state.facts.top_category = state.facts.top_category || "health"; state.facts.level = state.facts.level || "some"; } toggle(slug); };
+    else if (a.live) el.onclick=function(){ if (state.done[slug]) toggle(slug); else openApp(slug, a.live, a.name); };
     else if (!a.soon) el.onclick=function(){ toggle(slug); };
     else el.title="Proposed for this door. Not built yet.";
     return el;
@@ -374,16 +479,18 @@
   }
 
   /* ---------- public ------------------------------------------------ */
-  window.YNS = window.YNS || {};
   Object.assign(window.YNS, {
     next: function(){ if (state.q<3) showQ(state.q+1); else { state.door=route(state.a); state.skipped=false; render(); show("hub"); } },
     back: function(){ showQ(state.q-1); },
     skip: function(){ state.skipped=true; state.door="know"; render(); show("hub"); },
     retake: function(){ state.a=[null,null,null]; renderPicker(); renderQ(1);renderQ(2);renderQ(3); showQ(1); show("intake"); },
     pickAvatar: function(){ renderPicker(); showQ(0); show("intake"); },
+    /* Review build only: mark activities done without playing them, so
+       the team can see the scene fill. Remove with the demo strip. */
+    demoFill: function(list){ (list||Object.keys(ACTS)).forEach(function(k){ if(!ACTS[k].soon) state.done[k]=true; }); render(); },
     reset: function(){ state={a:[null,null,null],q:0,done:{},door:null,skipped:false,body:"n",tone:"3",facts:window.YNSMock.facts}; Object.keys(state.facts).forEach(function(k){ delete state.facts[k]; }); $("youChip").textContent="Not signed in"; renderPicker(); showQ(0); show("intake"); }
   });
 
-  window.YNSMock.mount($("actModal"), function(slug){ state.done[slug]=true; bubbleIdx=Math.max(0,bubbleLines().length-1); render(); toast("Done: "+ACTS[slug].name+". One more piece of you."); });
+  window.YNSMock.mount($("actModal"), function(slug){ state.done[slug]=true; lastAdded=slug; bubbleIdx=Math.max(0,bubbleLines().length-1); render(); toast("Done: "+ACTS[slug].name+". One more piece of you."); });
   renderPicker(); renderQ(1); renderQ(2); renderQ(3); showQ(0);
 })();
