@@ -499,3 +499,15 @@ body.modal-open{overflow:hidden}
 .signup-form input[type=email],.signup-form input[type=password]{font:inherit;padding:10px 12px;border:1.5px solid var(--yns-line);border-radius:var(--r-sm)}
 .signup-consent{display:flex !important;gap:10px;align-items:flex-start;color:var(--yns-ink) !important;font-size:.92rem !important}
 .signup-consent input{margin-top:3px;width:17px;height:17px;accent-color:var(--yns-blue)}
+
+/* ---- investment comparison rows ----------------------------------- */
+.iv-rows{display:grid;gap:8px;margin:12px 0 0;text-align:left}
+.iv-row{display:grid;grid-template-columns:1fr 2fr auto;gap:10px;align-items:center}
+.iv-t b{display:block;font-family:var(--yns-display);font-weight:500;font-size:.88rem}
+.iv-t span{font-size:.74rem;color:var(--yns-muted)}
+.iv-bar{height:14px;border-radius:7px;background:var(--yns-line-soft);overflow:hidden}
+.iv-bar i{display:block;height:100%;background:var(--yns-blue)}
+.iv-row:nth-child(1) .iv-bar i,.iv-row:nth-child(2) .iv-bar i{background:var(--yns-ok)}
+.iv-row:nth-child(5) .iv-bar i{background:var(--yns-gold)}
+.iv-n{font-family:var(--yns-display);font-weight:500;font-size:.9rem;white-space:nowrap}
+@media (max-width:560px){.iv-row{grid-template-columns:1fr auto}.iv-bar{display:none}}

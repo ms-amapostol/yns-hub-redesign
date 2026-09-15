@@ -132,7 +132,60 @@ YNSActivity.define({
           { k: "unsure", t: "I\u2019d want to learn more first", s: "The honest answer, and the right one for most people at this point.", echo: "learn more first" }
         ]
       }]
-    }
+    },
+    /* The whole point, in one screen: the same money, five places, and
+       what the gap looks like after time. Risk is named next to every
+       number so nobody reads the biggest one as a recommendation. */
+    {
+      id: "compare",
+      axes: [],
+      ladder: [
+        {
+          mechanic: "calc",
+          eyebrow: "See the difference",
+          title: "Same money. Five places. Watch what time does.",
+          scene: [
+            "Put in what you could set aside in a year, then move the years and the rates. The rates filled in are ordinary long-run figures rather than promises, and they are yours to change.",
+            "The gap at the bottom is what taking risk has historically paid. The top two rows are what not taking risk guarantees."
+          ],
+          prompt: "Your numbers.",
+          inputs: [
+            { k: "annual", t: "What you\u2019d put in a year", prefix: "$", start: 1200, step: 300, max: 50000, s: "$1,200 is $100 a month." },
+            { k: "years",  t: "For how many years",            prefix: "", start: 20, step: 5, max: 30, s: "Moves in fives, up to 30." },
+            { k: "hysa",   t: "Savings account rate",          prefix: "", suffix: "%", start: 4, step: 1, max: 6, s: "High-yield savings. Moves with the market." },
+            { k: "cd",     t: "CD rate",                       prefix: "", suffix: "%", start: 4, step: 1, max: 7, s: "Locked for a term." },
+            { k: "bond",   t: "Bonds and money market",        prefix: "", suffix: "%", start: 5, step: 1, max: 8, s: "Steadier than stocks, lower ceiling." },
+            { k: "etf",    t: "Index fund or ETF",             prefix: "", suffix: "%", start: 9, step: 1, max: 12, s: "Long-run US stock market average, before inflation." },
+            { k: "stock",  t: "Individual stocks",             prefix: "", suffix: "%", start: 9, step: 1, max: 15, s: "Same average, far wider spread. Some go to zero." }
+          ],
+          compute: function (v) {
+            var yrs = Math.max(0, Math.min(30, v.years || 0));
+            function g(rate) { var b = 0; for (var i = 0; i < yrs; i++) b = (b + (v.annual || 0)) * (1 + rate / 100); return b; }
+            var rows = [
+              { t: "Savings account",     risk: "No risk to what you put in", r: v.hysa,  end: g(v.hysa || 0) },
+              { t: "CD",                  risk: "No risk, locked up",         r: v.cd,    end: g(v.cd || 0) },
+              { t: "Bonds, money market", risk: "Low risk",                   r: v.bond,  end: g(v.bond || 0) },
+              { t: "Index fund or ETF",   risk: "Real risk, spread wide",     r: v.etf,   end: g(v.etf || 0) },
+              { t: "Individual stocks",   risk: "Highest risk",               r: v.stock, end: g(v.stock || 0) }
+            ];
+            return { rows: rows, paid: (v.annual || 0) * yrs, years: yrs };
+          },
+          render: function (r) {
+            var max = Math.max.apply(null, r.rows.map(function (x) { return x.end; })) || 1;
+            var m = function (n) { return "$" + Math.round(n).toLocaleString("en-US"); };
+            return '<p class="calc-sub">You would have put in ' + m(r.paid) + " over " + r.years + " years.</p>" +
+              '<div class="iv-rows">' + r.rows.map(function (x) {
+                return '<div class="iv-row"><div class="iv-t"><b>' + x.t + "</b><span>" + x.risk + " \u00b7 " + (x.r || 0) + "%</span></div>" +
+                  '<div class="iv-bar"><i style="width:' + Math.round(x.end / max * 100) + '%"></i></div>' +
+                  '<div class="iv-n">' + m(x.end) + "</div></div>";
+              }).join("") + "</div>" +
+              '<p class="calc-late">The gap between the bottom row and the top row is ' + m(r.rows[4].end - r.rows[0].end) +
+              ". That gap is the reward for risk, and the risk is real: the bottom two can fall, and a single company can go to nothing. The top two cannot fall, which is exactly what you are paying for.</p>";
+          },
+          cta: "That\u2019s the picture"
+        }
+      ]
+    },
   ]),
 
   results: function (r) {

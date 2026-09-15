@@ -436,14 +436,16 @@ function exportBudget(){
 M.calc = function(r){
   var v=run.ui.calc||(run.ui.calc={});
   r.inputs.forEach(function(i){ if (v[i.k]==null) v[i.k]=i.start; });
-  var res=compute(v, r.mode);
+  /* A screen can bring its own maths and its own readout. `mode` still
+     selects one of the three built-in calculators for everything else. */
+  var res=(r.compute||compute)(v, r.mode);
   var h = prompt(r)+'<div class="am-build">'+r.inputs.map(function(i){
     return '<div class="am-row"><div><strong>'+esc(i.t)+'</strong>'+(i.s?'<span>'+esc(i.s)+'</span>':'')+'</div>'
       +'<div class="am-step"><button type="button" onclick="YNSMock.calcBump(\''+i.k+'\',-'+i.step+')" aria-label="less">\u2212</button>'
       +'<span class="am-money">'+(i.prefix?'<i>'+i.prefix+'</i>':'')+'<input type="text" inputmode="numeric" value="'+v[i.k]+'" data-c="'+i.k+'" aria-label="'+esc(i.t)+'" oninput="YNSMock.calcType(this)">'+(i.suffix?'<i>'+i.suffix+'</i>':'')+'</span>'
       +'<button type="button" onclick="YNSMock.calcBump(\''+i.k+'\','+i.step+')" aria-label="more">+</button></div></div>';
   }).join("")+'</div>'
-  + '<div class="am-calcout" id="calcOut">'+calcHTML(res,v,r.mode)+'</div>';
+  + '<div class="am-calcout" id="calcOut">'+(r.render||calcHTML)(res,v,r.mode)+'</div>';
   shell(r, h, '<span></span>'+primary(r.cta,"YNSMock.submitCalc()"));
 };
 function compute(v, mode){
@@ -488,8 +490,8 @@ function calcHTML(res,v,mode){
     +'<p class="calc-late">Start ten years later instead and the same amount reaches $'+Math.round(res.late).toLocaleString("en-US")+'.</p>';
 }
 function refreshCalc(){
-  var v=run.ui.calc, out=host.querySelector("#calcOut");
-  var mode=cur().rung.mode; if (out) out.innerHTML=calcHTML(compute(v,mode),v,mode);
+  var r=cur().rung, v=run.ui.calc, out=host.querySelector("#calcOut");
+  if (out) out.innerHTML=(r.render||calcHTML)((r.compute||compute)(v,r.mode),v,r.mode);
 }
 function calcType(input){
   var k=input.getAttribute("data-c");
@@ -507,7 +509,7 @@ function calcBump(k,d){
 }
 function submitCalc(){
   var s2=cur(), r=s2.rung, id=s2.slot.id, v=run.ui.calc;
-  run.extra[id+"_values"]=v; run.extra[id+"_result"]=compute(v, r.mode);
+  run.extra[id+"_values"]=v; run.extra[id+"_result"]=(r.compute||compute)(v, r.mode);
   if (r.asks) facts[r.asks]=v.monthly;
   run.ui.calc=null; next();
 }
