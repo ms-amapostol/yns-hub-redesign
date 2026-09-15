@@ -58,7 +58,7 @@
     { key:"mind", n:"Door 4", title:"Mindset and money",
       blurb:"Build the grit and the financial footing to follow through.",
       why:"Knowing what you want is half of it. This door works on the part nobody teaches: bouncing back when it's hard, and knowing your real numbers.",
-      acts:["floor","grit","bounce","money101"] },
+      acts:["grit","able","floor","money101","budget0","compound","bounce"] },
     { key:"plan", n:"Door 5", title:"Make the plan",
       blurb:"Six months, one SMART goal, written down.",
       why:"You're ready to commit. This door turns a direction into a plan with dates on it, and helps you spot what might knock it off course before it does.",
@@ -83,6 +83,9 @@
     abcs_a:       { name:"A · What you\u2019ve already done", tag:"Turn things you\u2019ve actually done into short stories you can use.", min:8, fact:"Your stories", tile:9, app:"a" },
     abcs_b:       { name:"B · Put it on paper",  tag:"A resume and a cover letter, built from those stories.", min:10, fact:"Resume and cover letter", tile:9, app:"b", after:"abcs_a" },
     abcs_c:       { name:"C · Say it out loud",  tag:"Interview practice, using the same stories.", min:8, fact:"Interview practice", tile:9, app:"c", after:"abcs_a" },
+    able:         { name:"Solve It",           tag:"One real problem, taken apart four ways. The ABLE method.", min:7, fact:"How you solve things", tile:11, play:true },
+    budget0:      { name:"Every Dollar a Job", tag:"Build a budget that adds to zero, then take the spreadsheet with you.", min:12, fact:"Your budget", tile:13, play:true },
+    compound:     { name:"What Money Does Over Time", tag:"Watch a small monthly amount turn into a number you didn\u2019t expect.", min:6, fact:"What time does to money", tile:13, play:true },
     floor:        { name:"The Floor",            tag:"The number you need, not the number you want.",     min:6, fact:"Your number", tile:10, play:true },
     grit:         { name:"Bounce Back",          tag:"The last time it went wrong, and what you did next.", min:6, fact:"How you recover", tile:11, play:true },
     bounce:       { name:"The Week It's Hard",   tag:"A plan for the week you want to quit.",             min:5, fact:"Your hard-week plan", tile:12, play:true },
@@ -429,6 +432,58 @@
     if (a.live){ openApp(slug, withLevel(a.live)+(atResults?"":"&fresh=1"), a.name); return; }
     toggle(slug);
   }
+
+  /* ---------- the Planner ------------------------------------------
+
+     Every activity ends by asking for one thing to do this week. Until
+     now those answers lived on the screen that produced them and nowhere
+     else, which makes them a nice feeling rather than a commitment.
+
+     The Planner is the list. Everything picked, where it came from, and
+     a box to tick. It also carries the dated things: the six-month goal,
+     the first step, and the note for a hard week. */
+  function weekOf(ts){
+    var d=new Date(ts), now=new Date();
+    var days=Math.floor((now-d)/86400000);
+    if (days<1) return "today";
+    if (days<7) return days+(days===1?" day ago":" days ago");
+    return Math.round(days/7)+(days<14?" week ago":" weeks ago");
+  }
+  function steps(){ return (state.facts.steps_open||[]); }
+  function openSteps(){ return steps().filter(function(s){ return !s.done; }); }
+
+  YNS.planner=function(){
+    var all=steps(), open=all.filter(function(s){return !s.done;}), done=all.filter(function(s){return s.done;});
+    var f=state.facts;
+    var dated=[];
+    if (f.smart_goal) dated.push({ t:"Six months from now", v:f.smart_goal });
+    if (f.smart_first_step) dated.push({ t:"This week, from your plan", v:f.smart_first_step });
+    if (f.hard_week_plan) dated.push({ t:"If it gets hard", v:String(f.hard_week_plan).split("\n")[0] });
+    if (f.contact_named) dated.push({ t:"A message you\u2019ve written", v:"Two Conversations has it ready to send." });
+
+    var m=$("actModal"); m.style.display="block"; document.body.classList.add("modal-open");
+    var list = open.length
+      ? open.map(function(s){
+          return '<label class="pl-row"><input type="checkbox" onchange="YNS.tickStep(\''+s.id+'\')"><span class="pl-t">'+s.text+'</span><span class="pl-from">'+s.from+' \u00b7 '+weekOf(s.at)+'</span></label>';
+        }).join("")
+      : '<p class="am-scene">Nothing on the list yet. Every activity ends by asking for one thing to do this week, and whatever you pick lands here.</p>';
+    var doneList = done.length
+      ? '<details class="pl-done"><summary>'+done.length+" done</summary>"
+        + done.map(function(s){ return '<div class="pl-row pl-off"><span class="pl-t">'+s.text+'</span><span class="pl-from">'+s.from+'</span></div>'; }).join("")
+        + "</details>"
+      : "";
+    m.innerHTML='<div class="am-card am-results"><div class="am-top"><span class="am-eyebrow">Your planner</span><button class="am-x" onclick="YNS.closeList()" aria-label="Close">\u00d7</button></div>'
+      +'<h1>What you said you\u2019d do</h1>'
+      +'<p class="am-scene">One line for every thing you picked at the end of an activity. Tick them off as they happen.</p>'
+      +'<section class="pf-sec"><h3>This week</h3>'+list+doneList+'</section>'
+      +(dated.length ? '<section class="pf-sec"><h3>Further out</h3>'+dated.map(function(d){ return '<div class="pf-row"><div class="pf-t">'+d.t+'</div><div class="pf-v">'+d.v+'</div></div>'; }).join("")+"</section>" : "")
+      +'<div class="am-foot"><span class="small muted">Signed out, this lives in this browser only.</span><button class="btn btn-primary" onclick="YNS.closeList()">Close</button></div></div>';
+  };
+  YNS.tickStep=function(id){
+    steps().forEach(function(s){ if (s.id===id) s.done=true; });
+    render(); YNS.planner();
+    toast("Ticked off. That\u2019s the whole point of the list.");
+  };
 
   /* ---------- everything we know, in one place ----------------------
 
@@ -779,7 +834,12 @@
     }).join("");
   }
 
-  function render(){ renderAvatar(); renderDoor(); renderGrid(); renderRail(); }
+  function renderPlannerButton(){
+    var b=$("plannerBtn"); if (!b) return;
+    var n=openSteps().length;
+    b.innerHTML='Planner'+(n?'<span class="pl-count">'+n+'</span>':'');
+  }
+  function render(){ renderAvatar(); renderDoor(); renderGrid(); renderRail(); renderPlannerButton(); }
 
   function toggle(slug){
     if (state.done[slug]) delete state.done[slug]; else state.done[slug]=true;

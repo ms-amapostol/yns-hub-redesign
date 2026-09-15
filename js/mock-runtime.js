@@ -146,11 +146,41 @@ function submitText(){
 }
 
 M.buildup = function(r){
-  var b=run.ui.build||(run.ui.build={}); var sum=0; r.rows.forEach(function(row){ if (b[row.k]==null) b[row.k]=row.start||0; sum+=b[row.k]; });
-  var h = prompt(r)+'<div class="am-total"><b>$'+sum.toLocaleString("en-US")+'</b><span>'+esc(r.totalLabel||"a month")+'</span></div><div class="am-build">'+r.rows.map(function(row){ return '<div class="am-row"><div><strong>'+esc(row.t)+'</strong>'+(row.s?'<span>'+esc(row.s)+'</span>':'')+'</div><div class="am-step"><button type="button" onclick="YNSMock.bump(\''+row.k+'\',-'+row.step+')" aria-label="less">−</button><b>$'+b[row.k].toLocaleString("en-US")+'</b><button type="button" onclick="YNSMock.bump(\''+row.k+'\','+row.step+')" aria-label="more">+</button></div></div>'; }).join("")+'</div>';
+  var b=run.ui.build||(run.ui.build={}); var sum=0;
+  r.rows.forEach(function(row){ if (b[row.k]==null) b[row.k]=row.start||0; sum+=b[row.k]; });
+  /* Typed in, not dragged. A slider is a bad way to say "$1,250" and an
+     even worse one on a phone; people already know their rent. The
+     stepper buttons stay for nudging, and the field takes the number. */
+  var h = prompt(r)+'<div class="am-total"><b id="amSum">$'+sum.toLocaleString("en-US")+'</b><span>'+esc(r.totalLabel||"a month")+'</span></div><div class="am-build">'+r.rows.map(function(row){
+    return '<div class="am-row"><div><strong>'+esc(row.t)+'</strong>'+(row.s?'<span>'+esc(row.s)+'</span>':'')+'</div>'
+      +'<div class="am-step"><button type="button" onclick="YNSMock.bump(\''+row.k+'\',-'+row.step+')" aria-label="less">\u2212</button>'
+      +'<span class="am-money"><i>$</i><input type="text" inputmode="numeric" value="'+b[row.k].toLocaleString("en-US")+'" data-k="'+row.k+'" aria-label="'+esc(row.t)+'" oninput="YNSMock.typeAmount(this)"></span>'
+      +'<button type="button" onclick="YNSMock.bump(\''+row.k+'\','+row.step+')" aria-label="more">+</button></div></div>';
+  }).join("")+'</div>';
   shell(r, h, '<span></span>'+primary(r.cta,"YNSMock.submitBuild()", sum<(r.minTotal||0)));
 };
-function bump(k,d){ var r=cur().rung; var row=r.rows.filter(function(x){return x.k===k;})[0]; var b=run.ui.build; var n=(b[k]||0)+d; if(n<0)n=0; if(row&&row.max&&n>row.max)n=row.max; b[k]=n; renderStep(); }
+/* Parse as they type, keep the total live, never repaint the field they
+   are inside. */
+function typeAmount(input){
+  var k=input.getAttribute("data-k");
+  var n=parseInt(String(input.value).replace(/[^0-9]/g,""),10); if (isNaN(n)) n=0;
+  var r=cur().rung, row=r.rows.filter(function(x){return x.k===k;})[0];
+  if (row && row.max && n>row.max) n=row.max;
+  run.ui.build[k]=n;
+  refreshSum();
+}
+function refreshSum(){
+  var r=cur().rung, b=run.ui.build||{}, sum=0;
+  r.rows.forEach(function(row){ sum+=b[row.k]||0; });
+  var el=host.querySelector("#amSum"); if (el) el.textContent="$"+sum.toLocaleString("en-US");
+  var cta=host.querySelector(".am-foot .btn-primary"); if (cta) cta.disabled = sum<(r.minTotal||0);
+}
+function bump(k,d){
+  var r=cur().rung, row=r.rows.filter(function(x){return x.k===k;})[0], b=run.ui.build;
+  var n=(b[k]||0)+d; if(n<0)n=0; if(row&&row.max&&n>row.max)n=row.max; b[k]=n;
+  var input=host.querySelector('input[data-k="'+k+'"]'); if (input) input.value=n.toLocaleString("en-US");
+  refreshSum();
+}
 function submitBuild(){
   var s=cur(), r=s.rung, id=s.slot.id, b=run.ui.build||{}; var sum=0; r.rows.forEach(function(row){sum+=b[row.k]||0;});
   run.extra[id+"_total"]=sum; run.extra[id+"_number"]=sum; run.extra[id+"_rows"]=b;
@@ -216,17 +246,31 @@ M.hours = function(r){
   var total=r.total||168, used=0;
   r.rows.forEach(function(row){ if (row.daily){ if (st.days[row.k]==null) st.days[row.k]=row.daily.days; if (st.perDay[row.k]==null) st.perDay[row.k]=0; st.weekly[row.k]=st.perDay[row.k]*st.days[row.k]; } else if (st.weekly[row.k]==null) st.weekly[row.k]=0; used+=st.weekly[row.k]; });
   var left=total-used;
-  var h = prompt(r)+'<div class="am-total"><b>'+Math.round(used)+'</b><span>of '+total+' hours placed · '+(left>=0?Math.round(left)+" left":Math.round(-left)+" over")+'</span></div><div class="am-build">'+r.rows.map(function(row){
-    var daily=!!row.daily, v=daily?st.perDay[row.k]:st.weekly[row.k], max=row.max||40, step=row.step||0.5;
-    return '<div class="am-row am-hrow"><div><strong>'+esc(row.t)+'</strong><span>'+esc(row.s||"")+'</span>'+
-      '<input type="range" min="0" max="'+max+'" step="'+step+'" value="'+v+'" oninput="YNSMock.hour(\''+row.k+'\',this.value)"></div>'+
-      '<div class="am-hval"><b>'+v+'</b><span>'+(daily?"hrs/day":"hrs/wk")+'</span>'+(daily?'<em>'+Math.round(st.weekly[row.k]*10)/10+'/wk</em>':'')+
+  /* Typed, not dragged. Everyone knows roughly how many hours they sleep;
+     nobody can land a slider on 7.5 with a thumb. */
+  var h = prompt(r)+'<div class="am-total"><b id="hrUsed">'+Math.round(used)+'</b><span id="hrNote">of '+total+' hours placed · '+(left>=0?Math.round(left)+" left":Math.round(-left)+" over")+'</span></div><div class="am-build">'+r.rows.map(function(row){
+    var daily=!!row.daily, v=daily?st.perDay[row.k]:st.weekly[row.k];
+    return '<div class="am-row am-hrow"><div><strong>'+esc(row.t)+'</strong><span>'+esc(row.s||"")+'</span></div>'+
+      '<div class="am-hval"><span class="am-money"><input type="text" inputmode="decimal" value="'+v+'" data-h="'+row.k+'" aria-label="'+esc(row.t)+'" oninput="YNSMock.hour(this.getAttribute(\'data-h\'),this.value)"></span><span>'+(daily?"hrs a day":"hrs a week")+'</span>'+(daily?'<em id="hw-'+row.k+'">'+Math.round(st.weekly[row.k]*10)/10+'/wk</em>':'')+
       (daily&&row.daily.adjustable?'<div class="am-days"><button type="button" onclick="YNSMock.days(\''+row.k+'\',-1)">−</button>'+st.days[row.k]+' days<button type="button" onclick="YNSMock.days(\''+row.k+'\',1)">+</button></div>':'')+'</div></div>';
   }).join("")+'</div>';
   shell(r, h, '<span></span>'+primary(r.cta,"YNSMock.submitHours()", left<0));
 };
-function hour(k,v){ var st=run.ui.hours; var row=cur().rung.rows.filter(function(x){return x.k===k;})[0]; if (row.daily) st.perDay[k]=parseFloat(v); else st.weekly[k]=parseFloat(v); renderStepKeepFocus(k); }
-function days(k,d){ var st=run.ui.hours; st.days[k]=Math.min(7,Math.max(1,st.days[k]+d)); renderStep(); }
+function hour(k,v){
+  var st=run.ui.hours, r=cur().rung, row=r.rows.filter(function(x){return x.k===k;})[0];
+  var n=parseFloat(String(v).replace(/[^0-9.]/g,"")); if (isNaN(n)) n=0;
+  if (row.max && n>row.max) n=row.max;
+  if (row.daily){ st.perDay[k]=n; st.weekly[k]=n*st.days[k]; } else st.weekly[k]=n;
+  /* Patch the total and this row's weekly figure; never repaint the field
+     someone is typing in. */
+  var total=r.total||168, used=0;
+  r.rows.forEach(function(x){ used += (x.daily ? (st.perDay[x.k]||0)*st.days[x.k] : (st.weekly[x.k]||0)); });
+  var b=host.querySelector("#hrUsed"); if (b) b.textContent=Math.round(used);
+  var sp=host.querySelector("#hrNote"); if (sp) sp.textContent="of "+total+" hours placed \u00b7 "+(total-used>=0?Math.round(total-used)+" left":Math.round(used-total)+" over");
+  var wk=host.querySelector("#hw-"+k); if (wk) wk.textContent=Math.round(st.weekly[k]*10)/10+"/wk";
+  var cta=host.querySelector(".am-foot .btn-primary"); if (cta) cta.disabled = used>total;
+}
+function days(k,d){ var st=run.ui.hours; st.days[k]=Math.min(7,Math.max(1,st.days[k]+d)); st.weekly[k]=(st.perDay[k]||0)*st.days[k]; renderStep(); }
 function renderStepKeepFocus(k){ renderStep(); var el=host.querySelector('input[oninput*="\''+k+'\'"]'); if (el) el.focus(); }
 function submitHours(){ var s=cur(), r=s.rung, id=s.slot.id, st=run.ui.hours; var alloc={}; r.rows.forEach(function(row){ alloc[row.k]=st.weekly[row.k]||0; }); run.extra[id+"_allocation"]=alloc; run.allocation=alloc; run.ui.hours=null; next(); }
 
@@ -292,6 +336,133 @@ function rate(k,v){
 }
 function submitRate(){ next(); }
 
+/* ---- budget: give every dollar a job ------------------------------
+   Income at the top, categories underneath, and a live "still to
+   assign" figure. Typed, never dragged. */
+M.budget = function(r){
+  var st=run.ui.budget||(run.ui.budget={alloc:{}});
+  var income = facts[r.incomeFrom] || run.extra.income_total || 0;
+  st.income=income;
+  r.rows.forEach(function(row){ if (st.alloc[row.k]==null) st.alloc[row.k]=0; });
+  var assigned=0; Object.keys(st.alloc).forEach(function(k){ assigned+=st.alloc[k]||0; });
+  var left=income-assigned;
+  var groups=[], seen={};
+  r.rows.forEach(function(row){ if(!seen[row.group]){ seen[row.group]=1; groups.push(row.group); } });
+  var h = prompt(r)
+    + '<div class="am-total"><b id="bgLeft">'+(left<0?"-":"")+"$"+Math.abs(Math.round(left)).toLocaleString("en-US")+'</b><span id="bgNote">'+(left>0?"still to assign, of $"+income.toLocaleString("en-US"):left<0?"more than you\u2019ve got":"every dollar has a job")+'</span></div>'
+    + groups.map(function(g){
+        return '<h3 class="am-group">'+esc(g)+'</h3><div class="am-build">'
+          + r.rows.filter(function(x){return x.group===g;}).map(function(row){
+              return '<div class="am-row"><div><strong>'+esc(row.t)+'</strong>'+(row.s?'<span>'+esc(row.s)+'</span>':'')+'</div>'
+                +'<div class="am-step"><span class="am-money"><i>$</i><input type="text" inputmode="numeric" value="'+st.alloc[row.k].toLocaleString("en-US")+'" data-b="'+row.k+'" aria-label="'+esc(row.t)+'" oninput="YNSMock.budgetType(this)"></span></div></div>';
+            }).join("")
+          + "</div>";
+      }).join("");
+  shell(r, h, '<span></span>'+primary(r.cta,"YNSMock.submitBudget()"));
+};
+function budgetType(input){
+  var k=input.getAttribute("data-b");
+  var n=parseInt(String(input.value).replace(/[^0-9]/g,""),10); if (isNaN(n)) n=0;
+  run.ui.budget.alloc[k]=n;
+  var st=run.ui.budget, assigned=0;
+  Object.keys(st.alloc).forEach(function(x){ assigned+=st.alloc[x]||0; });
+  var left=st.income-assigned;
+  var b=host.querySelector("#bgLeft"), note=host.querySelector("#bgNote");
+  if (b) b.textContent=(left<0?"-":"")+"$"+Math.abs(Math.round(left)).toLocaleString("en-US");
+  if (note) note.textContent=left>0?"still to assign, of $"+st.income.toLocaleString("en-US"):left<0?"more than you\u2019ve got":"every dollar has a job";
+  if (b) b.className = left===0 ? "bg-zero" : left<0 ? "bg-over" : "";
+}
+function submitBudget(){
+  var s2=cur(), r=s2.rung, id=s2.slot.id, st=run.ui.budget;
+  run.extra[id+"_alloc"]=st.alloc; run.extra[id+"_income"]=st.income;
+  if (r.asks) facts[r.asks]=st.alloc;
+  lastBudget={ rows:r.rows, alloc:st.alloc, income:st.income };
+  run.ui.budget=null; next();
+}
+/* The export. A budget that only lives on a website is a budget nobody
+   updates, so it leaves as a CSV with a spent column and a difference
+   column already in it. */
+var lastBudget=null;
+function exportBudget(){
+  if (!lastBudget) return;
+  var rows=[["Category","Group","Planned","Actually spent","Difference"]];
+  lastBudget.rows.forEach(function(row){
+    var n=lastBudget.alloc[row.k]||0;
+    rows.push([row.t, row.group, n, "", ""]);
+  });
+  rows.push([]);
+  rows.push(["Income","",lastBudget.income,"",""]);
+  rows.push(["Assigned","","=SUM(C2:C"+(lastBudget.rows.length+1)+")","",""]);
+  rows.push(["Left to assign","","=C"+(rows.length-1)+"-C"+rows.length,"",""]);
+  var csv=rows.map(function(r2){ return r2.map(function(c){
+    var v=String(c==null?"":c); return /[",]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v;
+  }).join(","); }).join("\n");
+  var blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="my-budget.csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+/* ---- calc: a live calculator, typed --------------------------------
+   Used by the compound-interest activity. Generic enough for any
+   "change the numbers, watch the answer" screen. */
+M.calc = function(r){
+  var v=run.ui.calc||(run.ui.calc={});
+  r.inputs.forEach(function(i){ if (v[i.k]==null) v[i.k]=i.start; });
+  var res=compute(v);
+  var h = prompt(r)+'<div class="am-build">'+r.inputs.map(function(i){
+    return '<div class="am-row"><div><strong>'+esc(i.t)+'</strong>'+(i.s?'<span>'+esc(i.s)+'</span>':'')+'</div>'
+      +'<div class="am-step"><button type="button" onclick="YNSMock.calcBump(\''+i.k+'\',-'+i.step+')" aria-label="less">\u2212</button>'
+      +'<span class="am-money">'+(i.prefix?'<i>'+i.prefix+'</i>':'')+'<input type="text" inputmode="numeric" value="'+v[i.k]+'" data-c="'+i.k+'" aria-label="'+esc(i.t)+'" oninput="YNSMock.calcType(this)">'+(i.suffix?'<i>'+i.suffix+'</i>':'')+'</span>'
+      +'<button type="button" onclick="YNSMock.calcBump(\''+i.k+'\','+i.step+')" aria-label="more">+</button></div></div>';
+  }).join("")+'</div>'
+  + '<div class="am-calcout" id="calcOut">'+calcHTML(res,v)+'</div>';
+  shell(r, h, '<span></span>'+primary(r.cta,"YNSMock.submitCalc()"));
+};
+function compute(v){
+  var m=v.monthly||0, yrs=v.years||0, rate=(v.rate||0)/100;
+  function run2(years){
+    var bal=0, r2=rate/12, n=Math.round(years*12);
+    for (var i=0;i<n;i++) bal=(bal+m)*(1+r2);
+    return bal;
+  }
+  var end=run2(yrs), paid=m*Math.round(yrs*12);
+  return { end:end, paid:paid, growth:Math.max(0,end-paid), late:run2(Math.max(0,yrs-10)) };
+}
+function calcHTML(res,v){
+  var pct = res.end ? Math.min(100, Math.round(res.paid/res.end*100)) : 0;
+  return '<div class="calc-big">$'+Math.round(res.end).toLocaleString("en-US")+'</div>'
+    +'<p class="calc-sub">after '+(v.years||0)+' years, from $'+(v.monthly||0)+' a month</p>'
+    +'<div class="calc-bar"><i style="width:'+pct+'%"></i></div>'
+    +'<p class="calc-key"><span class="k1"></span>$'+Math.round(res.paid).toLocaleString("en-US")+' you put in &nbsp; <span class="k2"></span>$'+Math.round(res.growth).toLocaleString("en-US")+' growth</p>'
+    +'<p class="calc-late">Start ten years later instead and the same amount reaches $'+Math.round(res.late).toLocaleString("en-US")+'.</p>';
+}
+function refreshCalc(){
+  var v=run.ui.calc, out=host.querySelector("#calcOut");
+  if (out) out.innerHTML=calcHTML(compute(v),v);
+}
+function calcType(input){
+  var k=input.getAttribute("data-c");
+  var n=parseFloat(String(input.value).replace(/[^0-9.]/g,"")); if (isNaN(n)) n=0;
+  var i=cur().rung.inputs.filter(function(x){return x.k===k;})[0];
+  if (i && i.max && n>i.max) n=i.max;
+  run.ui.calc[k]=n; refreshCalc();
+}
+function calcBump(k,d){
+  var i=cur().rung.inputs.filter(function(x){return x.k===k;})[0];
+  var n=(run.ui.calc[k]||0)+d; if(n<0)n=0; if(i&&i.max&&n>i.max)n=i.max;
+  run.ui.calc[k]=n;
+  var input=host.querySelector('input[data-c="'+k+'"]'); if (input) input.value=n;
+  refreshCalc();
+}
+function submitCalc(){
+  var s2=cur(), r=s2.rung, id=s2.slot.id, v=run.ui.calc;
+  run.extra[id+"_values"]=v; run.extra[id+"_result"]=compute(v);
+  if (r.asks) facts[r.asks]=v.monthly;
+  run.ui.calc=null; next();
+}
+
 M.compare = function(r){
   var v=view(), routes=val(r.routes,v)||[], p=run.ui.picks||(run.ui.picks={});
   var h = prompt(r)+'<div class="am-table"><table><thead><tr><th>'+esc(r.rowHeader||"")+'</th>'+r.columns.map(function(c){return '<th>'+esc(c.t)+'</th>';}).join("")+'<th></th></tr></thead><tbody>'+
@@ -326,7 +497,15 @@ function renderResults(){
 }
 function finish(el){
   var slug=run.slug;
-  lastRun[slug] = { answers: run.answers, extra: run.extra, allocation: run.allocation || {} }; if (el) facts.next_action=el.textContent.trim(); facts.activities_completed=(facts.activities_completed||[]).concat([slug]); close(); hooks.onDone(slug); }
+  lastRun[slug] = { answers: run.answers, extra: run.extra, allocation: run.allocation || {} };
+  /* The thing they picked at the end is a commitment, not a sentiment.
+     It goes on the list in the Planner with where it came from and the
+     date, so it exists somewhere other than that one screen. */
+  if (el){
+    var text=el.textContent.trim();
+    facts.steps_open = (facts.steps_open||[]).filter(function(x){ return x.text!==text; });
+    facts.steps_open.push({ id: slug+"-"+Date.now(), text: text, from: (DEFS[slug]||{}).title || slug, at: Date.now(), done: false });
+  } if (el) facts.next_action=el.textContent.trim(); facts.activities_completed=(facts.activities_completed||[]).concat([slug]); close(); hooks.onDone(slug); }
 
 /* ---------- public --------------------------------------------------- */
 global.YNSActivity = {
@@ -354,6 +533,9 @@ global.YNSMock = {
   diffMark: diffMark, submitDiff: submitDiff,
   chainPick: chainPick, submitChain: submitChain,
   compareMark: compareMark, submitCompare: submitCompare,
-  finish: finish, skipStep: skipStep, rate: rate, submitRate: submitRate
+  finish: finish, skipStep: skipStep, rate: rate, submitRate: submitRate,
+  typeAmount: typeAmount,
+  budgetType: budgetType, submitBudget: submitBudget, exportBudget: exportBudget,
+  calcType: calcType, calcBump: calcBump, submitCalc: submitCalc
 };
 })(window);

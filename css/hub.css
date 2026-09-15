@@ -399,3 +399,38 @@ body.modal-open{overflow:hidden}
 @media (max-width:560px){.pf-row{grid-template-columns:1fr}.pf-from{grid-column:1}}
 /* two actions on a finished card */
 .act-actions{display:flex;gap:14px;flex-wrap:wrap;padding-top:6px}
+
+/* ---- typed money and hours --------------------------------------- */
+.am-money{display:inline-flex;align-items:center;gap:2px;background:#fff;border:1.5px solid var(--yns-line);border-radius:var(--r-sm);padding:4px 8px}
+.am-money i{font-style:normal;color:var(--yns-muted);font-size:.9rem}
+.am-money input{border:0;outline:0;font:inherit;font-family:var(--yns-display);font-weight:500;width:78px;text-align:right;background:none;color:var(--yns-ink)}
+.am-money:focus-within{border-color:var(--yns-blue);box-shadow:var(--focus)}
+.am-hval .am-money input{width:52px;text-align:right}
+
+/* ---- planner ------------------------------------------------------ */
+.planner-btn{font:inherit;font-family:var(--yns-display);font-size:.88rem;display:inline-flex;align-items:center;gap:7px;background:var(--yns-paper);border:1px solid var(--yns-line);border-radius:999px;padding:6px 14px;cursor:pointer;color:var(--yns-blue-deep)}
+.planner-btn:hover{background:var(--yns-tint)}
+.pl-count{background:var(--yns-blue);color:#fff;border-radius:999px;min-width:19px;height:19px;display:inline-grid;place-items:center;font-size:.72rem;padding:0 5px}
+.pl-row{display:grid;grid-template-columns:22px 1fr;gap:4px 10px;align-items:start;padding:10px 0;border-top:1px solid var(--yns-line-soft);cursor:pointer}
+.pl-row input{margin-top:3px;width:17px;height:17px;accent-color:var(--yns-blue)}
+.pl-t{font-size:.96rem}
+.pl-from{grid-column:2;font-size:.76rem;color:var(--yns-muted)}
+.pl-off{grid-template-columns:1fr;opacity:.55;text-decoration:line-through}
+.pl-off .pl-from{grid-column:1;text-decoration:none}
+.pl-done{margin-top:10px}
+.pl-done summary{cursor:pointer;font-size:.85rem;color:var(--yns-muted)}
+
+/* ---- budget and calculator --------------------------------------- */
+.am-group{font-family:var(--yns-display);font-size:.9rem;color:var(--yns-blue-deep);margin:var(--s4) 0 6px}
+#bgLeft.bg-zero{color:var(--yns-ok)}
+#bgLeft.bg-over{color:#B3261E}
+.am-calcout{background:var(--yns-sunk);border-radius:var(--r);padding:16px;margin-top:var(--s4);text-align:center}
+.calc-big{font-family:var(--yns-display);font-size:2.4rem;line-height:1.1;color:var(--yns-blue-deep)}
+.calc-sub{font-size:.85rem;color:var(--yns-muted);margin:2px 0 12px}
+.calc-bar{height:14px;border-radius:7px;background:var(--yns-gold);overflow:hidden}
+.calc-bar i{display:block;height:100%;background:var(--yns-blue)}
+.calc-key{font-size:.8rem;color:var(--yns-muted);margin:8px 0 0}
+.calc-key .k1,.calc-key .k2{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.calc-key .k1{background:var(--yns-blue)}
+.calc-key .k2{background:var(--yns-gold)}
+.calc-late{font-size:.85rem;margin:10px 0 0}

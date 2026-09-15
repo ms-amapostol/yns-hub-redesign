@@ -6,7 +6,13 @@
    SMART Goals; Module 6 Strategic Planning: Begin with the End in Mind.
    The shape is the class's: pick one thing from the five-year vision,
    ask what has to be true in six months, then break the six months
-   into months. SMART is asked as five plain questions.
+   into months.
+
+   SMART is asked as five plain questions, each screen labelled with its
+   letter so the framework is learnable rather than invisible. The result
+   screen shows the five parts back as a checked goal, and says which
+   part is thin when one is. The class's own instruction to work
+   backwards from the finish line is what the month-by-month screen does.
 
    Outcome: "I have one goal for six months, and I know the first step
    and the date."
@@ -102,7 +108,7 @@ YNSActivity.define({
         {
           asks: "smart_goal",
           mechanic: "text",
-          eyebrow: "What",
+          eyebrow: "S \u00b7 Specific",
           title: "So what has to be true in six months to get closer to that?",
           scene: function (v) {
             var vis = v && v.extra && v.extra.vision_text;
@@ -145,7 +151,7 @@ YNSActivity.define({
         {
           asks: "smart_measure",
           mechanic: "text",
-          eyebrow: "How you'll know",
+          eyebrow: "M \u00b7 Measurable",
           title: "On the last day, what could someone else check?",
           scene: [
             "A thing you could point at. A certificate, a start date, a number in an account, an email that says yes. \u201cFeeling more confident\u201d is real, and nobody can check it."
@@ -169,7 +175,7 @@ YNSActivity.define({
         {
           asks: "smart_confidence",
           mechanic: "choice",
-          eyebrow: "Doable",
+          eyebrow: "A \u00b7 Achievable",
           title: "With the life you actually have, how likely is this in six months?",
           scene: [
             "Your hours, your money, your people. The class's example: if you've got a C, aiming for a B+ first beats aiming for an A. Shrinking a goal is a good move."
@@ -195,7 +201,7 @@ YNSActivity.define({
         {
           asks: "smart_why",
           mechanic: "text",
-          eyebrow: "Why it matters",
+          eyebrow: "R \u00b7 Relevant",
           title: "Why this goal, out of everything you could pick?",
           scene: ["One line. It's what you'll read on the week it feels pointless."],
           prompt: "Because\u2026",
@@ -207,7 +213,7 @@ YNSActivity.define({
         {
           needs: { fact: "why_statement" },
           mechanic: "learn",
-          eyebrow: "Why it matters",
+          eyebrow: "R \u00b7 Relevant",
           title: "You've already written this part.",
           lead: function (v) { return "\u201c" + ((v && v.facts && v.facts.why_statement) || "") + "\u201d"; },
           body: ["That's your why, from Your Why. Hold this goal up against it. If they don't match, one of them needs changing, and it's usually the goal."],
@@ -227,10 +233,10 @@ YNSActivity.define({
         {
           asks: "smart_first_step",
           mechanic: "text",
-          eyebrow: "The first step",
-          title: "What's the smallest thing you can do this week?",
+          eyebrow: "T \u00b7 Time-bound",
+          title: "When does it start, and what\u2019s the first week?",
           scene: [
-            "Small enough that it'd be embarrassing to skip. Look up one program. Email one person. Open one account. Fifteen minutes or less."
+            "The date is already set: six months from today. So the only thing left is the first week, and it wants to be small enough that it would be embarrassing to skip. Look up one program. Email one person. Open one account. Fifteen minutes or less."
           ],
           prompt: "This week, I will\u2026",
           placeholder: "This week, I will\u2026",
@@ -287,6 +293,25 @@ YNSActivity.define({
       small:   "You said you could do more. Add one thing to it, not three."
     };
 
+    /* The five parts, back as a check. Naming a thin one is more use
+       than a tick for every box. */
+    var parts = [
+      { L:"S", t:"Specific",    v:goal,    hint:"Say the thing itself, not the area it's in." },
+      { L:"M", t:"Measurable",  v:measure, hint:"Something a person could check on the last day." },
+      { L:"A", t:"Achievable",  v:CONF[conf] ? r.state.answers.doable : "", hint:"Right size for the life you actually have." },
+      { L:"R", t:"Relevant",    v:why,     hint:"Tied to why you're doing any of this." },
+      { L:"T", t:"Time-bound",  v:inSixMonths()+(first?" \u00b7 starting this week":""), hint:"A date, and a first week." }
+    ];
+    var thin = parts.filter(function(p){ return !p.v; });
+    var check = '<div class="ya-readout"><h3>Your goal, checked</h3>' +
+      parts.map(function(p){
+        return "<p><b>" + p.L + " \u00b7 " + p.t + "</b> \u2014 " + (p.v ? "done" : "still thin. " + p.hint) + "</p>";
+      }).join("") +
+      (thin.length
+        ? "<p>" + (thin.length === 1 ? "One part" : thin.length + " parts") + " could be sharper. A goal missing its M is the one that quietly never gets judged, and a goal missing its T is the one that never starts.</p>"
+        : "<p>All five parts are there. That is a SMART goal, and most people never write one down.</p>") +
+      "</div>";
+
     return "<h1>Your six months, written down.</h1>" +
       (vision ? '<div class="ya-readout"><h3>The end in mind</h3><p>' + esc(vision) + "</p></div>" : "") +
       (goal ? '<div class="ya-quote">' + esc(goal) + "</div>" : "") +
@@ -295,6 +320,7 @@ YNSActivity.define({
       (why ? '<div class="ya-readout"><h3>Why it matters</h3><p>' + esc(why) + "</p></div>" : "") +
       (first ? '<div class="ya-readout"><h3>This week</h3><p>' + esc(first) + "</p></div>" : "") +
       (months ? '<div class="ya-readout"><h3>Month by month</h3><p style="white-space:pre-line">' + esc(months) + "</p></div>" : "") +
+      check +
       (CONF[conf] ? '<p class="ya-result-lead">' + esc(CONF[conf]) + "</p>" : "") +
       '<p class="ya-result-lead">When the six months are up, the class says to rinse and repeat: pick the next six-month piece of the same five-year picture. Still True? will ask you about this in a month. Say what changed. Plans that get checked are the ones that happen.</p>';
   },
