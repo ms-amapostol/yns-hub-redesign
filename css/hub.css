@@ -170,8 +170,16 @@ button{font:inherit}
 .ptone{width:44px;height:44px;border-radius:50%;border:3px solid var(--yns-paper);box-shadow:0 0 0 1.5px var(--yns-line);cursor:pointer;padding:0}
 .ptone[aria-checked="true"]{box-shadow:0 0 0 2.5px var(--yns-blue)}
 .pick .label{font-size:.9rem;color:var(--yns-muted);margin-bottom:6px}
-.preview{display:flex;align-items:center;gap:var(--s4);padding:var(--s3);background:var(--yns-paper);border-radius:var(--r);border:1px solid var(--yns-line)}
-.preview svg,.preview img{width:88px;height:88px;border-radius:50%;background:var(--yns-warm);display:block}
+.preview{display:flex;align-items:center;gap:var(--s5);flex-wrap:wrap;padding:var(--s4);background:var(--yns-paper);border-radius:var(--r);border:1px solid var(--yns-line)}
+.preview>div:first-child{flex:1;min-width:200px}
+.preview-minis{display:flex;gap:var(--s4)}
+.mini{margin:0;text-align:center}
+.mini-card{position:relative;width:96px;height:96px;border-radius:var(--r);background:var(--yns-warm);box-shadow:inset 0 0 0 1px var(--yns-line-soft);overflow:hidden}
+.mini-card svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.mini-art{position:absolute;left:50%;top:50%;width:44%;height:44%;transform:translate(-50%,-50%);border-radius:50%;background:var(--yns-paper);box-shadow:0 0 0 2px var(--yns-paper);overflow:hidden}
+.mini-art img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+.mini figcaption{font-size:.75rem;color:var(--yns-muted);margin-top:6px}
+
 /* ---- avatar stages: one image, filters do the "coming into focus" --- */
 .avatar .art{position:absolute;inset:0;border-radius:50%;overflow:hidden;background:var(--yns-paper);box-shadow:var(--shadow)}
 .avatar .art img,.avatar .art svg{width:100%;height:100%;display:block;object-fit:cover;transition:filter .8s,opacity .8s}
