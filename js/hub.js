@@ -28,11 +28,11 @@
   ];
 
   /* ---------- the five doors --------------------------------------- */
-  /* The illustrated banners from Career ABCs, reused so the hub and the
-     app feel like one product. banner-a is about-you, banner-b is
+  /* One illustration per door. banner-a is about-you, banner-b is
      building something, banner-c is a conversation, banner is the
-     staircase everyone climbs. */
-  var BANNER = { know:"banner-a", explore:"banner", get:"banner-b", mind:"banner-c", plan:"banner" };
+     staircase everyone climbs, banner-e is the path ahead with the
+     milestones still to fill in. */
+  var BANNER = { know:"banner-a", explore:"banner", get:"banner-b", mind:"banner-c", plan:"banner-e" };
 
   var DOORS = [
     { key:"know", n:"Door 1", title:"Get to know you",
