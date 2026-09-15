@@ -292,6 +292,11 @@ const MOMENTS = [
   options: Quiz.LEVELS.map(function(l){ return {t:l.t, s:l.s, level:l.k}; })
 }
 ];
+/* level is asked once, by whoever gets there first. Handed in by the hub,
+   this activity drops its own version of the question rather than asking
+   it a second time in different words. */
+const PRESET_LEVEL = Quiz.presetLevel && Quiz.presetLevel();
+if (PRESET_LEVEL) { for (let i = MOMENTS.length - 1; i >= 0; i--) if (MOMENTS[i].type === "level") MOMENTS.splice(i, 1); }
 MOMENTS.forEach(function(m,i){ m.id = m.id || ("moment_" + i); });
 
 /* ---------------- engine ---------------- */

@@ -39,11 +39,11 @@
 
       <div class="q is-on" data-q="0">
         <h2>First, pick someone to walk with you.</h2>
-        <p class="hint">This is you, in cartoon form. Everything you finish adds something to the world around you. Change it whenever you like, or skip this and we'll pick one for you.</p>
+        <p class="hint">This is you, in cartoon form. Change it whenever you like, or skip this and we'll pick one for you.</p>
         <div class="pick">
           <div><div class="pick-row" role="radiogroup" id="pickBody"></div></div>
           <div><div class="label">Skin tone</div><div class="pick-row" role="radiogroup" id="pickTone"></div></div>
-          <div class="preview"><div><b style="font-family:var(--yns-display);font-weight:500">Here's how it works.</b><p class="small muted">You start on an empty page. Every activity you finish puts something around you.</p></div><div id="pickPreview" class="preview-minis"></div></div>
+          <div class="preview"><div><b style="font-family:var(--yns-display);font-weight:500">Here's how it works.</b><p class="small muted">Everything you finish, your character says back to you in their own bubble. That's how you'll see what we've learned.</p></div><div id="pickPreview" class="preview-minis"></div></div>
         </div>
       </div>
 
@@ -60,8 +60,8 @@
       </div>
 
       <div class="q" data-q="3">
-        <h2>Where are you with work?</h2>
-        <p class="hint">This only changes how we talk to you. Nothing on this list is a disadvantage.</p>
+        <h2>How much experience have you got?</h2>
+        <p class="hint">This is the one boring question, and we only ask it here. It decides which roles we show you, so the numbers you see are ones you could actually reach. Nothing on this list is a disadvantage.</p>
         <div class="opts" role="radiogroup" id="q3"></div>
       </div>
 
@@ -85,17 +85,15 @@
         <div class="hero">
           <div>
             <div class="avatar" id="avatarBox">
-              <svg class="scene" id="avatarScene" viewBox="0 0 260 200" aria-hidden="true"></svg>
               <div class="art" id="avatarArt" aria-label="Your character"></div>
               <span class="pct" id="avatarPct">0 of 17</span>
             </div>
-            <div class="scene-legend" id="sceneLegend"></div>
             <p class="avatar-caption" id="avatarCaption">A blank page. That's fine, that's where everyone starts.</p>
           </div>
           <div class="hero-text">
             <div>
               <h1 id="heroH1">What should you do with your life?</h1>
-              <p class="lead" id="heroLead">You didn't get this far just to feel stuck. We'll take it one small piece at a time, and everything you finish shows up right here.</p>
+              <p class="lead" id="heroLead">You didn't get this far just to feel stuck. We'll take it one small piece at a time, and everything you tell us shows up right here.</p>
             </div>
             <div class="bubble" id="bubble" aria-live="polite"><span class="lead-in" id="bubbleLead"></span><span class="say" id="bubbleSay"></span><div class="dots" id="bubbleDots"></div></div>
           </div>

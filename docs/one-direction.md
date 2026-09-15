@@ -14,15 +14,22 @@ Three separate things were going wrong. They have three separate fixes.
 **Level** ("where are you right now, really?") was asked by the hub intake, by
 each of the three quizzes, and by Career ABCs. Four times, in four wordings.
 
-The hub now owns it. It derives level from intake question three and hands it to
-each quiz on the URL as `?lvl=`. `Quiz.presetLevel()` reads it, and each quiz
-drops its own level question rather than asking it again.
+**The hub asks it, once, as intake question three**, in the same four-value
+vocabulary every activity already scores against: `early`, `some`,
+`experienced`, `leader`. Nothing is derived and nothing is translated.
 
-| Hub intake answer | Level handed over |
-|---|---|
-| Never had a job / A few part-time jobs | `early` |
-| In a job right now | `some` |
-| Years in, thinking of switching | `experienced` |
+An earlier version of this fix kept the old "where are you with work" wording
+and mapped it onto those four values. That was a guess dressed up as a fact:
+"in a job right now" says nothing about seniority, and "running things already"
+had nowhere to land. If the hub is going to own the answer, it has to ask the
+real question.
+
+The level travels to each quiz on the URL as `?lvl=`. `Quiz.presetLevel()` reads
+it, and each quiz drops its own level step rather than asking again.
+
+**If someone skips the intake**, the first activity that needs a level asks for
+it, and the hub picks the answer up out of the finished run. Whoever asks first
+owns it, either way.
 
 The in-hub activities already work this way: the runtime drops any rung whose
 `asks` fact is already known. This extends the same rule across the iframe
