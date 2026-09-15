@@ -202,7 +202,15 @@
       el.onclick=function(){ state.tone=o.k; renderPicker(); };
       t.appendChild(el);
     });
-    var pv=$("pickPreview"); pv.innerHTML='<img src="avatars/'+state.body+"-"+state.tone+'-outline.png" alt="" style="background:var(--yns-warm)">';
+    /* Two small versions of the real thing: day one, and a few
+       activities in. Showing the mechanic beats describing it. */
+    var pv=$("pickPreview");
+    function mini(slugs, label){
+      var art='<img src="avatars/'+state.body+"-"+state.tone+'.png" alt="">';
+      var sc=slugs.map(function(k){ var d=SCENE[k]; if(!d) return ""; if(d.full) return '<g>'+d.full+'</g>'; var at=SLOT[k]; return '<g transform="translate('+at[0]+' '+at[1]+')">'+d.d+'</g>'; }).join("");
+      return '<figure class="mini"><div class="mini-card"><svg viewBox="0 0 200 200" aria-hidden="true">'+sc+'</svg><span class="mini-art">'+art+'</span></div><figcaption>'+label+'</figcaption></figure>';
+    }
+    pv.innerHTML = mini([], "Day one") + mini(["why","proof","hours168","floor","cyoa"], "Five activities in");
   }
   function renderQ(i){
     var host=$("q"+i); host.innerHTML="";
