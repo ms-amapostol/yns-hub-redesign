@@ -759,7 +759,7 @@
               }).join("")
             + "</section>";
         }).join("")
-      : '<p class="am-scene">Nothing here yet. Finish an activity and this fills in.</p>';
+      : '<p class="am-scene">Nothing here yet. Finish any activity and this page starts filling in: your own words, the work they point at, and the numbers worth having to hand. It is also the thing you can save as a PDF and take to an interview.</p>';
     m.innerHTML='<div class="am-card am-results"><div class="am-top"><span class="am-eyebrow">Everything you\u2019ve told us</span><button class="am-x" onclick="YNS.closeList()" aria-label="Close">\u00d7</button></div>'
       +'<h1>What we know about you</h1>'
       +'<p class="am-scene">Your own words, the direction they add up to, and the facts worth having to hand. Take any of it straight into an application or a message.</p>'

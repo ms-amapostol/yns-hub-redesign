@@ -36,7 +36,7 @@ button{font:inherit}
    drives it; never re-tint it in another blue. */
 .brand-lockup{width:104px;height:auto;display:block}
 .foot-mark{width:26px;height:26px;display:block;border-radius:6px}
-.bar .acct{display:flex;gap:var(--s3);align-items:center;font-size:.88rem;color:var(--yns-muted)}
+.bar .acct{display:flex;gap:var(--s2);align-items:center;font-size:.88rem;color:var(--yns-muted);flex-wrap:wrap;justify-content:flex-end}
 .chip{display:inline-flex;max-width:46vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--yns-paper);border:1px solid var(--yns-line);font-size:.8rem;color:var(--yns-muted)}
 
 /* ---- demo strip (remove in production) ---------------------------- */
