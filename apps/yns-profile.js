@@ -833,6 +833,10 @@
 
   function paint(el, u, opts) {
     opts = opts || {};
+    /* Inside the hub, the hub is the chrome. A second Back, a second Home,
+       a second theme toggle and a row of progress dots that start in the
+       middle only confuse the person. */
+    if (window.parent !== window) { el.innerHTML = ""; return; }
     var done = (signalsData && signalsData.activities_completed) || [];
 
     var right;

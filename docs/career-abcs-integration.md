@@ -66,3 +66,30 @@ the hub writes the raw answers and the app's intake never appears twice.
 
 That needs the hub to ask a fourth question, the last thing you finished, which
 Three Doors would also use. That is Anastasia's call.
+
+---
+
+## Career ABCs fixes made in the bundle (Sept 15) — port these to source
+
+These edits were made directly in `apps/career-abcs_v2.html`. **They will be
+lost the next time the app is rebuilt from source** unless ported. Each one
+names the source file it belongs in.
+
+| # | Change | Source file |
+|---|---|---|
+| 1 | When embedded (`window.parent !== window`), the app bar drops its own Back/Home nav and the Coach on/off chip. The hub is the chrome. | `src/app/main.js` → `paintShell` |
+| 2 | `yns-profile.js` renders nothing inside an iframe: no second Back/Home, no theme toggle, no progress dots. | `apps/yns-profile.js` → `paint` |
+| 3 | Resume print CSS centres the name, contact line and headline (Module 3 convention). Headline paragraph gets `class="headline"`. | `src/content/resume.js` → `PRINT_CSS`, `resumeHTML` |
+| 4 | Every bullet on a job has **edit** as well as remove. `manualBullet(jobId, editIndex)` handles both. | `src/content/resume.js` → `renderJobs`, `manualBullet` |
+| 5 | **Impact-statement builder** at the top of "Pull from a story": three boxes (what you did / measured by / result) prefilled from the story, clause-leading verbs moved to past tense, the number sentence and any numeric sentence from the situation pulled into "measured by", assembled live into an editable line. The generated alternatives stay underneath. | `src/content/resume.js` → `storyToBullet` (`xyzPrefill`, `xyzAssemble`) |
+| 6 | Cover letter screen: section retitled *The job you're applying for*, plus **Hiring manager's name** (`build.target.hiringManager`) and **The posting** (`build.target.jdText`, shared with the tailoring tab). `buildCoverInputs` passes `hiringManager`. The generator already supported both; the UI never collected them. | `src/content/coverletter.js` → `renderCover`, `buildCoverInputs` |
+| 7 | **Edit the letter**: a textarea under the preview, saved to `build.cover.full` with `edited: true`. Print and Word use `cover.full`, so the edit is what ships. | `src/content/coverletter.js` → `renderCover`, `wireCover` |
+| 8 | `tellStory`: a number entered as a whole sentence (5+ words) is used as a sentence rather than prefixed with "The number on that was". Skills in "What I bring" are lower-cased unless acronyms. | `src/content/coverletter.js` → `tellStory`, `buildSkillsParagraph` |
+| 9 | Stage B tabs renumbered and reordered: **1 · Resume → 2 · The job you want → 3 · Cover letter**. Sticky footer buttons walk that sequence. The tailoring tab intro explains it feeds the cover letter. | `src/content/coverletter.js` → `renderBuild`, `renderTarget` |
+| 10 | Practice: the gold pill only says *you banked a story for this* when a banked story actually carries the tag; otherwise a quiet *a banked story would answer this*. A "How to practise" note explains the mic, the clock, How did that go, Different question, and the question-type menu. Shows the running count of answers practised. | `src/content/coverletter.js` → `renderPractice` |
+| 11 | Kit page headline is always *Your kit* (with the name after it) and the subtitle says "Best in order: A, then B, then C. Nothing is locked." | `src/app/main.js` → `renderHome` |
+
+| 12 | **The interview kit** is a real page at `#kit`: four status tiles, the documents with their PDF and Word buttons, every story in one line, every practised answer with its feedback, who they are meeting, what they will ask, and a night-before checklist. Printable as one sheet. "See your interview kit" in Stage C and "See it" after three practised answers both go there. "Back to your hub" closes the hub panel. | `src/app/main.js` → `STAGES`, `go`; new `renderKit` beside `renderHistory` |
+
+**Still open in the app itself**
+- The generated bullet alternatives under the XYZ builder still come from the old parser and can read badly on first-person text. The builder is the default now, so this is less exposed, but the parser wants a first-person strip too.

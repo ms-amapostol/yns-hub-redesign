@@ -11192,6 +11192,11 @@ body.front-open{overflow:hidden}
   }
 }
 
+/* Name, contact line and headline sit centred at the top, which is the
+   convention Module 3 teaches and what most readers expect. */
+h1, .contact, .headline { text-align: center; }
+.resume h1, .resume .contact, .resume .headline { text-align: center; }
+
 .resume {
   font-family: Georgia, "Times New Roman", "Liberation Serif", serif;
   font-size: 10.75pt;
@@ -12937,7 +12942,11 @@ body.front-open{overflow:hidden}
     if (story.whatChanged) push2(story.whatChanged);
     const so_far = out.join(" ");
     const num = story.numbers.find((n) => !mentionsValue(so_far, n.value));
-    if (num) {
+    if (num && String(num.value || "").trim().split(/\s+/).length >= 5) {
+      /* The person wrote the number as a whole sentence. Use it as one,
+         rather than bolting "The number on that was" to the front. */
+      out.push(sentence(String(num.value)));
+    } else if (num) {
       const startsNumeric = /^[\d$£€]/.test(num.value);
       if (num.what && startsNumeric) {
         out.push(sentence(upperFirst2(num.what) + " came out at " + num.value));
@@ -12979,7 +12988,7 @@ body.front-open{overflow:hidden}
       ));
       if (ctx.others.length) bits.push(sentence("I also bring " + oxford(ctx.others)));
     } else if (ctx.skills.length) {
-      bits.push(sentence("What I bring is " + oxford(ctx.skills)));
+      bits.push(sentence("What I bring is " + oxford(ctx.skills.map((k) => /^[A-Z]{2,}/.test(k) ? k : k.charAt(0).toLowerCase() + k.slice(1)))));
     }
     if (ctx.story2) {
       const s2 = ctx.story2;
@@ -13878,17 +13887,21 @@ body.front-open{overflow:hidden}
     </div>
 
     <div class="pill-nav" role="tablist" aria-label="What you are building">
-      <button class="pill" role="tab" data-tab="resume" aria-selected="${tab === "resume"}">Resume</button>
-      <button class="pill" role="tab" data-tab="cover" aria-selected="${tab === "cover"}">Cover letter</button>
-      <button class="pill" role="tab" data-tab="target" aria-selected="${tab === "target"}">A specific job</button>
+      <button class="pill" role="tab" data-tab="resume" aria-selected="${tab === "resume"}">1 \u00b7 Resume</button>
+      <button class="pill" role="tab" data-tab="target" aria-selected="${tab === "target"}">2 \u00b7 The job you want</button>
+      <button class="pill" role="tab" data-tab="cover" aria-selected="${tab === "cover"}">3 \u00b7 Cover letter</button>
     </div>
 
     <div id="b-body"></div>
 
     <div class="sticky-actions">
       <div class="row row-end">
-        <button class="btn btn-ghost" data-go="a">Back to your stories</button>
-        <button class="btn btn-primary" data-go="c">Next: get ready for the interview</button>
+        ${tab === "resume" ? `<button class="btn btn-ghost" data-go="a">Back to your stories</button>
+          <button class="btn btn-primary" data-tab="target">Next: the job you want</button>`
+        : tab === "target" ? `<button class="btn btn-ghost" data-tab="resume">Back to the resume</button>
+          <button class="btn btn-primary" data-tab="cover">Next: write the cover letter</button>`
+        : `<button class="btn btn-ghost" data-tab="target">Back to the job</button>
+          <button class="btn btn-primary" data-go="c">Next: get ready for the interview</button>`}
       </div>
     </div>
   `;
@@ -14045,6 +14058,8 @@ body.front-open{overflow:hidden}
       </div>
       ${(j.bullets || []).length ? `<ul style="margin:8px 0 12px;padding-left:20px;font-size:var(--yns-t-sm)">
              ${j.bullets.map((t, i) => `<li>${esc(t)}
+               <button class="btn btn-quiet btn-sm" data-act="edit-bullet" data-id="${esc(j.id)}" data-i="${i}"
+                 aria-label="Edit this bullet">edit</button>
                <button class="btn btn-quiet btn-sm" data-act="del-bullet" data-id="${esc(j.id)}" data-i="${i}"
                  aria-label="Remove this bullet">remove</button></li>`).join("")}
            </ul>` : `<p class="sub" style="margin:8px 0 12px">No bullet points yet.</p>`}
@@ -14116,7 +14131,7 @@ body.front-open{overflow:hidden}
       contact: () => `
       <h1>${esc(d.contact.name || "Your Name")}</h1>
       <div class="contact">${contactBits.map(esc).join("&nbsp;&nbsp;\xB7&nbsp;&nbsp;")}</div>`,
-      headline: () => d.headline ? `<p style="margin:0 0 12px;font-weight:700">${esc(d.headline)}</p>` : "",
+      headline: () => d.headline ? `<p class="headline" style="margin:0 0 12px;font-weight:700">${esc(d.headline)}</p>` : "",
       summary: () => d.summary ? `<p style="margin:0 0 6px">${esc(d.summary)}</p>` : "",
       experience: () => d.experience.length ? `<h2>Experience</h2>${d.experience.map((j) => `
       <div class="job">
@@ -14170,6 +14185,7 @@ body.front-open{overflow:hidden}
       refresh();
     });
     on(body, "click", '[data-act="from-story"]', (e, t) => storyToBullet(t.dataset.id));
+    on(body, "click", '[data-act="edit-bullet"]', (e, t) => manualBullet(t.dataset.id, Number(t.dataset.i)));
     on(body, "click", '[data-act="write-bullet"]', (e, t) => manualBullet(t.dataset.id));
     on(body, "click", '[data-act="add-edu"]', () => eduEditor());
     on(body, "click", '[data-act="del-edu"]', (e, t) => {
@@ -14207,6 +14223,52 @@ body.front-open{overflow:hidden}
       }));
     });
     const out = $("#sb-out", wrap);
+    /* The XYZ builder. Module 3's impact statement: what you did (Z),
+       measured by what (Y), with what result (X). Three boxes, filled
+       from the story, assembled live, and the final line is editable
+       because the person's numbers belong in it even when the parser
+       missed them. The generated alternatives stay underneath. */
+    function xyzPrefill(story) {
+      const firstPerson = /^(i\s+am\s+the\s+one\s+who|i'm\s+the\s+one\s+who|i\s+was\s+the\s+one\s+who|i\s+am|i\s+was|i've|i\s+have|i)\s+/i;
+      /* Clause-leading verbs go to past tense, which is the resume
+         convention. A small irregular map, then the ordinary rule. It
+         is a draft for the person to fix, not a claim to be right. */
+      const IRR = { makes:"made", takes:"took", ensures:"ensured", serves:"served", runs:"ran", keeps:"kept", handles:"handled", helps:"helped", gets:"got", leads:"led", teaches:"taught", sells:"sold", builds:"built", deals:"dealt", does:"did", goes:"went", has:"had", is:"was", am:"was", are:"were", works:"worked", manages:"managed", opens:"opened", closes:"closed", trains:"trained", covers:"covered", answers:"answered", counts:"counted", stocks:"stocked", cleans:"cleaned", drives:"drove", writes:"wrote", brings:"brought", puts:"put", sets:"set", cuts:"cut", holds:"held", finds:"found", meets:"met", pays:"paid", says:"said", sees:"saw", shows:"showed", speaks:"spoke", stands:"stood", tells:"told", thinks:"thought", wins:"won", makes_sure:"made sure" };
+      const pastify = (w) => {
+        const lw = w.toLowerCase();
+        if (IRR[lw]) return IRR[lw];
+        if (/ies$/.test(lw)) return lw.replace(/ies$/, "ied");
+        if (/(sh|ch|ss|x|z)es$/.test(lw)) return lw.replace(/es$/, "ed");
+        if (/es$/.test(lw) && /[^aeiou]e s$/.test(lw.replace(/s$/, " s"))) return lw.replace(/s$/, "d");
+        if (/[^s]s$/.test(lw)) { const base = lw.replace(/s$/, ""); return /e$/.test(base) ? base + "d" : base + "ed"; }
+        return w;
+      };
+      let action = String(story.whatIDid || "").trim().replace(firstPerson, "").replace(/\.$/, "");
+      action = action.split(/(,\s*(?:and\s+)?|\s+and\s+)/).map((part, i) => i % 2 ? part : part.replace(/^(\w+)/, (m) => pastify(m))).join("");
+      const numberish = (t) => /\d|\b(one|two|three|four|five|six|seven|eight|nine|ten|dozen|hundred|thousand|half|twice|double)\b/i.test(t);
+      const frags = [];
+      (story.numbers || []).forEach((n) => {
+        const bits = [n.what, n.value].filter(Boolean).map(String);
+        if (bits.length) frags.push(bits.join(bits.length === 2 && /^[\d$]/.test(bits[1]) ? ": " : " ").replace(/\.$/, ""));
+      });
+      String(story.situation || "").split(/(?<=[.!?])\s+/).forEach((sent) => { if (numberish(sent)) frags.push(sent.trim().replace(/\.$/, "")); });
+      /* Digits first, at most two fragments, and the throat-clearing
+         openers trimmed so it reads as a measure rather than a sentence. */
+      const tidy = (f) => f.replace(/^(on any given day|on a typical day|on a normal day|every day|each day|usually|typically),?\s+/i, "").replace(/^(we|i)\s+(serve|served|handle|handled|deliver|delivered|see|saw|help|helped)\s+/i, "");
+      const uniq = frags.filter((f, i) => frags.indexOf(f) === i).map(tidy);
+      uniq.sort((a, b2) => (/\d/.test(b2) ? 1 : 0) - (/\d/.test(a) ? 1 : 0));
+      const measure = uniq.slice(0, 2).join("; ");
+      const result = String(story.whatChanged || "").trim().replace(/\.$/, "");
+      return { action, measure, result };
+    }
+    function xyzAssemble(v) {
+      const lower = (t) => t ? t.charAt(0).toLowerCase() + t.slice(1) : "";
+      const cap = (t) => t ? t.charAt(0).toUpperCase() + t.slice(1) : "";
+      let out2 = cap(v.action.trim());
+      if (v.measure.trim()) out2 += (out2 ? ", " : "") + lower(v.measure.trim());
+      if (v.result.trim()) out2 += (out2 ? "; " : "") + lower(v.result.trim());
+      return out2.replace(/\s+/g, " ").replace(/[.;,]+$/, "") + (out2 ? "." : "");
+    }
     function showVariants(story) {
       let result;
       try {
@@ -14215,9 +14277,23 @@ body.front-open{overflow:hidden}
         result = { bullets: [story.whatIDid], notes: [] };
       }
       const bullets = (result.bullets || []).filter(Boolean);
+      const pre = xyzPrefill(story);
       out.innerHTML = `
+      <section class="card card-sm" style="margin:0 0 16px">
+        <h4 style="margin:0 0 4px">Build it as an impact statement</h4>
+        <p class="sub" style="margin:0 0 12px">What you did, measured by what, with what result. Fix any box; the line at the bottom rewrites itself, and you can edit that too before adding it.</p>
+        <div class="field"><label for="xyz-z">What you did <span class="sub">(start with a verb: served, handled, trained)</span></label>
+          <input id="xyz-z" type="text" value="${esc(pre.action)}"></div>
+        <div class="field"><label for="xyz-y">Measured by <span class="sub">(the numbers)</span></label>
+          <input id="xyz-y" type="text" value="${esc(pre.measure)}" placeholder="100 to 150 customers a day; each order in five minutes or less"></div>
+        <div class="field"><label for="xyz-x">The result</label>
+          <input id="xyz-x" type="text" value="${esc(pre.result)}"></div>
+        <div class="field" style="margin-bottom:8px"><label for="xyz-final">The bullet <span class="sub">(edit it here; aim for under 30 words, and cut anything a stranger doesn\u2019t need)</span></label>
+          <textarea id="xyz-final" rows="3">${esc(xyzAssemble(pre))}</textarea></div>
+        <button class="btn btn-primary btn-sm" type="button" id="xyz-add">Add this bullet</button>
+      </section>
       <div class="note note-info" style="margin:0 0 12px">
-        <span class="note-t">Pick the one that fits</span>
+        <span class="note-t">Or pick one of these</span>
         ${(result.notes || []).slice(0, 2).map((n) => `<div>${esc(n)}</div>`).join("")}
       </div>
       ${bullets.map((b, i) => `
@@ -14240,6 +14316,26 @@ body.front-open{overflow:hidden}
         closeIt();
         renderBuild();
       });
+      /* XYZ wiring: any box edits the final line unless the person has
+         already put their own words in it. */
+      (function () {
+        const z = $("#xyz-z", out), y = $("#xyz-y", out), x = $("#xyz-x", out), fin = $("#xyz-final", out);
+        let touched = false;
+        if (fin) fin.addEventListener("input", () => { touched = true; });
+        [z, y, x].forEach((inp) => inp && inp.addEventListener("input", () => {
+          if (!touched && fin) fin.value = xyzAssemble({ action: z.value, measure: y.value, result: x.value });
+        }));
+        const add = $("#xyz-add", out);
+        if (add) add.addEventListener("click", () => {
+          const text = (fin ? fin.value : "").trim();
+          if (!text) { toast("Nothing to add yet", "warn"); return; }
+          const job = get("build.experience", []).find((j2) => j2.id === jobId);
+          updateById("build.experience", jobId, { bullets: [...job.bullets || [], text] });
+          toast("Added to your resume", "ok");
+          closeIt();
+          renderBuild();
+        });
+      })();
       const aiBtn = $("#sb-ai", out);
       if (aiBtn) aiBtn.addEventListener("click", async () => {
         aiBtn.disabled = true;
@@ -14267,27 +14363,35 @@ body.front-open{overflow:hidden}
       close();
     }
   }
-  function manualBullet(jobId) {
+  /* Write a bullet, or edit one that is already on the page. Editing is
+     the same box with the words already in it, because the machine's
+     version is a draft and the person's numbers belong in it. */
+  function manualBullet(jobId, editIndex) {
+    const editing = typeof editIndex === "number";
+    const job0 = get("build.experience", []).find((x) => x.id === jobId);
+    const current = editing && job0 ? (job0.bullets || [])[editIndex] || "" : "";
     const wrap = el("div");
     wrap.innerHTML = `
     <div class="field" style="margin-bottom:0">
-      <label for="mb">Write the bullet point</label>
-      <p class="field-hint">Start with a plain past-tense verb. Handled, trained, covered, kept, ran, sorted.</p>
-      <textarea id="mb" rows="3" placeholder="Trained four new hires on the register during their first week."></textarea>
+      <label for="mb">${editing ? "Edit the bullet point" : "Write the bullet point"}</label>
+      <p class="field-hint">Start with a plain past-tense verb, put a number in it if you have one, and end with what changed. Handled, trained, covered, kept, ran, sorted.</p>
+      <textarea id="mb" rows="3" placeholder="Trained four new hires on the register during their first week.">${esc(current)}</textarea>
     </div>`;
     modal({
-      title: "Write a bullet point",
+      title: editing ? "Edit a bullet point" : "Write a bullet point",
       body: wrap,
       actions: [
         { label: "Cancel", class: "btn-ghost" },
-        { label: "Add it", class: "btn-primary", onClick: () => {
+        { label: editing ? "Save it" : "Add it", class: "btn-primary", onClick: () => {
           const text = $("#mb", wrap).value.trim();
           if (!text) {
             toast("Nothing to add yet", "warn");
             return true;
           }
           const job = get("build.experience", []).find((x) => x.id === jobId);
-          updateById("build.experience", jobId, { bullets: [...job.bullets || [], text] });
+          const bullets = [...job.bullets || []];
+          if (editing) bullets[editIndex] = text; else bullets.push(text);
+          updateById("build.experience", jobId, { bullets });
           renderBuild();
         } }
       ]
@@ -14443,13 +14547,20 @@ body.front-open{overflow:hidden}
         </section>
 
         <section class="card" style="margin-top:20px">
-          <h3 style="margin-top:0">The job</h3>
+          <h3 style="margin-top:0">The job you\u2019re applying for</h3>
+          <p class="sub" style="margin-top:-8px">The new one, not where you are now. Everything below shapes the letter.</p>
           <div class="grid grid-2">
             <div class="field"><label for="c-role">Role</label>
               <input id="c-role" type="text" data-bind="build.target.role" value="${esc(b.target.role)}"></div>
             <div class="field"><label for="c-co">Company</label>
               <input id="c-co" type="text" data-bind="build.target.company" value="${esc(b.target.company)}"></div>
           </div>
+          <div class="field"><label for="c-hm">Hiring manager\u2019s name <span class="sub">(if you can find it)</span></label>
+            <p class="field-hint">Two minutes on the posting or the company page. If it isn\u2019t there, the team greeting is fine.</p>
+            <input id="c-hm" type="text" data-bind="build.target.hiringManager" value="${esc(b.target.hiringManager || "")}" placeholder="Maria Lopez"></div>
+          <div class="field"><label for="c-jd">The posting <span class="sub">(paste it in; this is what makes the letter specific)</span></label>
+            <p class="field-hint">With the posting here, the letter matches your skills to what they actually asked for and uses their own words back to them. Without it, the letter can only be general.</p>
+            <textarea id="c-jd" rows="5" data-bind="build.target.jdText" placeholder="Paste the whole thing. Nobody reads it but you and this page.">${esc(b.target.jdText || "")}</textarea></div>
           <div class="field"><label for="c-why">Why you want it</label>
             <p class="field-hint">Plain and honest. "I like taking care of people when they are having a hard day" is a great answer.</p>
             <textarea id="c-why" rows="2" data-bind="build.whyThisJob">${esc(b.whyThisJob || "")}</textarea></div>
@@ -14497,6 +14608,16 @@ body.front-open{overflow:hidden}
           </div>` : ""}
         </div>
         ${cover ? `<div class="letter" id="c-preview">${esc(cover.full)}</div>
+             <div class="row" style="margin-top:10px;gap:6px">
+               <button class="btn btn-ghost btn-sm" data-act="edit-cover">Edit the letter</button>
+             </div>
+             <div id="c-edit" hidden style="margin-top:10px">
+               <textarea id="c-edit-text" rows="16" style="width:100%">${esc(cover.full)}</textarea>
+               <div class="row" style="margin-top:8px;gap:6px">
+                 <button class="btn btn-primary btn-sm" data-act="save-cover-edit">Save my version</button>
+                 <button class="btn btn-quiet btn-sm" data-act="cancel-cover-edit">Cancel</button>
+               </div>
+             </div>
              ${(cover.notes || []).length ? `<div class="note note-info" style="margin-top:14px">
                <span class="note-t">What it did and why</span>
                ${cover.notes.slice(0, 4).map((n) => `<div>${esc(n)}</div>`).join("")}</div>` : ""}
@@ -14516,6 +14637,18 @@ body.front-open{overflow:hidden}
       draft: get("build.whyThisJob", "")
     }));
     on(body, "change", 'input[name="shape"]', (e, t) => set("build.coverShape", t.value));
+    /* Editing the letter. The draft is a draft; the person's version is
+       the one that gets printed and downloaded. */
+    on(body, "click", '[data-act="edit-cover"]', () => { const ed = $("#c-edit", body); if (ed) { ed.hidden = false; $("#c-edit-text", body).focus(); } });
+    on(body, "click", '[data-act="cancel-cover-edit"]', () => { const ed = $("#c-edit", body); if (ed) ed.hidden = true; });
+    on(body, "click", '[data-act="save-cover-edit"]', () => {
+      const text = ($("#c-edit-text", body).value || "").trim();
+      if (!text) { toast("The letter is empty", "warn"); return; }
+      const cur = get("build.cover") || {};
+      set("build.cover", { ...cur, full: text, edited: true });
+      toast("Saved. This is the version that prints.", "ok");
+      renderBuild();
+    });
     on(body, "change", 'input[name="cstory"]', () => {
       const picked = Array.from(body.querySelectorAll('input[name="cstory"]:checked')).map((i) => i.value);
       set("build.coverStories", picked);
@@ -14591,6 +14724,7 @@ body.front-open{overflow:hidden}
       // assert a relationship with the employer that she has not stated.
       connection: b.connection || "",
       jobDescriptionText: b.target.jdText || "",
+      hiringManager: b.target.hiringManager || "",
       contact: { email: a.email, phone: a.phone }
     };
   }
@@ -14598,8 +14732,8 @@ body.front-open{overflow:hidden}
     const b = get("build");
     body.innerHTML = `
     <section class="card">
-      <h3 style="margin-top:0">Paste a job posting</h3>
-      <p class="sub" style="margin-top:-8px">Everything here compares your resume against this one job. Nothing gets sent anywhere unless you ask for the AI version.</p>
+      <h3 style="margin-top:0">The job you want</h3>
+      <p class="sub" style="margin-top:-8px">Paste the posting for the job you\u2019re going for. It checks your resume against it, points your resume and letter at it, and gives the cover letter something specific to say. Nothing gets sent anywhere unless you ask for the AI version.</p>
       <div class="grid grid-2">
         <div class="field"><label for="t-role">Role</label>
           <input id="t-role" type="text" data-bind="build.target.role" value="${esc(b.target.role)}"></div>
@@ -14927,7 +15061,7 @@ body.front-open{overflow:hidden}
     <div class="sticky-actions">
       <div class="row row-end">
         <button class="btn btn-ghost" data-go="b">Back to your resume</button>
-        <button class="btn btn-primary" data-go="home">See your kit</button>
+        <button class="btn btn-primary" data-go="kit">See your interview kit</button>
       </div>
     </div>`;
     mountPoint3.replaceChildren(host);
@@ -14975,11 +15109,17 @@ body.front-open{overflow:hidden}
         ${days === 0 ? "You have done the work. Read your answers over once, then close this and go be a person. You are ready." : "Tonight is for one run through your best two stories. Nothing new. Get some sleep."}
       </div>` : ""}
 
+    <div class="note note-info" style="margin:0 0 14px">
+      <span class="note-t">How to practise</span>
+      Read the question, press the mic and answer out loud with the clock running, or type it. Then press <b>How did that go</b> for one thing that landed and one thing to try next.
+      <b>Different question</b> gives you another of the same kind; the menu on the right switches the kind. Three answers and you have a kit.
+      ${(() => { const n = get("carry.practice", []).length; return n ? `<div style="margin-top:6px"><b>${n} ${n === 1 ? "answer" : "answers"} practised so far.</b>${n >= 3 ? ` That is a kit. <button class="btn btn-ghost btn-sm" data-go="kit" type="button">See it</button>` : ""}</div>` : ""; })()}
+    </div>
     <section class="q-card">
       <div class="q-meta">
         <span class="badge">${esc(cat.label || current.category)}</span>
         <span class="badge badge-quiet">aim for about ${Math.round((cat.timeTarget || 90) / 15) * 15} seconds</span>
-        ${current.storyTag ? `<span class="badge badge-gold">answerable from your Story Bank</span>` : ""}
+        ${current.storyTag && get("about.stories", []).some((s) => (s.tags || []).includes(current.storyTag)) ? `<span class="badge badge-gold">you banked a story for this</span>` : current.storyTag ? `<span class="badge badge-quiet">a banked story would answer this</span>` : ""}
       </div>
 
       <p class="q-text">${esc(current.q)}</p>
@@ -15456,6 +15596,118 @@ body.front-open{overflow:hidden}
       });
     });
   }
+  /* The interview kit. One page with everything they walk in with: the
+     documents, the stories, the answers they have practised with the
+     feedback, who they are meeting, what to ask. Printable, because the
+     night before an interview a sheet of paper beats a tab. */
+  function renderKit(container) {
+    const st = load();
+    const a = st.about, b = st.build, c = st.carry;
+    const stories = a.stories || [];
+    const practised = c.practice || [];
+    const people = c.people || [];
+    const asks = c.askThemPicked || [];
+    const resumeReady = Boolean(b.roleFamily && b.headline) && (b.experience || []).length > 0;
+    const coverReady = Boolean(b.cover && b.cover.full);
+    const name = (a.name || "").split(" ")[0];
+    const when = c.interviewDate ? new Date(c.interviewDate) : null;
+    const days = daysUntil();
+
+    const host = document.createElement("div");
+    host.innerHTML = `
+    ${bannerHTML("c")}
+    <div class="stage-head">
+      <div class="stage-letter" aria-hidden="true">\u2713</div>
+      <div>
+        <h1>Your interview kit${name ? `, ${esc(name)}` : ""}</h1>
+        <p>${days !== null && days >= 0 ? (days === 0 ? "Today. " : days === 1 ? "Tomorrow. " : `${days} days out. `) : ""}Everything you walk in with, on one page. Print it the night before.</p>
+      </div>
+    </div>
+
+    <div class="kit-grid" style="margin-bottom:24px">
+      <div class="kit ${stories.length ? "filled" : ""}"><b>${stories.length}</b> ${stories.length === 1 ? "story" : "stories"} banked</div>
+      <div class="kit ${resumeReady ? "filled" : ""}"><b>Resume</b> ${resumeReady ? "ready" : "not finished"}</div>
+      <div class="kit ${coverReady ? "filled" : ""}"><b>Cover letter</b> ${coverReady ? "ready" : "not written"}</div>
+      <div class="kit ${practised.length >= 3 ? "filled" : ""}"><b>${practised.length}</b> ${practised.length === 1 ? "answer" : "answers"} practised</div>
+    </div>
+
+    <section class="card">
+      <div class="card-head"><h3 style="margin:0">Your documents</h3></div>
+      <div class="row" style="gap:8px;flex-wrap:wrap">
+        ${resumeReady ? `<button class="btn btn-ghost btn-sm" data-act="kit-print-resume">Resume \u00b7 Save as PDF</button>
+        <button class="btn btn-ghost btn-sm" data-act="kit-word-resume">Resume \u00b7 Word</button>` : `<button class="btn btn-ghost btn-sm" data-go="b">Finish the resume</button>`}
+        ${coverReady ? `<button class="btn btn-ghost btn-sm" data-act="kit-print-cover">Cover letter \u00b7 Save as PDF</button>
+        <button class="btn btn-ghost btn-sm" data-act="kit-word-cover">Cover letter \u00b7 Word</button>` : `<button class="btn btn-ghost btn-sm" data-go="b">Write the cover letter</button>`}
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:20px">
+      <div class="card-head"><h3 style="margin:0">Your stories, in one line each</h3><button class="btn btn-quiet btn-sm" data-go="a">Edit</button></div>
+      ${stories.length ? `<ul style="margin:0;padding-left:20px">${stories.map((s2) => `<li style="margin-bottom:6px"><b>${esc(s2.title)}</b>${s2.whatChanged ? ` \u2014 ${esc(s2.whatChanged)}` : ""}</li>`).join("")}</ul>`
+        : `<p class="sub" style="margin:0">Nothing banked yet. One story is enough to start.</p>`}
+    </section>
+
+    <section class="card" style="margin-top:20px">
+      <div class="card-head"><h3 style="margin:0">Answers you have practised</h3><button class="btn btn-quiet btn-sm" data-go="c">Practise more</button></div>
+      ${practised.length ? practised.slice().reverse().map((p2) => `
+        <div style="padding:12px 0;border-top:1px solid var(--yns-line-soft, #e6eaf1)">
+          <p style="margin:0 0 4px"><b>${esc(p2.question)}</b> <span class="badge badge-quiet">${clockFace(p2.seconds)}</span></p>
+          <p style="margin:0 0 6px;white-space:pre-wrap">${esc(p2.answer)}</p>
+          ${p2.feedback ? `<p class="sub" style="margin:0"><b>Landed:</b> ${esc(p2.feedback.landed || "")} <b>Try next:</b> ${esc(p2.feedback.tryNext || "")}</p>` : ""}
+        </div>`).join("")
+        : `<p class="sub" style="margin:0">Nothing yet. Three answers out loud is a kit; one is a start.</p>`}
+    </section>
+
+    ${people.length ? `<section class="card" style="margin-top:20px">
+      <div class="card-head"><h3 style="margin:0">Who you\u2019re meeting</h3><button class="btn btn-quiet btn-sm" data-go="c">Edit</button></div>
+      <ul style="margin:0;padding-left:20px">${people.map((pp) => `<li><b>${esc(pp.name || "")}</b>${pp.title ? `, ${esc(pp.title)}` : ""}${pp.notes ? ` \u2014 ${esc(pp.notes)}` : ""}</li>`).join("")}</ul>
+    </section>` : ""}
+
+    ${asks.length ? `<section class="card" style="margin-top:20px">
+      <div class="card-head"><h3 style="margin:0">What you\u2019ll ask them</h3></div>
+      <ul style="margin:0;padding-left:20px">${asks.map((q) => `<li>${esc(typeof q === "string" ? q : q.q || q.text || "")}</li>`).join("")}</ul>
+    </section>` : ""}
+
+    <section class="card" style="margin-top:20px">
+      <h3 style="margin-top:0">The night before</h3>
+      <ul style="margin:0;padding-left:20px">
+        <li>Read your two best stories once, out loud. Not five times.</li>
+        <li>Have one hard-day story ready: the customer, what you said, how it ended.</li>
+        <li>Print this page or keep it open on your phone.</li>
+        <li>Send the thank-you note within a day: four sentences, the role by name, one thing from the conversation.</li>
+      </ul>
+    </section>
+
+    <div class="sticky-actions">
+      <div class="row row-end">
+        <button class="btn btn-ghost" data-go="c">Back to practice</button>
+        <button class="btn btn-ghost" data-act="kit-print">Print the kit</button>
+        <button class="btn btn-primary" data-act="kit-hub">Back to your hub</button>
+      </div>
+    </div>`;
+    container.replaceChildren(host);
+
+    on(host, "click", '[data-act="kit-print-resume"]', () => printDocument({ title: `${get("about.name") || "Resume"}`, css: RESUME.PRINT_CSS, bodyHTML: resumeHTML(load()) }));
+    on(host, "click", '[data-act="kit-word-resume"]', () => {
+      const nm = (get("about.name") || "resume").replace(/\s+/g, "-").toLowerCase();
+      downloadAsWord(`${nm}-resume.doc`, "Resume", RESUME.PRINT_CSS, resumeHTML(load()));
+    });
+    on(host, "click", '[data-act="kit-print-cover"]', () => printDocument({ title: "Cover letter", css: COVER.PRINT_CSS, bodyHTML: `<pre style="white-space:pre-wrap;font-family:Georgia,serif;font-size:11pt;line-height:1.5">${esc(get("build.cover.full", ""))}</pre>` }));
+    on(host, "click", '[data-act="kit-word-cover"]', () => {
+      const nm = (get("about.name") || "cover-letter").replace(/\s+/g, "-").toLowerCase();
+      downloadAsWord(`${nm}-cover-letter.doc`, "Cover letter", COVER.PRINT_CSS, `<pre style="white-space:pre-wrap">${esc(get("build.cover.full", ""))}</pre>`);
+    });
+    on(host, "click", '[data-act="kit-print"]', () => {
+      const clone = host.cloneNode(true);
+      clone.querySelectorAll("button, .sticky-actions, .banner, img").forEach((n) => n.remove());
+      printDocument({ title: "Interview kit", css: `body{font-family:Georgia,serif;font-size:11pt;line-height:1.45;color:#111;max-width:7in;margin:0 auto} h1{font-size:18pt;margin:0 0 4pt} h3{font-size:12pt;margin:14pt 0 4pt;border-bottom:1px solid #ccc} .kit-grid{display:none} .badge{font-size:9pt;color:#666} .sub{color:#444}`, bodyHTML: clone.innerHTML });
+    });
+    on(host, "click", '[data-act="kit-hub"]', () => {
+      if (window.parent !== window) window.parent.postMessage({ yns: "close" }, "*");
+      else location.href = "../index.html";
+    });
+  }
+
   function renderHistory(body) {
     const list = get("carry.practice", []);
     if (!list.length) {
@@ -15509,6 +15761,7 @@ body.front-open{overflow:hidden}
   // src/app/main.js
   var STAGES = {
     home: { label: "Your kit" },
+    kit: { label: "Your interview kit" },
     a: { letter: "A", label: "About You", sub: "Your stories" },
     b: { letter: "B", label: "Build It", sub: "Resume, cover letter" },
     c: { letter: "C", label: "Carry It In", sub: "Interview practice" }
@@ -15550,6 +15803,10 @@ body.front-open{overflow:hidden}
     });
   }
   function paintShell() {
+    /* Inside the hub the hub is the chrome: its own Back to your hub, its
+       own account, its own theme. Duplicating them here gave the person
+       two Back buttons that went to different places. */
+    const EMBEDDED = window.parent !== window;
     document.body.innerHTML = `
     <a class="skip-link" href="#main">Skip to the main part</a>
 
@@ -15560,14 +15817,14 @@ body.front-open{overflow:hidden}
           <span class="brand-rule" aria-hidden="true"></span>
           <span class="brand-txt">Career ABCs</span>
         </a>
-        <nav class="appbar-nav" aria-label="Site">
+        ${EMBEDDED ? "" : `<nav class="appbar-nav" aria-label="Site">
           <button class="chip-btn" type="button" id="abc-back" title="Back">&#8592; Back</button>
           <a class="chip-btn" href="index.html" title="All activities">&#8962; Home</a>
-        </nav>
+        </nav>`}
         <span class="appbar-sp"></span>
         <div class="appbar-act">
           <span id="saved" class="sub" style="color:rgba(255,255,255,.82);font-size:var(--yns-t-xs)"></span>
-          <button class="chip-btn" id="ai-chip" type="button" aria-pressed="false">Coach</button>
+          ${EMBEDDED ? "" : `<button class="chip-btn" id="ai-chip" type="button" aria-pressed="false">Coach</button>`}
           <button class="chip-btn" id="menu-btn" type="button" aria-haspopup="dialog">Your data</button>
         </div>
       </div>
@@ -15603,7 +15860,7 @@ body.front-open{overflow:hidden}
       if (history.length > 1) history.back();
       else location.href = "index.html";
     });
-    $("#ai-chip").addEventListener("click", aiInfo);
+    if ($("#ai-chip")) $("#ai-chip").addEventListener("click", aiInfo);
     on(document.body, "click", "[data-go]", (e, t) => {
       e.preventDefault();
       go(t.dataset.go);
@@ -15654,6 +15911,7 @@ body.front-open{overflow:hidden}
     const slot = document.createElement("div");
     stage.replaceChildren(slot);
     if (next === "home") renderHome(slot);
+    else if (next === "kit") renderKit(slot);
     else if (next === "a") renderAbout(slot);
     else if (next === "b") renderBuild(slot);
     else {
@@ -15682,9 +15940,9 @@ body.front-open{overflow:hidden}
     host.innerHTML = `
     ${bannerHTML()}
     <section style="margin-bottom:32px">
-      <h1 style="margin-bottom:6px">${started && name ? `Welcome back, ${esc(name)}.` : "Your kit"}</h1>
+      <h1 style="margin-bottom:6px">Your kit${started && name ? `, ${esc(name)}` : ""}</h1>
       <p class="sub" style="font-size:var(--yns-t-base)">
-        ${done2 === 0 ? "Four things to walk away with, and they are yours to keep." : done2 === 4 ? "All four done. That is a fuller kit than a lot of people walk in with." : `${done2} of four done. ${done2 >= 2 ? "You are through a good chunk of it." : "Good start."}`}
+        ${done2 === 0 ? "Four things to walk away with, and they are yours to keep. Best in order: A, then B, then C. Nothing is locked." : done2 === 4 ? "All four done. That is a fuller kit than a lot of people walk in with." : `${done2} of four done. ${done2 >= 2 ? "You are through a good chunk of it." : "Good start."} Best in order: A, then B, then C.`}
       </p>
     </section>
 
