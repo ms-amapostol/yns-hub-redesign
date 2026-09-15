@@ -129,3 +129,35 @@ becoming a credit card balance.
   single answer before the next screen renders. Used here so the savings
   decision can be turned into an amount, which needs income that the choice
   itself does not carry.
+
+
+## Fourth pass (Sept 15): the last three money activities, and where the course is offered
+
+| File | Activity | From Module 5 |
+|---|---|---|
+| `activities/invest.js` | **Where Money Can Live** — five places from safest to riskiest, one screen each, then two decisions: where money you need within a year goes, and where ten-year money goes | "Opportunities to Grow Your Wealth" |
+| `activities/retire.js` | **The Match** — 401k, 403b, pension, Roth in one line each; a calculator showing the employer match in dollars using the class's $40,000 / 3% / 3% example; one status question with five honest options | "All Things Retirement" |
+| `activities/taxes.js` | **Where Your Paycheck Goes** — the four kinds of line on a payslip; gross-to-net with the class's 25–31% rule of thumb, labelled as a rule of thumb; the W-4 as the one thing you control | "All about the Benjamins", "Gross vs. Net Income" |
+
+All three describe and never recommend. The `calc` mechanic gained two modes, `match` and `net`, alongside the original compounding mode.
+
+**Credit** is the one Module 5 topic still without an activity. It is a natural fifth: "Credit, Plainly", the score, the two habits (pay in full, pay on time), and the 0% rule.
+
+### The course, in two places only
+
+- On the results screen of each money activity (`wix: true` on the card): one card, one link to `https://www.yournextstepai.com/curriculum`.
+- Once, on the hub, when all five doors are finished.
+
+Nowhere else. Not on arrival, not per door.
+
+### Door 3 ready state
+
+When `top_category`, stage B and stage C all exist, the door shows "You've got the story, the paper and the practice. Here's where to point it," with the four CareerOneStop search links. It appears only when true.
+
+### Career ABCs → Places
+
+If stage B named a target company, it is added to Places as a company, status "looking", once. Never overwritten.
+
+### The signup screen
+
+`YNS.signup()` renders the account screen with the four real perks and the consent box, unticked. The button is disabled and labelled for Matt. The consent sentence is the one to copy into the privacy policy.

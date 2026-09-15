@@ -63,7 +63,7 @@
     { key:"mind", n:"Door 4", title:"Mindset and money",
       blurb:"Build the grit and the financial footing to follow through.",
       why:"Knowing what you want is half of it. This door works on the part nobody teaches: bouncing back when it's hard, and knowing your real numbers.",
-      acts:["grit","able","floor","money101","budget0","compound","bounce"] },
+      acts:["grit","able","floor","money101","budget0","compound","taxes","retire","invest","bounce"] },
     { key:"plan", n:"Door 5", title:"Make the plan",
       blurb:"Six months, one SMART goal, written down.",
       why:"You're ready to commit. This door turns a direction into a plan with dates on it, and helps you spot what might knock it off course before it does.",
@@ -91,6 +91,9 @@
     able:         { name:"Solve It",           tag:"One real problem, taken apart four ways. The ABLE method.", min:7, fact:"How you solve things", tile:11, play:true },
     budget0:      { name:"Every Dollar a Job", tag:"Build a budget that adds to zero, then take the spreadsheet with you.", min:12, fact:"Your budget", tile:13, play:true },
     compound:     { name:"What Money Does Over Time", tag:"Watch a small monthly amount turn into a number you didn\u2019t expect.", min:6, fact:"What time does to money", tile:13, play:true },
+    invest:       { name:"Where Money Can Live", tag:"Five places money can sit, from safest to riskiest, and which end yours goes.", min:5, fact:"Where money lives", tile:13, play:true, wix:true },
+    retire:       { name:"The Match",            tag:"401k, 403b, pension, Roth, and the free money you might be leaving.", min:6, fact:"The match", tile:13, play:true, wix:true },
+    taxes:        { name:"Where Your Paycheck Goes", tag:"The four lines that take money out, and the one you control.", min:4, fact:"Your paycheck", tile:13, play:true, wix:true },
     floor:        { name:"The Floor",            tag:"The number you need, not the number you want.",     min:6, fact:"Your number", tile:10, play:true },
     grit:         { name:"Bounce Back",          tag:"The last time it went wrong, and what you did next.", min:6, fact:"How you recover", tile:11, play:true },
     bounce:       { name:"The Week It's Hard",   tag:"A plan for the week you want to quit.",             min:5, fact:"Your hard-week plan", tile:12, play:true },
@@ -355,6 +358,17 @@
     };
   }
   function syncAbcs(){
+    /* If stage B named a target company, it's a place they're looking
+       at. Added once, never overwritten. */
+    try {
+      var st=abcsState(), tgt=st && st.build && st.build.target;
+      if (tgt && tgt.company && tgt.company.trim()){
+        var name=tgt.company.trim();
+        if (!places().some(function(p){ return p.name.toLowerCase()===name.toLowerCase(); })){
+          places().push({ id:"p"+Date.now(), name:name, type:"company", status:"looking", note:tgt.role||"", at:Date.now(), from:"Career ABCs" });
+        }
+      }
+    } catch(e){}
     var d=abcsDone(), changed=false;
     Object.keys(d).forEach(function(k){ if (d[k] && !state.done[k]) { state.done[k]=true; lastAdded=k; changed=true; } });
     return changed;
@@ -444,6 +458,51 @@
     if (a.app){ openApp(slug, ABCS_URL+"#"+a.app, a.name); return; }
     if (a.live){ openApp(slug, withLevel(a.live)+(atResults?"":"&fresh=1"), a.name); return; }
     toggle(slug);
+  }
+
+  /* ---------- the account, as a screen ------------------------------
+
+     Built here so the words and the order are decided; wired by Matt to
+     Supabase. Nothing in this panel submits anywhere. The perks are the
+     real ones, the consent box starts unticked, and the same sentence
+     belongs in the privacy policy. */
+  YNS.signup=function(){
+    var m=$("actModal"); m.style.display="block"; document.body.classList.add("modal-open");
+    var ns=nextStepSentence();
+    m.innerHTML='<div class="am-card"><div class="am-top"><span class="am-eyebrow">Keep your next step</span><button class="am-x" onclick="YNS.closeList()" aria-label="Close">\u00d7</button></div>'
+      +'<h2>'+(ns ? "That\u2019s your next step. Make it stay." : "Make an account and everything here stays.")+'</h2>'
+      +(ns ? '<p class="am-scene">'+ns+'</p>' : '')
+      +'<p class="am-scene">Everything is free without one. With one, four things change:</p>'
+      +'<ul class="am-points">'
+      +'<li><b>It saves.</b> Your plan, your portfolio, your places, on any device, and it survives a cleared browser.</li>'
+      +'<li><b>The coach.</b> The AI coach inside Career ABCs works with you the whole way through, rather than once.</li>'
+      +'<li><b>Check-ins.</b> Still True? emails you when something you planned is due, so the plan gets kept.</li>'
+      +'<li><b>First to hear.</b> When we start working with schools, programs and employers, you\u2019ll be first to hear about ones that match what you\u2019ve told us. You choose whether to be introduced, every time, and you can turn it off any time.</li>'
+      +'</ul>'
+      +'<div class="signup-form">'
+      +'<label>Email<input type="email" placeholder="you@email.com" autocomplete="email"></label>'
+      +'<label>Password<input type="password" placeholder="At least 8 characters" autocomplete="new-password"></label>'
+      +'<label class="signup-consent"><input type="checkbox"> Yes, tell me when there\u2019s an opportunity that fits. I can turn this off any time.</label>'
+      +'<p class="am-note">By making an account you agree to the <a href="https://www.yournextstepai.com/terms" target="_blank" rel="noopener">terms</a> and the privacy policy. We don\u2019t sell your data, and nobody is introduced to you without your say-so.</p>'
+      +'</div>'
+      +'<div class="am-foot"><button class="btn-quiet" onclick="YNS.closeList()">Not now</button><button class="btn btn-primary" disabled title="Wired by Matt to Supabase in the live build">Make my account</button></div>'
+      +'<p class="am-note" style="margin-top:8px">Review build: this screen shows the words and the order. The button is connected in the live build.</p>'
+      +'</div>';
+  };
+
+  /* ---------- the structured course --------------------------------
+
+     Promoted in exactly two places, and nowhere else. At the end of the
+     money activities, where a person has just met a concept the course
+     teaches in full with video and the coach. And once, when all five
+     doors are finished. Never on arrival, never on every door. */
+  var WIX_URL = "https://www.yournextstepai.com/curriculum";
+  var WIX_LINE = "Want the full version of this, with the videos and the AI coach? Module 5 of the Your Next Step course covers it end to end.";
+  function wixCard(text){
+    return '<div class="wix-card"><p>'+text+'</p><a class="btn btn-ghost" href="'+WIX_URL+'" target="_blank" rel="noopener">See the course \u2197</a></div>';
+  }
+  function allDoorsDone(){
+    return DOORS.every(function(d){ var l=live(d); return l.length && l.every(function(sl){ return state.done[sl]; }); });
   }
 
   /* ---------- the next step, said in one sentence --------------------
@@ -1016,6 +1075,9 @@
       ? "You haven't answered the questions yet, so we've opened the door most people start at. Answer them whenever you like and we'll point you somewhere that fits you better."
       : routeReason(state.a);
     var offer="";
+    if (allDoorsDone()){
+      offer=wixCard("You\u2019ve been through all five doors, which almost nobody does. The structured version of the same journey, six modules with video and an AI coach in every one, is the Your Next Step course.");
+    }
     if (offerDue()){
       var names=notNeeded().map(function(k){ return byKey(k).title; });
       offer='<div class="offer"><svg viewBox="0 0 20 20" fill="none" stroke="#6B5F00" stroke-width="1.6"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.5v.5"/></svg><div>'
@@ -1023,10 +1085,21 @@
         +'<div class="offer-acts"><button class="btn btn-ghost" onclick="YNS.acceptOffer()">Yes, set '+(names.length>1?"them":"it")+' aside</button><button class="btn-quiet" onclick="YNS.declineOffer()">I\u2019d rather keep '+(names.length>1?"them":"it")+'</button></div></div></div>';
     }
     var nd=doorDone(d), nl=live(d).length;
+    /* Door 3 has a "ready" state: when the direction, a resume and one
+       practice answer all exist, the door says so and points at real
+       places to take it. It appears only when it is true. */
+    var ready="";
+    if (d.key==="get" && state.facts.top_category && state.done.abcs_b && state.done.abcs_c){
+      var links=searchLinks();
+      ready='<div class="ready"><b>You\u2019ve got the story, the paper and the practice.</b> Here\u2019s where to point it.'
+        +'<div class="pf-links">'+links.map(function(l){ return '<a class="btn btn-ghost" href="'+l.u+'" target="_blank" rel="noopener">'+l.t+' \u2197</a>'; }).join("")+'</div>'
+        +'<p class="small muted" style="margin:8px 0 0">Log anywhere you apply under Places in your Portfolio, so it lands in your plan.</p></div>';
+    }
     host.innerHTML='<img class="door-banner" src="assets/banners/'+(BANNER[d.key]||"banner")+'.webp" alt="">'
       +'<div class="eyebrow">'+eyebrow+' · '+d.n+'</div><h2>'+d.title+'</h2><p class="why">'+d.why+'</p>'
       +'<div class="because"><svg viewBox="0 0 20 20" fill="none" stroke="#2859B6" stroke-width="1.6"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.5v.5"/></svg><span><b>Why this door:</b> '+because+'</span></div>'
       +offer
+      +ready
       +'<div class="acts" id="doorActs"></div>'
       +'<div class="door-foot"><span class="small muted">'+nd+' of '+nl+' done here.</span>'
       +(nd===nl&&nl?'<span class="tag gold">That\u2019s the whole door. Really well done.</span>':'')+'</div>';
@@ -1182,6 +1255,13 @@
   });
 
   window.YNSHub = { addEvidence: addEvidence };
-  window.YNSMock.mount($("actModal"), function(slug){ state.done[slug]=true; lastAdded=slug; bubbleIdx=Math.max(0,bubbleLines().length-1); render(); toast("Nice work. That\u2019s "+ACTS[slug].name+" done."); });
+  window.YNSMock.mount($("actModal"),
+    function(slug){
+      state.done[slug]=true; lastAdded=slug;
+      bubbleIdx=Math.max(0,bubbleLines().length-1); render();
+      toast(allDoorsDone() ? "That\u2019s all five doors. Really well done." : "Nice work. That\u2019s "+ACTS[slug].name+" done.");
+    },
+    /* The course card, on the results of the money activities only. */
+    function(slug){ return (ACTS[slug] && ACTS[slug].wix) ? wixCard(WIX_LINE) : ""; });
   renderPicker(); renderQ(1); renderQ(2); renderQ(3); showQ(0);
 })();

@@ -436,17 +436,30 @@ function exportBudget(){
 M.calc = function(r){
   var v=run.ui.calc||(run.ui.calc={});
   r.inputs.forEach(function(i){ if (v[i.k]==null) v[i.k]=i.start; });
-  var res=compute(v);
+  var res=compute(v, r.mode);
   var h = prompt(r)+'<div class="am-build">'+r.inputs.map(function(i){
     return '<div class="am-row"><div><strong>'+esc(i.t)+'</strong>'+(i.s?'<span>'+esc(i.s)+'</span>':'')+'</div>'
       +'<div class="am-step"><button type="button" onclick="YNSMock.calcBump(\''+i.k+'\',-'+i.step+')" aria-label="less">\u2212</button>'
       +'<span class="am-money">'+(i.prefix?'<i>'+i.prefix+'</i>':'')+'<input type="text" inputmode="numeric" value="'+v[i.k]+'" data-c="'+i.k+'" aria-label="'+esc(i.t)+'" oninput="YNSMock.calcType(this)">'+(i.suffix?'<i>'+i.suffix+'</i>':'')+'</span>'
       +'<button type="button" onclick="YNSMock.calcBump(\''+i.k+'\','+i.step+')" aria-label="more">+</button></div></div>';
   }).join("")+'</div>'
-  + '<div class="am-calcout" id="calcOut">'+calcHTML(res,v)+'</div>';
+  + '<div class="am-calcout" id="calcOut">'+calcHTML(res,v,r.mode)+'</div>';
   shell(r, h, '<span></span>'+primary(r.cta,"YNSMock.submitCalc()"));
 };
-function compute(v){
+function compute(v, mode){
+  /* Three calculators share one mechanic. `mode` picks the maths and
+     the readout; the inputs are whatever the activity declared. */
+  if (mode==="match"){
+    var sal=v.salary||0, you=(v.you||0)/100, mt=(v.match||0)/100;
+    var youYear=sal*you, matchYear=sal*mt, total=youYear+matchYear;
+    var bal=0, r2=0.07/12, mo=total/12;
+    for (var i=0;i<120;i++) bal=(bal+mo)*(1+r2);
+    return { youYear:youYear, matchYear:matchYear, tenYear:bal };
+  }
+  if (mode==="net"){
+    var g=v.salary||0, pct=(v.pct||0)/100;
+    return { outYear:g*pct, netYear:g*(1-pct), netMonth:g*(1-pct)/12 };
+  }
   var m=v.monthly||0, yrs=v.years||0, rate=(v.rate||0)/100;
   function run2(years){
     var bal=0, r2=rate/12, n=Math.round(years*12);
@@ -456,7 +469,17 @@ function compute(v){
   var end=run2(yrs), paid=m*Math.round(yrs*12);
   return { end:end, paid:paid, growth:Math.max(0,end-paid), late:run2(Math.max(0,yrs-10)) };
 }
-function calcHTML(res,v){
+function calcHTML(res,v,mode){
+  if (mode==="match"){
+    return '<div class="calc-big">$'+Math.round(res.matchYear).toLocaleString("en-US")+' a year</div>'
+      +'<p class="calc-sub">from your employer, for $'+Math.round(res.youYear).toLocaleString("en-US")+' from you</p>'
+      +'<p class="calc-late">'+(res.matchYear>0 ? "Over ten years at the same numbers, about $"+Math.round(res.tenYear).toLocaleString("en-US")+" in the account, using the same 7% assumption as the compounding activity." : "No match means no free money on this one. A Roth IRA is the one you open yourself.")+'</p>';
+  }
+  if (mode==="net"){
+    return '<div class="calc-big">$'+Math.round(res.netMonth).toLocaleString("en-US")+' a month</div>'
+      +'<p class="calc-sub">lands in your account, from $'+Math.round(v.salary||0).toLocaleString("en-US")+' a year on the offer</p>'
+      +'<p class="calc-late">About $'+Math.round(res.outYear).toLocaleString("en-US")+' a year comes out across tax, FICA and anything you chose. Rule of thumb, not your actual withholding.</p>';
+  }
   var pct = res.end ? Math.min(100, Math.round(res.paid/res.end*100)) : 0;
   return '<div class="calc-big">$'+Math.round(res.end).toLocaleString("en-US")+'</div>'
     +'<p class="calc-sub">after '+(v.years||0)+' years, from $'+(v.monthly||0)+' a month</p>'
@@ -466,7 +489,7 @@ function calcHTML(res,v){
 }
 function refreshCalc(){
   var v=run.ui.calc, out=host.querySelector("#calcOut");
-  if (out) out.innerHTML=calcHTML(compute(v),v);
+  var mode=cur().rung.mode; if (out) out.innerHTML=calcHTML(compute(v,mode),v,mode);
 }
 function calcType(input){
   var k=input.getAttribute("data-c");
@@ -484,7 +507,7 @@ function calcBump(k,d){
 }
 function submitCalc(){
   var s2=cur(), r=s2.rung, id=s2.slot.id, v=run.ui.calc;
-  run.extra[id+"_values"]=v; run.extra[id+"_result"]=compute(v);
+  run.extra[id+"_values"]=v; run.extra[id+"_result"]=compute(v, r.mode);
   if (r.asks) facts[r.asks]=v.monthly;
   run.ui.calc=null; next();
 }
@@ -518,6 +541,7 @@ function renderResults(){
   }
   var acts=[]; try { acts=d.actions({answers:run.answers, extra:run.extra}, ctx())||[]; } catch(e){}
   var h='<div class="am-card am-results"><div class="am-top"><span class="am-eyebrow">'+esc(d.title)+'</span><button class="am-x" onclick="YNSMock.close()" aria-label="Close">×</button></div>'+html;
+  if (hooks.resultsFooter){ try { h+=hooks.resultsFooter(run.slug)||""; } catch(e){} }
   h+='<div class="am-seven"><h3>Seven days</h3><p class="am-scene">Pick one thing to do this week. It goes on your hub until you tick it off.</p>'+acts.map(function(a){return '<button class="opt" onclick="YNSMock.finish(this)"><i class="dot"></i><div><strong>'+esc(a)+'</strong></div></button>';}).join("")+'<button class="btn-quiet" onclick="YNSMock.finish(null)">Skip for now</button></div></div>';
   host.innerHTML=h; host.scrollTop=0;
 }
@@ -541,7 +565,7 @@ global.YNSActivity = {
   unlockedBy: function(){ return {text:"", slugs:[]}; }
 };
 global.YNSMock = {
-  mount: function(el, onDone){ host=el; hooks.onDone=onDone||hooks.onDone; },
+  mount: function(el, onDone, resultsFooter){ host=el; hooks.onDone=onDone||hooks.onDone; hooks.resultsFooter=resultsFooter||null; },
   has: function(slug){ return !!DEFS[slug]; },
   title: function(slug){ return (DEFS[slug]||{}).title || slug; },
   /* Put an activity back to never-answered: forget its saved results and

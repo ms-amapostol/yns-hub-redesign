@@ -488,3 +488,14 @@ body.modal-open{overflow:hidden}
 .pf-add input,.pf-add select{font:inherit;font-size:.9rem;padding:8px 10px;border:1.5px solid var(--yns-line);border-radius:var(--r-sm);background:#fff;min-width:0}
 .dir-next{font-size:.88rem;background:var(--yns-gold-tint);border-radius:var(--r-sm);padding:8px 10px;margin:8px 0 0;line-height:1.45}
 @media (max-width:560px){.pf-place,.pf-add{grid-template-columns:1fr}.pf-place .pl-acts{justify-content:flex-start}}
+
+/* ---- the course card, the ready state, the signup screen ---------- */
+.wix-card{display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--yns-tint);border:1px solid var(--yns-tint-2);border-radius:var(--r);padding:14px 16px;margin:var(--s4) 0 0}
+.wix-card p{margin:0;flex:1;min-width:220px;font-size:.92rem}
+.ready{background:var(--yns-ok-tint);border:1px solid #bfe3cf;border-radius:var(--r);padding:14px 16px;margin-bottom:var(--s4);font-size:.95rem}
+.ready .pf-links{margin-top:10px}
+.signup-form{display:grid;gap:10px;margin:var(--s4) 0 0}
+.signup-form label{display:grid;gap:4px;font-size:.85rem;color:var(--yns-muted)}
+.signup-form input[type=email],.signup-form input[type=password]{font:inherit;padding:10px 12px;border:1.5px solid var(--yns-line);border-radius:var(--r-sm)}
+.signup-consent{display:flex !important;gap:10px;align-items:flex-start;color:var(--yns-ink) !important;font-size:.92rem !important}
+.signup-consent input{margin-top:3px;width:17px;height:17px;accent-color:var(--yns-blue)}
