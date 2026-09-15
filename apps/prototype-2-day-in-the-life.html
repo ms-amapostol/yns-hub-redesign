@@ -295,7 +295,7 @@ const MOMENTS = [
 MOMENTS.forEach(function(m,i){ m.id = m.id || ("moment_" + i); });
 
 /* ---------------- engine ---------------- */
-let state = {i:0, axes:{}, echoes:[], level:"early"};
+let state = {i:0, axes:{}, echoes:[], level: PRESET_LEVEL || "early"};
 let history = [];
 const app = document.getElementById('app');
 const snap = ()=>JSON.parse(JSON.stringify(state));

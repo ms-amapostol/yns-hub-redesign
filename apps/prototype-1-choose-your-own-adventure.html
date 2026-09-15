@@ -295,7 +295,13 @@ const BEATS = [
 ];
 
 /* ------------------------------------------------------------------ */
-let state = { i:0, axes:{}, echoes:[], level:"early", money:1 };
+/* level is asked once, by whoever gets there first. If the hub already
+   knows it, this activity drops its own version of the question rather
+   than asking it a second time in different words. */
+const PRESET_LEVEL = Quiz.presetLevel && Quiz.presetLevel();
+if (PRESET_LEVEL) { for (let i = BEATS.length - 1; i >= 0; i--) if (BEATS[i].id === "level") BEATS.splice(i, 1); }
+
+let state = { i:0, axes:{}, echoes:[], level: PRESET_LEVEL || "early", money:1 };
 let history = [];
 const app = document.getElementById('app');
 const snapshot = ()=> JSON.parse(JSON.stringify({state:state, history:history}));

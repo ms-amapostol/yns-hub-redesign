@@ -168,7 +168,7 @@
   var REVEAL_ORDER=(function(){ var G=6, out=[]; for (var d=0; d<=2*(G-1); d++){ for (var x=0;x<G;x++){ var y=(G-1)-(d-x); if (y>=0&&y<G) out.push([x,y]); } } return out; })();
 
   /* ---------- state ------------------------------------------------- */
-  var state = { a:[null,null,null], q:0, done:{}, door:null, skipped:false, body:"n", tone:"3", facts: window.YNSMock.facts, opened:{}, aside:{}, asideAct:{}, offerAnswered:false };
+  var state = { a:[null,null,null], q:0, done:{}, door:null, skipped:false, body:"n", tone:"3", facts: window.YNSMock.facts, opened:{}, aside:{}, asideAct:{}, offerAnswered:false, evidence:[] };
   var $ = function(id){ return document.getElementById(id); };
   window.YNS = window.YNS || {};
 
@@ -247,6 +247,67 @@
     window.scrollTo({top:0});
   }
 
+  /* ---------- one direction, built from many signals -----------------
+
+     Five activities in Door 2 ask overlapping questions in different
+     ways, and each one used to write `top_category` outright. Whoever
+     finished last won, so the hub could tell someone Health & Care on
+     Tuesday and Finance & Data on Wednesday from the same person's
+     answers. That is the contradiction.
+
+     Now nothing writes the answer. Each activity files *evidence*: a
+     ranked list of categories plus how much that instrument is worth.
+     One resolver adds it up. Doing another activity refines the picture
+     rather than replacing it, which is what asking the same thing five
+     ways is supposed to buy.
+
+     Weights are a judgement about instrument strength, not importance:
+
+       interests   3   thirty items, five per interest area. The most
+                       direct measurement of the thing being measured.
+       cyoa        2   a narrative of the life you'd want, which is real
+                       evidence and also a mood on the night.
+       dayinlife   2   same shape, different slice.
+       budget      1   measures what you value in work more than which
+                       field, so it gets a light touch on category.
+
+     Re-taking an activity replaces that activity's evidence rather than
+     adding a second vote. */
+  var SOURCE_WEIGHT = { interests: 3, cyoa: 2, dayinlife: 2, budget: 1 };
+
+  function addEvidence(source, ranked){
+    if (!ranked || !ranked.length) return;
+    state.evidence = (state.evidence || []).filter(function(e){ return e.source !== source; });
+    state.evidence.push({ source: source, ranked: ranked.slice(0, 5), w: SOURCE_WEIGHT[source] || 1 });
+    resolveDirection();
+  }
+
+  /* Points down the ranking: first place 3, second 2, third 1. Times the
+     weight of the instrument that said it. */
+  function resolveDirection(){
+    var ev = state.evidence || [];
+    if (!ev.length) return;
+    var score = {};
+    ev.forEach(function(e){
+      e.ranked.forEach(function(cat, i){
+        var pts = [3, 2, 1][i] || 0;
+        if (pts) score[cat] = (score[cat] || 0) + pts * e.w;
+      });
+    });
+    var ranked = Object.keys(score).sort(function(a,b){ return score[b]-score[a]; });
+    state.facts.category_ranking = ranked;
+    /* Only claim a direction when the top two actually separate. A tie
+       is a real result and saying so is more use than picking. */
+    if (ranked.length > 1 && score[ranked[0]] === score[ranked[1]]) delete state.facts.top_category;
+    else state.facts.top_category = ranked[0];
+    state.facts.signal_count = ev.length;
+    /* Do the instruments agree on first place? */
+    var firsts = {};
+    ev.forEach(function(e){ firsts[e.ranked[0]] = (firsts[e.ranked[0]]||0)+1; });
+    state.facts.signals_agree = Object.keys(firsts).length === 1;
+    state.direction = { score: score, ranked: ranked, firsts: firsts };
+  }
+
   /* ---------- Career ABCs, opened at a stage ------------------------ */
   var ABCS_URL="apps/career-abcs_v2.html", ABCS_KEY="yns.abcs.v1";
   function abcsState(){
@@ -273,10 +334,17 @@
   }
 
   /* ---------- the standalone apps, in an iframe --------------------- */
-  var appOpen=null, uploadWatch=null;
+  var appOpen=null, uploadWatch=null, appRunBaseline=0;
+  /* The level question belongs to whoever asks it first. The hub asks it
+     in the intake, so the quizzes get it handed to them and drop their
+     own copy of it. */
+  var LEVEL_FROM_STAGE = { never:"early", some:"early", now:"some", "switch":"experienced" };
+  function levelKnown(){ return state.facts.level || LEVEL_FROM_STAGE[state.a[2]] || null; }
+  function withLevel(url){ var l=levelKnown(); return l ? url+(url.indexOf("?")<0?"?":"&")+"lvl="+l : url; }
   function openApp(slug, url, name, opts){
     opts=opts||{};
-    appOpen=slug; var m=$("actModal"); m.style.display="block"; document.body.classList.add("modal-open");
+    appOpen=slug; appRunBaseline=runsFor(slug).length;
+    var m=$("actModal"); m.style.display="block"; document.body.classList.add("modal-open");
     m.innerHTML='<div class="am-card am-frame"><div class="am-top"><span class="am-eyebrow">'+name+'</span><span class="small muted">Close when you\u2019re done. Everything saves as you go.</span><button class="am-x" onclick="YNS.closeApp()" aria-label="Back to your hub">\u00d7 Back to your hub</button></div><iframe src="'+url+'" title="'+name+'"></iframe></div>';
     if (opts.upload){
       /* The app already has a proper document importer: PDF, DOC, DOCX,
@@ -298,11 +366,18 @@
   function readRuns(){
     try { var q=JSON.parse(localStorage.getItem("yns_pending_runs")||"[]"); return Array.isArray(q)?q:[]; } catch(e){ return []; }
   }
+  function runsFor(slug){
+    return readRuns().filter(function(r){ return r.activity===slug && r.status!=="in_progress"; });
+  }
+  /* Only a run finished during this open counts. Reading the queue alone
+     would mark an activity done again every time it was opened and
+     closed, because a run from an earlier visit is still sitting there. */
   function absorbRun(slug){
-    var runs=readRuns().filter(function(r){ return r.activity===slug && r.status!=="in_progress"; });
+    var runs=runsFor(slug);
+    if (runs.length <= appRunBaseline) return false;
     var last=runs[runs.length-1]; if (!last) return false;
-    if (last.top_categories && last.top_categories[0]) state.facts.top_category=last.top_categories[0];
-    if (last.level) state.facts.level=last.level;
+    if (last.top_categories && last.top_categories.length) addEvidence(slug, last.top_categories);
+    if (last.level && !state.facts.level) state.facts.level=last.level;
     return true;
   }
   window.addEventListener("message", function(ev){
@@ -338,16 +413,23 @@
      Five slots across the top, five across the bottom, three down each
      side, and the ground band, which is The Floor. Seventeen places for
      seventeen activities. */
+  /* The scene is 260 wide by 200 tall, with the portrait in the middle.
+     Seventeen slots ring it: five along the top, six along the bottom,
+     three down each side.
+
+     Two rules the layout exists to keep. Nothing sits directly above the
+     head, because a lone drawing there reads as an antenna rather than
+     as part of the scene. And nothing sits in the middle band behind the
+     portrait, where it would simply be invisible. */
   var SLOT = {
-    /* Five across the top, three down each side, five across the bottom.
-       Every box is 36 wide, so these are spaced 38 apart and the rows
-       clear each other: top 6-40, sides 46-156, bottom 156-190, ground
-       190-200. */
-    why:[6,6], dayinlife:[44,6], cyoa:[82,6], grit:[120,6], stilltrue:[158,6],
-    bounce:[6,46], constraints:[6,84], conversations:[6,122],
-    doors:[158,46], money101:[158,84], abcs_b:[158,122],
-    proof:[6,156], hours168:[44,156], budget:[82,156], smart6:[120,156], premortem:[158,156],
-    abcs_a:[44,84], abcs_c:[120,84], interests:[82,84]
+    /* top, with the centre deliberately empty */
+    why:[4,4], dayinlife:[46,4], interests:[88,4], grit:[172,4], stilltrue:[214,4],
+    /* left column */
+    bounce:[4,44], constraints:[4,82], conversations:[4,120],
+    /* right column */
+    doors:[220,44], money101:[220,82], abcs:[220,120],
+    /* bottom */
+    proof:[4,156], hours168:[46,156], budget:[88,156], cyoa:[130,156], smart6:[172,156], premortem:[214,156]
   };
   var SCENE = {
     why:        { title:"Your why \u2014 the sun",              d:'<circle cx="18" cy="18" r="9" fill="var(--yns-gold)"/><g stroke="var(--yns-gold)" stroke-width="2" stroke-linecap="round"><path d="M18 3v-2M18 33v2M3 18H1M33 18h2M7.5 7.5l-1.5-1.5M28.5 28.5l1.5 1.5M28.5 7.5l1.5-1.5M7.5 28.5l-1.5 1.5"/></g>' },
@@ -361,20 +443,21 @@
     conversations:{ title:"Two Conversations \u2014 two people talking", d:'<g><path d="M2 3h20a3 3 0 013 3v9a3 3 0 01-3 3h-9l-6 5v-5H2a3 3 0 01-3-3V6a3 3 0 013-3z" transform="translate(1 0)" fill="var(--yns-paper)" stroke="var(--yns-blue-deep)" stroke-width="1.8" stroke-linejoin="round"/><path d="M13 19h20a3 3 0 013 3v8a3 3 0 01-3 3h-3v4l-5-4h-12a3 3 0 01-3-3v-8a3 3 0 013-3z" transform="translate(-1 0)" fill="var(--yns-blue)" stroke="var(--yns-blue-deep)" stroke-width="1.8" stroke-linejoin="round"/></g>' },
     doors:      { title:"Three Doors \u2014 the routes in",     d:'<g fill="var(--yns-paper)" stroke="var(--yns-blue-deep)" stroke-width="1.8"><path d="M2 34V17a4.5 4.5 0 019 0v17z"/><path d="M14 34V12a4.5 4.5 0 019 0v22z"/><path d="M26 34V20a4 4 0 018 0v14z"/></g><g fill="var(--yns-blue-deep)"><circle cx="9" cy="26" r="1.3"/><circle cx="21" cy="24" r="1.3"/><circle cx="32" cy="28" r="1.2"/></g>' },
     money101:   { title:"Money, Plainly \u2014 the jar with something in it", d:'<path d="M7 10h22v20a4 4 0 01-4 4H11a4 4 0 01-4-4z" fill="var(--yns-paper)" stroke="var(--yns-blue-deep)" stroke-width="2"/><path d="M7 22h22v8a4 4 0 01-4 4H11a4 4 0 01-4-4z" fill="var(--yns-gold)" opacity=".85"/><rect x="5" y="5" width="26" height="5" rx="2" fill="var(--yns-blue-deep)"/>' },
-    abcs_b:{ title:"Put it on paper \u2014 the resume in your hand", d:'<g transform="rotate(-6 18 19)"><rect x="6" y="3" width="24" height="32" rx="2" fill="var(--yns-paper)" stroke="var(--yns-blue-deep)" stroke-width="2"/><g stroke="var(--yns-blue)" stroke-width="2" stroke-linecap="round"><path d="M11 12h14M11 19h14M11 26h9"/></g></g>' },
-    abcs_a:{ title:"What you\u2019ve already done \u2014 your stories, gathered", d:'<g fill="none" stroke="var(--yns-blue-deep)" stroke-width="1.8"><rect x="3" y="8" width="17" height="13" rx="2" fill="var(--yns-paper)"/><rect x="10" y="15" width="17" height="13" rx="2" fill="var(--yns-paper)"/><rect x="17" y="22" width="16" height="12" rx="2" fill="var(--yns-gold-tint)"/></g>' },
-    abcs_c:{ title:"Say it out loud \u2014 the table, and you at it", d:'<g><rect x="2" y="16" width="32" height="3" rx="1.5" fill="var(--yns-blue-deep)"/><rect x="6" y="19" width="2.5" height="10" fill="var(--yns-blue-deep)"/><rect x="27" y="19" width="2.5" height="10" fill="var(--yns-blue-deep)"/><circle cx="9" cy="9" r="5" fill="var(--yns-blue)"/><circle cx="27" cy="9" r="5" fill="var(--yns-tint-2)"/><path d="M15 4h8v6h-3l-2 2v-2h-3z" fill="var(--yns-gold)"/></g>' },
+    /* Career ABCs is three activities but one drawing. Three separate
+       marks for one app crowded the scene and read as three unrelated
+       things. */
+    abcs:{ title:"Career ABCs \u2014 the resume in your hand", d:'<g transform="rotate(-6 18 19)"><rect x="6" y="3" width="24" height="32" rx="2" fill="var(--yns-paper)" stroke="var(--yns-blue-deep)" stroke-width="2"/><g stroke="var(--yns-blue)" stroke-width="2" stroke-linecap="round"><path d="M11 12h14M11 19h14M11 26h9"/></g></g>' },
     proof:      { title:"Proof \u2014 three stones that hold",  d:'<g fill="var(--yns-blue-deep)"><rect x="2" y="25" width="22" height="8" rx="2"/><rect x="7" y="16" width="22" height="8" rx="2"/><rect x="12" y="7" width="20" height="8" rx="2"/></g>' },
     hours168:   { title:"168 Hours \u2014 the week, in bars",   d:'<g fill="var(--yns-blue)" opacity=".85"><rect x="3" y="18" width="5" height="15" rx="1.5"/><rect x="12" y="10" width="5" height="23" rx="1.5"/><rect x="21" y="23" width="5" height="10" rx="1.5"/><rect x="30" y="4" width="5" height="29" rx="1.5"/></g>' },
     budget:     { title:"Spend Your 100 \u2014 what you\u2019d pay for", d:'<g fill="none" stroke="var(--yns-gold)" stroke-width="2.5"><circle cx="12" cy="12" r="8"/><circle cx="24" cy="20" r="8"/><circle cx="11" cy="26" r="7"/></g>' },
     smart6:     { title:"Your Six Months \u2014 the staircase", d:'<g fill="var(--yns-blue)"><rect x="1" y="26" width="9" height="7"/><rect x="10" y="19" width="9" height="14"/><rect x="19" y="12" width="9" height="21"/><rect x="28" y="5" width="8" height="28"/></g>' },
     premortem:  { title:"What Might Trip You Up \u2014 the rock you saw coming", d:'<path d="M3 33l9-17 11-5 11 22z" fill="var(--yns-muted)"/><path d="M12 16l11-5 4 8-9 3z" fill="var(--yns-ink)" opacity=".35"/>' },
     /* The ground everything else stands on. Full width, no slot. */
-    floor:      { title:"The Floor \u2014 solid ground", full:'<rect x="0" y="190" width="200" height="10" fill="var(--yns-blue-deep)" opacity=".9"/>' }
+    floor:      { title:"The Floor \u2014 solid ground", full:'<rect x="0" y="190" width="260" height="10" fill="var(--yns-blue-deep)" opacity=".9"/>' }
   };
   /* Back to front. The ground lands last so it sits in front of the feet
      of everything standing on it. */
-  var SCENE_ORDER = ["why","dayinlife","interests","cyoa","grit","stilltrue","bounce","constraints","conversations","doors","money101","abcs_a","abcs_b","abcs_c","proof","hours168","budget","smart6","premortem","floor"];
+  var SCENE_ORDER = ["why","dayinlife","interests","grit","stilltrue","bounce","constraints","conversations","doors","money101","abcs","cyoa","proof","hours168","budget","smart6","premortem","floor"];
 
   /* ---------- hub render -------------------------------------------- */
   function doneCount(){ return Object.keys(state.done).length; }
@@ -414,7 +497,11 @@
     /* The scene around the portrait, one drawing per finished activity. */
     var svg=$("avatarScene"), parts="";
     SCENE_ORDER.forEach(function(slug){
-      var sc=SCENE[slug]; if (!state.done[slug] || !sc) return;
+      var sc=SCENE[slug]; if (!sc) return;
+      var shown = slug==="abcs"
+        ? (state.done.abcs_a || state.done.abcs_b || state.done.abcs_c)
+        : state.done[slug];
+      if (!shown) return;
       if (sc.full){ parts += '<g class="sc"><title>'+sc.title+'</title>'+sc.full+'</g>'; return; }
       var at=SLOT[slug]||[82,82];
       parts += '<g class="sc" transform="translate('+at[0]+' '+at[1]+')"><title>'+sc.title+'</title>'+sc.d+'</g>';
@@ -502,7 +589,7 @@
       var link=document.createElement("button"); link.type="button"; link.className="notme";
       link.textContent = done ? "Do it again" : aside ? "Bring it back" : "Not for me right now";
       link.onclick=function(ev){ ev.stopPropagation();
-        if (done) { if (a.app) openApp(slug, ABCS_URL+"#"+a.app, a.name); else if (a.play) window.YNSMock.play(slug); else if (a.live) openApp(slug,a.live,a.name); return; }
+        if (done) { if (a.app) openApp(slug, ABCS_URL+"#"+a.app, a.name); else if (a.play) window.YNSMock.play(slug); else if (a.live) openApp(slug,withLevel(a.live),a.name); return; }
         state.asideAct[slug]=!aside; render();
       };
       el.appendChild(link);
@@ -516,7 +603,7 @@
       el.appendChild(up);
     }
     if (!a.soon && !aside && !done){
-      el.onclick=function(){ if (a.app) openApp(slug, ABCS_URL+"#"+a.app, a.name); else if (a.play) window.YNSMock.play(slug); else if (a.live) openApp(slug,a.live,a.name); else toggle(slug); };
+      el.onclick=function(){ if (a.app) openApp(slug, ABCS_URL+"#"+a.app, a.name); else if (a.play) window.YNSMock.play(slug); else if (a.live) openApp(slug,withLevel(a.live),a.name); else toggle(slug); };
       el.style.cursor="pointer"; el.tabIndex=0;
       el.onkeydown=function(ev){ if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); el.onclick(); } };
     }
@@ -608,6 +695,36 @@
     }
     host.innerHTML=h;
 
+    /* What the signals add up to. Shown only once something has been
+       measured, and honest when the instruments disagree. */
+    var dir = $("direction");
+    if (dir) {
+      var ev = state.evidence || [];
+      if (!ev.length) {
+        dir.innerHTML = '<p class="small muted">Do one of the Explore activities and your direction shows up here.</p>';
+      } else {
+        var rank = state.facts.category_ranking || [];
+        var names = { interests: "What Kind of Work", cyoa: "The Story", dayinlife: "A Day In The Life", budget: "Spend Your 100" };
+        var topCat = state.facts.top_category;
+        var parts = [];
+        parts.push(topCat
+          ? '<p class="dir-top">' + catLabel(topCat) + "</p>"
+          : '<p class="dir-top">Level, so far</p>');
+        parts.push('<p class="small muted">' + (topCat
+          ? (rank[1] ? "Then " + catLabel(rank[1]) + "." : "")
+          : catLabel(rank[0]) + " and " + catLabel(rank[1]) + " are tied.") + "</p>");
+        parts.push('<p class="dir-sig">' + ev.length + (ev.length === 1 ? " signal" : " signals") + ": "
+          + ev.map(function (e) { return names[e.source] || e.source; }).join(", ") + ".</p>");
+        if (ev.length > 1) {
+          parts.push(state.facts.signals_agree
+            ? '<p class="dir-note">All of them point the same way, which makes this a stronger read than any one on its own.</p>'
+            : '<p class="dir-note">These do not all point the same way, and that is worth knowing rather than hiding. Each one measures something different, so the answer above is the weight of all of them together.</p>');
+        }
+        dir.innerHTML = parts.join("");
+      }
+    }
+
+
     /* All 17, closed by default, grouped by door, summarised by what they
        have done rather than what they have not. */
     var acc=$("allActs");
@@ -655,9 +772,10 @@
     declineOffer: function(){ state.offerAnswered=true; render(); },
     asideDoor: function(k){ state.aside[k]=true; render(); },
     revisit: function(k){ delete state.aside[k]; byKey(k).acts.forEach(function(s){ delete state.asideAct[s]; }); render(); toast("Welcome back to "+byKey(k).title+"."); },
-    reset: function(){ state={a:[null,null,null],q:0,done:{},door:null,skipped:false,body:"n",tone:"3",facts:window.YNSMock.facts,opened:{},aside:{},asideAct:{},offerAnswered:false}; Object.keys(state.facts).forEach(function(k){ delete state.facts[k]; }); $("youChip").textContent="Not signed in"; renderPicker(); showQ(0); show("intake"); }
+    reset: function(){ state={a:[null,null,null],q:0,done:{},door:null,skipped:false,body:"n",tone:"3",facts:window.YNSMock.facts,opened:{},aside:{},asideAct:{},offerAnswered:false,evidence:[]}; Object.keys(state.facts).forEach(function(k){ delete state.facts[k]; }); $("youChip").textContent="Not signed in"; renderPicker(); showQ(0); show("intake"); }
   });
 
+  window.YNSHub = { addEvidence: addEvidence };
   window.YNSMock.mount($("actModal"), function(slug){ state.done[slug]=true; lastAdded=slug; bubbleIdx=Math.max(0,bubbleLines().length-1); render(); toast("Nice work. That\u2019s "+ACTS[slug].name+" done."); });
   renderPicker(); renderQ(1); renderQ(2); renderQ(3); showQ(0);
 })();

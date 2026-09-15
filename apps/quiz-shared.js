@@ -513,6 +513,17 @@
       '. This activity will read alongside them.</div>';
   }
 
+  /* A level handed in by the hub, so the person is not asked the same
+     boring question in every activity. The hub owns it; whoever asks
+     first writes it; everyone after reads it. */
+  function presetLevel() {
+    try {
+      var m = /[?&]lvl=([a-z_]+)/.exec(window.location.search || "");
+      if (m && levelLabel(m[1]) !== m[1]) return m[1];
+    } catch (e) {}
+    return null;
+  }
+
   function levelLabel(k) {
     for (var i = 0; i < LEVELS.length; i++) if (LEVELS[i].k === k) return LEVELS[i].t;
     return k;
@@ -843,6 +854,7 @@
     trackComplete: trackComplete,
 
     wireBackToHub: wireBackToHub,
+    presetLevel: presetLevel,
     emailFormHTML: emailFormHTML,
     wireEmailForm: wireEmailForm,
     shareHTML: shareHTML,

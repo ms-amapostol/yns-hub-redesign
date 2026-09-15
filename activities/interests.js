@@ -312,9 +312,16 @@ YNSActivity.define({
 
     r.setFact("interest_code", ranked.slice(0, 3).join(""));
     r.setFact("interest_top", AREA[ranked[0]].t + ", then " + AREA[ranked[1]].t.toLowerCase() + ".");
-    r.setFact("category_ranking", cats.map(function (c) { return c.k; }));
-    /* Only claim a top category when the profile actually separates. */
-    if (cats[0].score > cats[1].score) r.setFact("top_category", cats[0].k);
+    /* Evidence, not a verdict. The hub adds this to whatever the other
+       activities have said and resolves one direction from all of it, so
+       finishing this refines the picture rather than overwriting it. */
+    var ranked = cats.map(function (c) { return c.k; });
+    if (window.YNSHub && window.YNSHub.addEvidence) {
+      window.YNSHub.addEvidence("interests", ranked);
+    } else {
+      r.setFact("category_ranking", ranked);
+      if (cats[0].score > cats[1].score) r.setFact("top_category", cats[0].k);
+    }
   },
 
   actions: function (state) {

@@ -227,7 +227,10 @@ const SHOW_BENCHMARKS = false;
 
 const TOTAL = 100;
 let alloc = {pay:0,flex:0,impact:0,stable:0,growth:0,craft:0};
-let won = null, lost = null, level = "early", screen = 0;
+/* level is asked once, by whoever gets there first. Handed in by the
+   hub, this activity skips its own version of the question. */
+const PRESET_LEVEL = Quiz.presetLevel && Quiz.presetLevel();
+let won = null, lost = null, level = PRESET_LEVEL || "early", screen = 0;
 const app = document.getElementById('app');
 
 const spent = ()=> VALUES.reduce((s,v)=>s+alloc[v.k],0);
@@ -354,7 +357,7 @@ function renderTradeoff(){
     won  = el.dataset.k;
     lost = (won === a.k) ? b.k : a.k;
     Quiz.trackStep(1,'tradeoff', won + '_over_' + lost);
-    screen=2; render(); window.scrollTo({top:0,behavior:'smooth'});
+    screen = PRESET_LEVEL ? 3 : 2; render(); window.scrollTo({top:0,behavior:'smooth'});
   });
   document.getElementById('back').onclick = ()=>{ screen=0; render(); };
 }
