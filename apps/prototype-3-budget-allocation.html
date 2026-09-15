@@ -474,17 +474,20 @@ function renderResults(){
     ${cards}
     ${Quiz.continuityHTML(top)}
     ${Quiz.salaryNote()}
-    <div class="cta">
-      <h3>Want the full map?</h3>
-      <p>The 90-day plan for getting from where you are to any of these, plus what to learn first.</p>
-      ${Quiz.emailFormHTML()}
-      <p style="margin:0;font-size:12.5px">Or start the program, $9.99/month</p>
-    </div>
     ${Quiz.shareHTML()}
     <button type="button" class="back" id="restart" style="margin-left:18px">↺ spend it differently</button>
+    <div class="cta">
+      <h3>Nice work. That's one more piece of the picture.</h3>
+      <p>Your result is saved. Head back and we'll show you what fits next.</p>
+      <button type="button" class="btn" id="tohub">Back to your hub</button>
+    </div>
   `;
 
-  Quiz.wireEmailForm(app, {result: top, level: level, allocation: alloc, chose: won, over: lost});
+  /* Email capture and the pricing line were removed: inside the hub
+     they are a dead end, and the account conversation belongs to the
+     hub rather than to each activity. */
+  Quiz.wireBackToHub(app);
+  if (false) Quiz.wireEmailForm(app, {result: top, level: level, allocation: alloc, chose: won, over: lost});
   Quiz.wireShare(app, top);
   document.getElementById('restart').onclick = ()=>{ Quiz.track('restart',{}); Quiz.clear(); location.reload(); };
   Quiz.finish({

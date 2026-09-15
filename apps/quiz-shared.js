@@ -522,6 +522,19 @@
      EMAIL CAPTURE + SHARE + NOTES
      =================================================================== */
 
+  /* Every activity ends the same way: back to the hub. Inside the hub
+     this asks the parent to close the panel, which keeps one set of
+     navigation rather than two. Opened directly, it navigates. */
+  function wireBackToHub(root) {
+    var btn = root.querySelector("#tohub");
+    if (!btn) return;
+    btn.onclick = function () {
+      track("back_to_hub", { activity: activity });
+      if (window.parent !== window) { window.parent.postMessage({ yns: "close" }, "*"); return; }
+      window.location.href = "../index.html";
+    };
+  }
+
   function emailFormHTML() {
     return '<div class="emailrow q-email">' +
       '<input type="email" placeholder="you@email.com" autocomplete="email" data-q="email" aria-label="Your email">' +
@@ -829,6 +842,7 @@
     trackStep: trackStep,
     trackComplete: trackComplete,
 
+    wireBackToHub: wireBackToHub,
     emailFormHTML: emailFormHTML,
     wireEmailForm: wireEmailForm,
     shareHTML: shareHTML,

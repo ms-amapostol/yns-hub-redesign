@@ -305,7 +305,13 @@
     if (last.level) state.facts.level=last.level;
     return true;
   }
-  window.addEventListener("message", function(ev){ if (ev.data && ev.data.yns==="run" && appOpen) { if (absorbRun(appOpen) && !state.done[appOpen]) { state.done[appOpen]=true; render(); } } });
+  window.addEventListener("message", function(ev){
+    if (!ev.data || !appOpen) return;
+    if (ev.data.yns==="run"){ if (absorbRun(appOpen) && !state.done[appOpen]) { state.done[appOpen]=true; lastAdded=appOpen; render(); } }
+    /* The activity finished and asked to come back. One set of
+       navigation rather than two. */
+    if (ev.data.yns==="close") YNS.closeApp();
+  });
   YNS.closeApp=function(){
     var slug=appOpen; appOpen=null; if (uploadWatch){ clearInterval(uploadWatch); uploadWatch=null; }
     $("actModal").style.display="none"; $("actModal").innerHTML=""; document.body.classList.remove("modal-open");

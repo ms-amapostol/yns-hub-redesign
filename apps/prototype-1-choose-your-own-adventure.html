@@ -121,7 +121,9 @@
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]) .btn { color:#0D1523 }
   }
-</style>
+    .cta{text-align:center}
+    .cta .btn{margin-top:4px}
+  </style>
 </head>
 <body>
 
@@ -424,17 +426,20 @@ function renderResults(){
     <div style="height:22px"></div>
     ${cards}
     ${Quiz.salaryNote()}
-    <div class="cta">
-      <h3>Want the full map?</h3>
-      <p>The 90-day plan for getting from where you are to any of these, plus what to learn first.</p>
-      ${Quiz.emailFormHTML()}
-      <p style="margin:10px 0 0;font-size:12.5px">Or start the program, $9.99/month</p>
-    </div>
     <button type="button" class="back" id="rback">← change my last answer</button>
     <button type="button" class="back" id="restart" style="margin-left:18px">↺ start over</button>
+    <div class="cta">
+      <h3>Nice work. That's one more piece of the picture.</h3>
+      <p>Your result is saved. Head back and we'll show you what fits next.</p>
+      <button type="button" class="btn" id="tohub">Back to your hub</button>
+    </div>
   `;
 
-  Quiz.wireEmailForm(app, {result: top, level: state.level, answers: state.echoes});
+  /* Email capture and the pricing line were removed: inside the hub
+     they are a dead end, and the account conversation belongs to the
+     hub rather than to each activity. */
+  Quiz.wireBackToHub(app);
+  if (false) Quiz.wireEmailForm(app, {result: top, level: state.level, answers: state.echoes});
   Quiz.wireShare(app, top);
   document.getElementById('rback').onclick = goBack;
   document.getElementById('restart').onclick = ()=>{
