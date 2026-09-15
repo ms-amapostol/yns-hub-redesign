@@ -28,6 +28,12 @@
   ];
 
   /* ---------- the five doors --------------------------------------- */
+  /* The illustrated banners from Career ABCs, reused so the hub and the
+     app feel like one product. banner-a is about-you, banner-b is
+     building something, banner-c is a conversation, banner is the
+     staircase everyone climbs. */
+  var BANNER = { know:"banner-a", explore:"banner", get:"banner-b", mind:"banner-c", plan:"banner" };
+
   var DOORS = [
     { key:"know", n:"Door 1", title:"Get to know you",
       blurb:"Start with who you are. No career words required.",
@@ -39,8 +45,8 @@
       acts:["cyoa","dayinlife","budget","doors","conversations"] },
     { key:"get", n:"Door 3", title:"Get the job",
       blurb:"Resume, cover letter, interview. Built from what you've already done.",
-      why:"You know the direction, or you just need work now. Career ABCs turns things you've actually done into resume bullets and interview answers, no blank page.",
-      acts:["career_abcs","conversations"] },
+      why:"You know the direction, or you just need work now. These three run on the same raw material: things you have actually done. Start at A, or jump in wherever you need to.",
+      acts:["abcs_a","abcs_b","abcs_c","conversations"] },
     { key:"mind", n:"Door 4", title:"Mindset and money",
       blurb:"Build the grit and the financial footing to follow through.",
       why:"Knowing what you want is half of it. This door works on the part nobody teaches: bouncing back when it's hard, and knowing your real numbers.",
@@ -62,7 +68,12 @@
     budget:       { name:"Spend Your 100",       tag:"What you'd really pay for in a job.",               min:4, fact:"What you value in work", tile:6, live:"apps/prototype-3-budget-allocation.html" },
     doors:        { name:"Three Doors",          tag:"Every realistic route in, side by side.",           min:7, fact:"Your route in", tile:7, play:true },
     conversations:{ name:"Two Conversations",    tag:"Who to talk to, and the message already written.",  min:6, fact:"Someone to talk to", tile:8, play:true },
-    career_abcs:  { name:"Career ABCs",          tag:"Build the resume, the cover letter and the interview.", min:20, fact:"Resume, letter, interview", tile:9, big:true, live:"apps/career-abcs_v2.html" },
+    /* Career ABCs is one app with three stages. The hub opens it at the
+       stage she picked (#a/#b/#c) and reads real completion back out of
+       its own storage, so wandering inside the app still counts. */
+    abcs_a:       { name:"A · What you\u2019ve already done", tag:"Turn things you\u2019ve actually done into short stories you can use.", min:8, fact:"Your stories", tile:9, app:"a" },
+    abcs_b:       { name:"B · Put it on paper",  tag:"A resume and a cover letter, built from those stories.", min:10, fact:"Resume and cover letter", tile:9, app:"b", after:"abcs_a" },
+    abcs_c:       { name:"C · Say it out loud",  tag:"Interview practice, using the same stories.", min:8, fact:"Interview practice", tile:9, app:"c", after:"abcs_a" },
     floor:        { name:"The Floor",            tag:"The number you need, not the number you want.",     min:6, fact:"Your number", tile:10, play:true },
     grit:         { name:"Bounce Back",          tag:"The last time it went wrong, and what you did next.", min:6, fact:"How you recover", tile:11, play:true },
     bounce:       { name:"The Week It's Hard",   tag:"A plan for the week you want to quit.",             min:5, fact:"Your hard-week plan", tile:12, play:true },
@@ -139,7 +150,9 @@
     budget:       { lead:"What I'd pay for in a job:",         say:"Stability first, then flexibility. Pay ceiling came third.", key:"value_ranking" },
     doors:        { lead:"My route in:",                       say:"Certificate program. Eighteen months, and I keep my job.", key:"route_preference" },
     conversations:{ lead:"Someone I'm going to talk to:",      say:"My cousin's friend who does medical assisting. Message is written.", key:"contact_named" },
-    career_abcs:  { lead:"Ready to send:",                     say:"Resume, cover letter, and three interview stories. Built from what I've done.", key:"" },
+    abcs_a:       { lead:"Something I\u2019ve actually done:",  say:"Covered a double shift when we were two people down, and the night still ran.", key:"" },
+    abcs_b:       { lead:"Ready to send:",                     say:"A resume and a cover letter, built from my own stories.", key:"" },
+    abcs_c:       { lead:"I\u2019ve practised out loud:",       say:"Three answers, in my own words, with the clock running.", key:"" },
     floor:        { lead:"My number:",                         say:"$2,900 a month keeps the lights on. Everything above that is choice.", key:"floor_monthly" },
     grit:         { lead:"The last time it went wrong:",       say:"I got passed over for shift lead. I asked why, and I'm still here.", key:"setback_response" },
     bounce:       { lead:"My plan for the hard week:",         say:"Text Jordan, do the smallest step, no big decisions before Friday.", key:"hard_week_plan" },
@@ -233,11 +246,53 @@
     window.scrollTo({top:0});
   }
 
-  /* ---------- the four standalone apps, in an iframe ---------------- */
-  var appOpen=null;
-  function openApp(slug, url, name){
+  /* ---------- Career ABCs, opened at a stage ------------------------ */
+  var ABCS_URL="apps/career-abcs_v2.html", ABCS_KEY="yns.abcs.v1";
+  function abcsState(){
+    try { var raw=localStorage.getItem(ABCS_KEY); return raw ? JSON.parse(raw) : null; } catch(e){ return null; }
+  }
+  /* Completion comes from her actual work, never from "opened the card".
+     These three reads are the contract between the hub and the app; if
+     the app's state shape changes, this is the thing to update. */
+  function abcsDone(){
+    var st=abcsState(); if (!st) return {};
+    var about=st.about||{}, build=st.build||{}, carry=st.carry||{};
+    var stories=(about.stories||[]).length;
+    var bullets=(build.experience||[]).some(function(e){ return (e.bullets||e.bulletIds||[]).length; });
+    return {
+      abcs_a: stories>0,
+      abcs_b: !!(build.cover || bullets || build.summary),
+      abcs_c: (carry.practice||[]).length>0
+    };
+  }
+  function syncAbcs(){
+    var d=abcsDone(), changed=false;
+    Object.keys(d).forEach(function(k){ if (d[k] && !state.done[k]) { state.done[k]=true; lastAdded=k; changed=true; } });
+    return changed;
+  }
+
+  /* ---------- the standalone apps, in an iframe --------------------- */
+  var appOpen=null, uploadWatch=null;
+  function openApp(slug, url, name, opts){
+    opts=opts||{};
     appOpen=slug; var m=$("actModal"); m.style.display="block"; document.body.classList.add("modal-open");
-    m.innerHTML='<div class="am-card am-frame"><div class="am-top"><span class="am-eyebrow">'+name+'</span><span class="small muted">Runs from the real page. Finish it, then close.</span><button class="am-x" onclick="YNS.closeApp()" aria-label="Close">×</button></div><iframe src="'+url+'" title="'+name+'"></iframe></div>';
+    m.innerHTML='<div class="am-card am-frame"><div class="am-top"><span class="am-eyebrow">'+name+'</span><span class="small muted">Close when you\u2019re done. Everything saves as you go.</span><button class="am-x" onclick="YNS.closeApp()" aria-label="Back to your hub">\u00d7 Back to your hub</button></div><iframe src="'+url+'" title="'+name+'"></iframe></div>';
+    if (opts.upload){
+      /* The app already has a proper document importer: PDF, DOC, DOCX,
+         TXT, 8MB cap, and it pulls the jobs and bullets out into stories.
+         It sits on the app's home screen, which is reached after its own
+         welcome, so this waits for the button rather than assuming it is
+         there. Same origin, so this is a click and not a fork of the app.
+         Cleared when the panel closes. */
+      var frame=m.querySelector("iframe"), fired=false;
+      uploadWatch=setInterval(function(){
+        if (fired) return;
+        try {
+          var btn=frame.contentDocument && frame.contentDocument.querySelector('[data-act="upload"]');
+          if (btn){ fired=true; btn.click(); clearInterval(uploadWatch); uploadWatch=null; }
+        } catch(e){}
+      },200);
+    }
   }
   function readRuns(){
     try { var q=JSON.parse(localStorage.getItem("yns_pending_runs")||"[]"); return Array.isArray(q)?q:[]; } catch(e){ return []; }
@@ -251,11 +306,18 @@
   }
   window.addEventListener("message", function(ev){ if (ev.data && ev.data.yns==="run" && appOpen) { if (absorbRun(appOpen) && !state.done[appOpen]) { state.done[appOpen]=true; render(); } } });
   YNS.closeApp=function(){
-    var slug=appOpen; appOpen=null; $("actModal").style.display="none"; $("actModal").innerHTML=""; document.body.classList.remove("modal-open");
+    var slug=appOpen; appOpen=null; if (uploadWatch){ clearInterval(uploadWatch); uploadWatch=null; }
+    $("actModal").style.display="none"; $("actModal").innerHTML=""; document.body.classList.remove("modal-open");
     if (!slug) return;
+    if (ACTS[slug] && ACTS[slug].app){
+      var before=Object.keys(state.done).length;
+      syncAbcs();
+      toast(Object.keys(state.done).length>before ? "Nice work. That\u2019s saved." : "Nothing lost. Pick it up whenever you like.");
+      render(); return;
+    }
     var had=absorbRun(slug);
-    if (slug==="career_abcs" || had) { if (!state.done[slug]) { state.done[slug]=true; lastAdded=slug; toast("Done: "+ACTS[slug].name+". One more piece of you."); } }
-    else toast("Closed without finishing. Nothing saved for "+ACTS[slug].name+".");
+    if (had) { if (!state.done[slug]) { state.done[slug]=true; lastAdded=slug; toast("Nice work. That\u2019s "+ACTS[slug].name+" done."); } }
+    else toast("No problem, nothing lost. "+ACTS[slug].name+" is there whenever you want it.");
     render();
   };
 
@@ -276,8 +338,9 @@
        190-200. */
     why:[6,6], dayinlife:[44,6], cyoa:[82,6], grit:[120,6], stilltrue:[158,6],
     bounce:[6,46], constraints:[6,84], conversations:[6,122],
-    doors:[158,46], money101:[158,84], career_abcs:[158,122],
-    proof:[6,156], hours168:[44,156], budget:[82,156], smart6:[120,156], premortem:[158,156]
+    doors:[158,46], money101:[158,84], abcs_b:[158,122],
+    proof:[6,156], hours168:[44,156], budget:[82,156], smart6:[120,156], premortem:[158,156],
+    abcs_a:[44,84], abcs_c:[120,84]
   };
   var SCENE = {
     why:        { title:"Your why \u2014 the sun",              d:'<circle cx="18" cy="18" r="9" fill="var(--yns-gold)"/><g stroke="var(--yns-gold)" stroke-width="2" stroke-linecap="round"><path d="M18 3v-2M18 33v2M3 18H1M33 18h2M7.5 7.5l-1.5-1.5M28.5 28.5l1.5 1.5M28.5 7.5l1.5-1.5M7.5 28.5l-1.5 1.5"/></g>' },
@@ -290,7 +353,9 @@
     conversations:{ title:"Two Conversations \u2014 two people talking", d:'<g><path d="M2 3h20a3 3 0 013 3v9a3 3 0 01-3 3h-9l-6 5v-5H2a3 3 0 01-3-3V6a3 3 0 013-3z" transform="translate(1 0)" fill="var(--yns-paper)" stroke="var(--yns-blue-deep)" stroke-width="1.8" stroke-linejoin="round"/><path d="M13 19h20a3 3 0 013 3v8a3 3 0 01-3 3h-3v4l-5-4h-12a3 3 0 01-3-3v-8a3 3 0 013-3z" transform="translate(-1 0)" fill="var(--yns-blue)" stroke="var(--yns-blue-deep)" stroke-width="1.8" stroke-linejoin="round"/></g>' },
     doors:      { title:"Three Doors \u2014 the routes in",     d:'<g fill="var(--yns-paper)" stroke="var(--yns-blue-deep)" stroke-width="1.8"><path d="M2 34V17a4.5 4.5 0 019 0v17z"/><path d="M14 34V12a4.5 4.5 0 019 0v22z"/><path d="M26 34V20a4 4 0 018 0v14z"/></g><g fill="var(--yns-blue-deep)"><circle cx="9" cy="26" r="1.3"/><circle cx="21" cy="24" r="1.3"/><circle cx="32" cy="28" r="1.2"/></g>' },
     money101:   { title:"Money, Plainly \u2014 the jar with something in it", d:'<path d="M7 10h22v20a4 4 0 01-4 4H11a4 4 0 01-4-4z" fill="var(--yns-paper)" stroke="var(--yns-blue-deep)" stroke-width="2"/><path d="M7 22h22v8a4 4 0 01-4 4H11a4 4 0 01-4-4z" fill="var(--yns-gold)" opacity=".85"/><rect x="5" y="5" width="26" height="5" rx="2" fill="var(--yns-blue-deep)"/>' },
-    career_abcs:{ title:"Career ABCs \u2014 the resume in your hand", d:'<g transform="rotate(-6 18 19)"><rect x="6" y="3" width="24" height="32" rx="2" fill="var(--yns-paper)" stroke="var(--yns-blue-deep)" stroke-width="2"/><g stroke="var(--yns-blue)" stroke-width="2" stroke-linecap="round"><path d="M11 12h14M11 19h14M11 26h9"/></g></g>' },
+    abcs_b:{ title:"Put it on paper \u2014 the resume in your hand", d:'<g transform="rotate(-6 18 19)"><rect x="6" y="3" width="24" height="32" rx="2" fill="var(--yns-paper)" stroke="var(--yns-blue-deep)" stroke-width="2"/><g stroke="var(--yns-blue)" stroke-width="2" stroke-linecap="round"><path d="M11 12h14M11 19h14M11 26h9"/></g></g>' },
+    abcs_a:{ title:"What you\u2019ve already done \u2014 your stories, gathered", d:'<g fill="none" stroke="var(--yns-blue-deep)" stroke-width="1.8"><rect x="3" y="8" width="17" height="13" rx="2" fill="var(--yns-paper)"/><rect x="10" y="15" width="17" height="13" rx="2" fill="var(--yns-paper)"/><rect x="17" y="22" width="16" height="12" rx="2" fill="var(--yns-gold-tint)"/></g>' },
+    abcs_c:{ title:"Say it out loud \u2014 the table, and you at it", d:'<g><rect x="2" y="16" width="32" height="3" rx="1.5" fill="var(--yns-blue-deep)"/><rect x="6" y="19" width="2.5" height="10" fill="var(--yns-blue-deep)"/><rect x="27" y="19" width="2.5" height="10" fill="var(--yns-blue-deep)"/><circle cx="9" cy="9" r="5" fill="var(--yns-blue)"/><circle cx="27" cy="9" r="5" fill="var(--yns-tint-2)"/><path d="M15 4h8v6h-3l-2 2v-2h-3z" fill="var(--yns-gold)"/></g>' },
     proof:      { title:"Proof \u2014 three stones that hold",  d:'<g fill="var(--yns-blue-deep)"><rect x="2" y="25" width="22" height="8" rx="2"/><rect x="7" y="16" width="22" height="8" rx="2"/><rect x="12" y="7" width="20" height="8" rx="2"/></g>' },
     hours168:   { title:"168 Hours \u2014 the week, in bars",   d:'<g fill="var(--yns-blue)" opacity=".85"><rect x="3" y="18" width="5" height="15" rx="1.5"/><rect x="12" y="10" width="5" height="23" rx="1.5"/><rect x="21" y="23" width="5" height="10" rx="1.5"/><rect x="30" y="4" width="5" height="29" rx="1.5"/></g>' },
     budget:     { title:"Spend Your 100 \u2014 what you\u2019d pay for", d:'<g fill="none" stroke="var(--yns-gold)" stroke-width="2.5"><circle cx="12" cy="12" r="8"/><circle cx="24" cy="20" r="8"/><circle cx="11" cy="26" r="7"/></g>' },
@@ -301,7 +366,7 @@
   };
   /* Back to front. The ground lands last so it sits in front of the feet
      of everything standing on it. */
-  var SCENE_ORDER = ["why","dayinlife","cyoa","grit","stilltrue","bounce","constraints","conversations","doors","money101","career_abcs","proof","hours168","budget","smart6","premortem","floor"];
+  var SCENE_ORDER = ["why","dayinlife","cyoa","grit","stilltrue","bounce","constraints","conversations","doors","money101","abcs_a","abcs_b","abcs_c","proof","hours168","budget","smart6","premortem","floor"];
 
   /* ---------- hub render -------------------------------------------- */
   function doneCount(){ return Object.keys(state.done).length; }
@@ -315,7 +380,7 @@
   function doorState(d){ return doorOpen(d) ? "open" : doorAside(d) ? "aside" : "untouched"; }
   function nextIn(d){ return live(d).filter(function(s){ return !state.done[s] && !state.asideAct[s]; })[0]; }
 
-  /* Which untouched doors her own answers say she does not need. This is
+  /* Which untouched doors the person's own answers say they do not need. This is
      the only thing that decides whether the offer is shown, and it is
      read off the three questions rather than guessed from behaviour. */
   function notNeeded(){
@@ -350,13 +415,13 @@
 
     
     var fr=n/total;
-    var cap = n===0 ? "Nothing around you yet. Every activity adds something."
-            : fr<.35 ? "It\u2019s starting to fill in around you."
-            : fr<.7  ? "Half a life on the page."
+    var cap = n===0 ? "Nothing around you yet, and that\u2019s exactly where everyone starts."
+            : fr<.35 ? "Look at that, it\u2019s starting to fill in."
+            : fr<.7  ? "Half a life on the page already."
             : n<total ? "Nearly the whole picture, and all of it yours."
-            : "That\u2019s the lot. Every piece of it, earned.";
+            : "That\u2019s everything. You did all of it.";
     $("avatarCaption").textContent=(n?n+" of "+total+" \u00b7 ":"")+cap;
-    $("heroH1").textContent = n===0 ? "What should you do with your life?" : fr<.7 ? "It\u2019s coming together." : "Look at what you\u2019ve built.";
+    $("heroH1").textContent = n===0 ? "What should you do with your life?" : fr<.7 ? "You\u2019re getting somewhere." : "Look at what you\u2019ve built.";
     renderLegend(n);
     renderBubble();
   }
@@ -408,7 +473,7 @@
   function renderBubble(){
     var lines=bubbleLines(); clearTimeout(bubbleTimer);
     var lead=$("bubbleLead"), say=$("bubbleSay"), dots=$("bubbleDots");
-    if (!lines.length){ lead.textContent=""; say.textContent="I don't know much about you yet. Finish one activity and I'll start saying it back to you."; dots.innerHTML=""; return; }
+    if (!lines.length){ lead.textContent=""; say.textContent="We're just getting started. Finish one activity and I'll update it here."; dots.innerHTML=""; return; }
     if (bubbleIdx>=lines.length) bubbleIdx=0;
     var l=lines[bubbleIdx];
     say.classList.add("fade");
@@ -422,18 +487,27 @@
     var el=document.createElement("div");
     el.className="act"+(done?" done":"")+(a.soon?" soon":"")+(aside?" aside":"");
     el.innerHTML='<span class="mark" aria-hidden="true"></span><h3>'+a.name+'</h3><p>'+a.tag+'</p>'
+      +(a.after && !state.done[a.after] ? '<p class="after">Works best after A, and it pulls your stories in for you.</p>' : '')
       +'<div class="meta"><span>'+a.min+' min</span>'+(a.soon?'<span class="tag gold">Coming soon</span>':'')+((a.play||a.live)&&!aside?'<span class="tag gold">Play it here</span>':'')+(a.big?'<span class="tag">Bigger one</span>':'')+'</div>';
     if (!a.soon){
       var link=document.createElement("button"); link.type="button"; link.className="notme";
       link.textContent = done ? "Do it again" : aside ? "Bring it back" : "Not for me right now";
       link.onclick=function(ev){ ev.stopPropagation();
-        if (done) { if (a.play) window.YNSMock.play(slug); else if (a.live) openApp(slug,a.live,a.name); return; }
+        if (done) { if (a.app) openApp(slug, ABCS_URL+"#"+a.app, a.name); else if (a.play) window.YNSMock.play(slug); else if (a.live) openApp(slug,a.live,a.name); return; }
         state.asideAct[slug]=!aside; render();
       };
       el.appendChild(link);
     }
+    /* Stage A offers the other way in: bring in a resume or cover letter
+       you already have, and it becomes stories rather than a blank page. */
+    if (slug==="abcs_a" && !aside){
+      var up=document.createElement("button"); up.type="button"; up.className="bringin";
+      up.textContent="Already have a resume or cover letter? Bring it in";
+      up.onclick=function(ev){ ev.stopPropagation(); openApp(slug, ABCS_URL+"#home", ACTS[slug].name, {upload:true}); };
+      el.appendChild(up);
+    }
     if (!a.soon && !aside && !done){
-      el.onclick=function(){ if (a.play) window.YNSMock.play(slug); else if (a.live) openApp(slug,a.live,a.name); else toggle(slug); };
+      el.onclick=function(){ if (a.app) openApp(slug, ABCS_URL+"#"+a.app, a.name); else if (a.play) window.YNSMock.play(slug); else if (a.live) openApp(slug,a.live,a.name); else toggle(slug); };
       el.style.cursor="pointer"; el.tabIndex=0;
       el.onkeydown=function(ev){ if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); el.onclick(); } };
     }
@@ -447,22 +521,23 @@
     var p=doorProgress(d);
     var eyebrow = state.skipped ? "A good place to start" : "Your starting door";
     var because = state.skipped
-      ? "You skipped the questions, so we opened the first door. Answer them any time from the panel on the right and we'll point you somewhere more specific."
+      ? "You haven't answered the questions yet, so we've opened the door most people start at. Answer them whenever you like and we'll point you somewhere that fits you better."
       : routeReason(state.a);
     var offer="";
     if (offerDue()){
       var names=notNeeded().map(function(k){ return byKey(k).title; });
       offer='<div class="offer"><svg viewBox="0 0 20 20" fill="none" stroke="#6B5F00" stroke-width="1.6"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.5v.5"/></svg><div>'
-        +'<p><b>You said you know what you want.</b> '+(names.length>1?names.join(" and ")+" are":names[0]+" is")+' for people still working that out. Want to set '+(names.length>1?"them":"it")+' aside for now? '+(names.length>1?"They stay":"It stays")+' one tap away.</p>'
-        +'<div class="offer-acts"><button class="btn btn-ghost" onclick="YNS.acceptOffer()">Set '+(names.length>1?"them":"it")+' aside</button><button class="btn-quiet" onclick="YNS.declineOffer()">No, leave '+(names.length>1?"them":"it")+'</button></div></div></div>';
+        +'<p><b>You already know what you want, so let\u2019s not waste your time.</b> '+(names.length>1?names.join(" and ")+" are":names[0]+" is")+' built for people still working that out. Shall we set '+(names.length>1?"them":"it")+' aside for now? '+(names.length>1?"They\u2019ll be":"It\u2019ll be")+' right here if you ever want '+(names.length>1?"them":"it")+'.</p>'
+        +'<div class="offer-acts"><button class="btn btn-ghost" onclick="YNS.acceptOffer()">Yes, set '+(names.length>1?"them":"it")+' aside</button><button class="btn-quiet" onclick="YNS.declineOffer()">I\u2019d rather keep '+(names.length>1?"them":"it")+'</button></div></div></div>';
     }
     var nd=doorDone(d), nl=live(d).length;
-    host.innerHTML='<div class="eyebrow">'+eyebrow+' · '+d.n+'</div><h2>'+d.title+'</h2><p class="why">'+d.why+'</p>'
+    host.innerHTML='<img class="door-banner" src="assets/banners/'+(BANNER[d.key]||"banner")+'.webp" alt="">'
+      +'<div class="eyebrow">'+eyebrow+' · '+d.n+'</div><h2>'+d.title+'</h2><p class="why">'+d.why+'</p>'
       +'<div class="because"><svg viewBox="0 0 20 20" fill="none" stroke="#2859B6" stroke-width="1.6"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.5v.5"/></svg><span><b>Why this door:</b> '+because+'</span></div>'
       +offer
       +'<div class="acts" id="doorActs"></div>'
       +'<div class="door-foot"><span class="small muted">'+nd+' of '+nl+' done here.</span>'
-      +(nd===nl&&nl?'<span class="tag gold">Door complete. The picture just got a gold piece.</span>':'')+'</div>';
+      +(nd===nl&&nl?'<span class="tag gold">That\u2019s the whole door. Really well done.</span>':'')+'</div>';
     var acts=$("doorActs"); d.acts.forEach(function(s){ acts.appendChild(actCard(s,d)); });
     state.opened[d.key]=true;
   }
@@ -474,11 +549,11 @@
       var st=doorState(d), nd=doorDone(d), nl=live(d).length;
       var el=document.createElement("button"); el.type="button";
       el.className="dcard"+(nd===nl&&nl?" full":"")+(st==="aside"?" aside":"");
-      /* A bar only exists for a door she has opened. An untouched door
+      /* A bar only exists for a door they have opened. An untouched door
          shows nothing to be behind on. */
       var foot = st==="aside" ? '<span class="small muted">Set aside</span>'
                : st==="open" ? '<div class="prog"><i style="width:'+(nl?nd/nl*100:0)+'%"></i></div><span class="small muted">'+nd+' of '+nl+'</span>'
-               : '<span class="small muted">Haven\u2019t opened this one</span>';
+               : '<span class="small muted">Not opened yet</span>';
       el.innerHTML='<span class="num">'+d.n+'</span><h3>'+d.title+'</h3><p>'+d.blurb+'</p>'+foot;
       el.onclick=function(){ state.door=d.key; state.skipped=true; state.opened[d.key]=true; render(); $("doorPanel").scrollIntoView({behavior:"smooth",block:"start"}); };
       g.appendChild(el);
@@ -493,29 +568,29 @@
       y.innerHTML='<div><span>Clarity</span><span>'+lbl(0)+'</span></div><div><span>Why now</span><span>'+lbl(1)+'</span></div><div><span>Work</span><span>'+lbl(2)+'</span></div>';
       $("youChip").textContent="Signed in \u00b7 "+lbl(2);
     } else {
-      y.innerHTML='<div><span class="muted">You skipped the questions. That\u2019s allowed.</span></div>';
+      y.innerHTML='<div><span class="muted">You haven\u2019t answered the questions yet. Whenever you\u2019re ready.</span></div>';
     }
 
-    /* Progress: a bar for every door she has opened, then the quiet ones.
+    /* Progress: a bar for every door they have opened, then the quiet ones.
        Nothing untouched gets a bar, so nothing untouched can look unfinished. */
     var host=$("progress"), h="";
     var open=DOORS.filter(function(d){ return doorState(d)==="open"; });
     var untouched=DOORS.filter(function(d){ return doorState(d)==="untouched"; });
     var aside=DOORS.filter(function(d){ return doorState(d)==="aside"; });
 
-    if (!open.length) h+='<p class="small muted">Finish something and your progress shows up here.</p>';
+    if (!open.length) h+='<p class="small muted">Finish anything at all and it shows up here.</p>';
     open.forEach(function(d){
       var nd=doorDone(d), nl=live(d).length, nx=nextIn(d), full=nd===nl&&nl;
       h+='<div class="prog'+(full?" full":"")+'"><div class="top"><b>'+d.title+'</b><span>'+nd+' of '+nl+'</span></div>'
         +'<div class="pbar"><i style="width:'+(nl?nd/nl*100:0)+'%"></i></div>'
         +'<p class="nextline">'+(nx
             ? (nl-nd)+" left: <b>"+ACTS[nx].name+"</b>, "+ACTS[nx].min+" minutes."
-            : full ? "Finished. Still True? will check in with you in a month."
-            : "Everything else here is set aside.")+'</p></div>';
+            : full ? "All done here. Still True? will check in with you in a month."
+            : "Everything else in here is set aside for now.")+'</p></div>';
     });
 
     if (untouched.length){
-      h+='<div class="quiet-doors"><div class="qhead"><span>Haven\u2019t opened yet</span></div>'
+      h+='<div class="quiet-doors"><div class="qhead"><span>Not opened yet</span></div>'
         +untouched.map(function(d){ return '<div class="qd"><span class="nm">'+d.title+'</span><button class="lnk" onclick="YNS.asideDoor(\''+d.key+'\')">Set aside</button></div>'; }).join("")+'</div>';
     }
     if (aside.length){
@@ -524,8 +599,8 @@
     }
     host.innerHTML=h;
 
-    /* All 17, closed by default, grouped by door, summarised by what she
-       has done rather than what she has not. */
+    /* All 17, closed by default, grouped by door, summarised by what they
+       have done rather than what they have not. */
     var acc=$("allActs");
     acc.innerHTML=DOORS.map(function(d){
       var nd=doorDone(d), nl=live(d).length, st=doorState(d);
@@ -567,13 +642,13 @@
     /* Review build only: mark activities done without playing them, so
        the team can see the scene fill. Remove with the demo strip. */
     demoFill: function(list){ (list||Object.keys(ACTS)).forEach(function(k){ if(!ACTS[k].soon) state.done[k]=true; }); render(); },
-    acceptOffer: function(){ notNeeded().forEach(function(k){ state.aside[k]=true; }); state.offerAnswered=true; render(); toast("Set aside. They're in the panel on the right whenever you want them."); },
+    acceptOffer: function(){ notNeeded().forEach(function(k){ state.aside[k]=true; }); state.offerAnswered=true; render(); toast("Done. They're in the panel on the right whenever you want them."); },
     declineOffer: function(){ state.offerAnswered=true; render(); },
     asideDoor: function(k){ state.aside[k]=true; render(); },
-    revisit: function(k){ delete state.aside[k]; byKey(k).acts.forEach(function(s){ delete state.asideAct[s]; }); render(); toast(byKey(k).title+" is back."); },
+    revisit: function(k){ delete state.aside[k]; byKey(k).acts.forEach(function(s){ delete state.asideAct[s]; }); render(); toast("Welcome back to "+byKey(k).title+"."); },
     reset: function(){ state={a:[null,null,null],q:0,done:{},door:null,skipped:false,body:"n",tone:"3",facts:window.YNSMock.facts,opened:{},aside:{},asideAct:{},offerAnswered:false}; Object.keys(state.facts).forEach(function(k){ delete state.facts[k]; }); $("youChip").textContent="Not signed in"; renderPicker(); showQ(0); show("intake"); }
   });
 
-  window.YNSMock.mount($("actModal"), function(slug){ state.done[slug]=true; lastAdded=slug; bubbleIdx=Math.max(0,bubbleLines().length-1); render(); toast("Done: "+ACTS[slug].name+". One more piece of you."); });
+  window.YNSMock.mount($("actModal"), function(slug){ state.done[slug]=true; lastAdded=slug; bubbleIdx=Math.max(0,bubbleLines().length-1); render(); toast("Nice work. That\u2019s "+ACTS[slug].name+" done."); });
   renderPicker(); renderQ(1); renderQ(2); renderQ(3); showQ(0);
 })();
