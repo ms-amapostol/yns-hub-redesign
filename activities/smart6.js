@@ -304,13 +304,31 @@ YNSActivity.define({
           title: "Now work backwards from month six.",
           scene: [
             "The class does this with a home library: month six is three more books, month five is three before that. Yours can be exactly that plain.",
-            "Same shape as month one each time: a thing, a number, and a by-when. A line with no number is the one that quietly never gets judged."
+            "Write each month the way you wrote month one. The five letters are what turn a line into something you can actually finish."
           ],
           prompt: "One line per month. Leave any of them blank for now.",
+          /* The acronym belongs here, on the screen where it gets used,
+             rather than on the results screen where it is too late to
+             act on. */
+          aside: {
+            title: "SMART, in one line each",
+            points: [
+              "<b>S</b> \u00b7 Specific. The thing itself. \u201clook into schools\u201d is an area; \u201ccall three medical assistant programs\u201d is a thing.",
+              "<b>M</b> \u00b7 Measurable. Put a number in it. Three calls. $300. Two shifts.",
+              "<b>A</b> \u00b7 Achievable. Something that fits the month you are actually going to have.",
+              "<b>R</b> \u00b7 Relevant. It has to move the six-month goal, or it does not belong on the list.",
+              "<b>T</b> \u00b7 Time-bound. A by-when inside the month. \u201cby the 10th\u201d beats \u201cthis month\u201d."
+            ],
+            note: "A line with a number and a by-when can be judged at the end of the month. That is the whole difference."
+          },
           prefill: function (ctx) {
             var b = (ctx && ctx.extra && ctx.extra.month1_blanks) || {};
+            /* "by by the last Friday" is what you get if you prepend a
+               word the person already typed. */
+            var by = (b.by || "").trim();
+            if (by && !/^(by|before|on|from|during|end of)\b/i.test(by)) by = "by " + by;
             var first = b.action
-              ? b.action + (b.number ? " (" + b.number + ")" : "") + (b.by ? ", by " + b.by : "")
+              ? b.action + (b.number ? " (" + b.number + ")" : "") + (by ? ", " + by : "")
               : "";
             return "Month 1: " + first + "\n" +
                    "Month 2: \n" +

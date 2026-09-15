@@ -434,3 +434,10 @@ body.modal-open{overflow:hidden}
 .calc-key .k1{background:var(--yns-blue)}
 .calc-key .k2{background:var(--yns-gold)}
 .calc-late{font-size:.85rem;margin:10px 0 0}
+
+/* ---- a reference card inside a writing screen --------------------- */
+.am-aside{background:var(--yns-tint);border:1px solid var(--yns-tint-2);border-radius:var(--r);padding:12px 14px;margin:0 0 var(--s3)}
+.am-aside b{font-family:var(--yns-display);font-weight:500;font-size:.92rem}
+.am-aside ul{margin:6px 0 0;padding-left:18px;display:grid;gap:4px}
+.am-aside li{font-size:.86rem;line-height:1.45}
+.am-aside span{display:block;font-size:.8rem;color:var(--yns-muted);margin-top:8px}

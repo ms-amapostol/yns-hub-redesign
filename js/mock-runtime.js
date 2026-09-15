@@ -135,7 +135,13 @@ function pick(k){
 
 M.text = function(r){
   var pre=""; if (r.prefill){ try { pre=r.prefill({facts:facts, extra:run.extra, answers:run.answers, derived:derived()})||""; } catch(e){} }
-  var h = prompt(r)+'<textarea id="amText" rows="'+(r.rows||4)+'" maxlength="'+(r.maxLength||600)+'" placeholder="'+esc(r.placeholder||"")+'">'+esc(pre)+'</textarea>';
+  /* A short reference card, for screens where the person is being asked
+     to apply something rather than recall it. Sits above the box so it
+     is readable while typing rather than a thing they scrolled past. */
+  var aside = r.aside ? '<div class="am-aside"><b>'+esc(r.aside.title)+'</b><ul>'
+      + r.aside.points.map(function(x){ return "<li>"+x+"</li>"; }).join("")
+      + "</ul>"+(r.aside.note?'<span>'+esc(r.aside.note)+'</span>':'')+"</div>" : "";
+  var h = prompt(r)+aside+'<textarea id="amText" rows="'+(r.rows||4)+'" maxlength="'+(r.maxLength||600)+'" placeholder="'+esc(r.placeholder||"")+'">'+esc(pre)+'</textarea>';
   if (pre) h += '<p class="am-note">We started this for you. Change any of it.</p>';
   if (r.examples) h += '<div class="am-examples"><span>Examples</span>'+r.examples.map(function(e){return '<button type="button" class="am-chip" onclick="YNSMock.useExample(this)">'+esc(e)+'</button>';}).join("")+'</div>';
   if (r.tags) h += '<p class="am-prompt">'+esc(r.tagPrompt||"")+'</p><div class="am-tags">'+r.tags.map(function(t){return '<button type="button" class="am-tag" data-k="'+esc(t.k)+'" onclick="YNSMock.tag(this)">'+esc(t.t)+'</button>';}).join("")+'</div>';
