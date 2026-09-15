@@ -154,7 +154,7 @@
   var REVEAL_ORDER=(function(){ var G=6, out=[]; for (var d=0; d<=2*(G-1); d++){ for (var x=0;x<G;x++){ var y=(G-1)-(d-x); if (y>=0&&y<G) out.push([x,y]); } } return out; })();
 
   /* ---------- state ------------------------------------------------- */
-  var state = { a:[null,null,null], q:0, done:{}, door:null, skipped:false, body:"n", tone:"3", facts: window.YNSMock.facts };
+  var state = { a:[null,null,null], q:0, done:{}, door:null, skipped:false, body:"n", tone:"3", facts: window.YNSMock.facts, opened:{}, aside:{}, asideAct:{}, offerAnswered:false };
   var $ = function(id){ return document.getElementById(id); };
   window.YNS = window.YNS || {};
 
@@ -259,9 +259,9 @@
     render();
   };
 
-  /* ---------- the scene behind her ---------------------------------
+  /* ---------- the scene behind the portrait ---------------------------------
      One small drawing per activity, placed in a fixed slot around the
-     portrait so nothing ever lands on her face and the composition holds
+     portrait so nothing ever lands on the face and the composition holds
      at any combination. Each drawing is authored in its own 36x36 box
      and translated into its slot, which is why the paths below all use
      small numbers.
@@ -305,6 +305,27 @@
 
   /* ---------- hub render -------------------------------------------- */
   function doneCount(){ return Object.keys(state.done).length; }
+  function live(d){ return d.acts.filter(function(s){ return !ACTS[s].soon; }); }
+  function doorDone(d){ return live(d).filter(function(s){ return state.done[s]; }).length; }
+  function doorOpen(d){ return !!state.opened[d.key] || doorDone(d)>0; }
+  function doorAside(d){
+    if (state.aside[d.key]) return true;
+    var l=live(d); return l.length>0 && l.every(function(s){ return state.asideAct[s]; }) && doorDone(d)===0;
+  }
+  function doorState(d){ return doorOpen(d) ? "open" : doorAside(d) ? "aside" : "untouched"; }
+  function nextIn(d){ return live(d).filter(function(s){ return !state.done[s] && !state.asideAct[s]; })[0]; }
+
+  /* Which untouched doors her own answers say she does not need. This is
+     the only thing that decides whether the offer is shown, and it is
+     read off the three questions rather than guessed from behaviour. */
+  function notNeeded(){
+    var clarity=state.a[0], reason=state.a[1], out=[];
+    if (clarity==="clear"){ out.push("know"); if (reason!=="fit") out.push("explore"); }
+    if (reason==="job" && clarity!=="none" && out.indexOf("explore")<0) out.push("explore");
+    return out.filter(function(k){ var d=byKey(k); return doorState(d)==="untouched"; });
+  }
+  function byKey(k){ return DOORS.filter(function(d){return d.key===k;})[0]; }
+  function offerDue(){ return !state.offerAnswered && doneCount()>=1 && notNeeded().length>0; }
   function doorProgress(d){ var n=0; d.acts.forEach(function(s){ if(state.done[s]) n++; }); return {n:n,of:d.acts.length}; }
 
   var bubbleTimer=null, bubbleIdx=0, lastAdded=null;
@@ -317,7 +338,7 @@
       art.innerHTML=""; art.appendChild(artFor(state.body,state.tone)); art.setAttribute("data-key",state.body+state.tone);
     }
 
-    /* The scene around her, one drawing per finished activity. */
+    /* The scene around the portrait, one drawing per finished activity. */
     var svg=$("avatarScene"), parts="";
     SCENE_ORDER.forEach(function(slug){
       var sc=SCENE[slug]; if (!state.done[slug] || !sc) return;
@@ -397,15 +418,26 @@
   }
 
   function actCard(slug, door){
-    var a=ACTS[slug]; var done=!!state.done[slug];
-    var el=document.createElement("button"); el.type="button";
-    el.className="act"+(done?" done":"")+(a.soon?" soon":"");
+    var a=ACTS[slug]; var done=!!state.done[slug], aside=!!state.asideAct[slug];
+    var el=document.createElement("div");
+    el.className="act"+(done?" done":"")+(a.soon?" soon":"")+(aside?" aside":"");
     el.innerHTML='<span class="mark" aria-hidden="true"></span><h3>'+a.name+'</h3><p>'+a.tag+'</p>'
-      +'<div class="meta"><span>'+a.min+' min</span>'+(a.soon?'<span class="tag gold">Coming soon</span>':'')+(a.play?'<span class="tag gold">Play it here</span>':'')+(a.live?'<span class="tag gold">Play it here</span>':'')+(a.big?'<span class="tag">Bigger one</span>':'')+'</div>';
-    if (a.play) el.onclick=function(){ if (state.done[slug]) toggle(slug); else window.YNSMock.play(slug); };
-    else if (a.live) el.onclick=function(){ if (state.done[slug]) toggle(slug); else openApp(slug, a.live, a.name); };
-    else if (!a.soon) el.onclick=function(){ toggle(slug); };
-    else el.title="Proposed for this door. Not built yet.";
+      +'<div class="meta"><span>'+a.min+' min</span>'+(a.soon?'<span class="tag gold">Coming soon</span>':'')+((a.play||a.live)&&!aside?'<span class="tag gold">Play it here</span>':'')+(a.big?'<span class="tag">Bigger one</span>':'')+'</div>';
+    if (!a.soon){
+      var link=document.createElement("button"); link.type="button"; link.className="notme";
+      link.textContent = done ? "Do it again" : aside ? "Bring it back" : "Not for me right now";
+      link.onclick=function(ev){ ev.stopPropagation();
+        if (done) { if (a.play) window.YNSMock.play(slug); else if (a.live) openApp(slug,a.live,a.name); return; }
+        state.asideAct[slug]=!aside; render();
+      };
+      el.appendChild(link);
+    }
+    if (!a.soon && !aside && !done){
+      el.onclick=function(){ if (a.play) window.YNSMock.play(slug); else if (a.live) openApp(slug,a.live,a.name); else toggle(slug); };
+      el.style.cursor="pointer"; el.tabIndex=0;
+      el.onkeydown=function(ev){ if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); el.onclick(); } };
+    }
+    if (a.soon) el.title="Proposed for this door. Not built yet.";
     return el;
   }
 
@@ -417,55 +449,94 @@
     var because = state.skipped
       ? "You skipped the questions, so we opened the first door. Answer them any time from the panel on the right and we'll point you somewhere more specific."
       : routeReason(state.a);
+    var offer="";
+    if (offerDue()){
+      var names=notNeeded().map(function(k){ return byKey(k).title; });
+      offer='<div class="offer"><svg viewBox="0 0 20 20" fill="none" stroke="#6B5F00" stroke-width="1.6"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.5v.5"/></svg><div>'
+        +'<p><b>You said you know what you want.</b> '+(names.length>1?names.join(" and ")+" are":names[0]+" is")+' for people still working that out. Want to set '+(names.length>1?"them":"it")+' aside for now? '+(names.length>1?"They stay":"It stays")+' one tap away.</p>'
+        +'<div class="offer-acts"><button class="btn btn-ghost" onclick="YNS.acceptOffer()">Set '+(names.length>1?"them":"it")+' aside</button><button class="btn-quiet" onclick="YNS.declineOffer()">No, leave '+(names.length>1?"them":"it")+'</button></div></div></div>';
+    }
+    var nd=doorDone(d), nl=live(d).length;
     host.innerHTML='<div class="eyebrow">'+eyebrow+' · '+d.n+'</div><h2>'+d.title+'</h2><p class="why">'+d.why+'</p>'
       +'<div class="because"><svg viewBox="0 0 20 20" fill="none" stroke="#2859B6" stroke-width="1.6"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.5v.5"/></svg><span><b>Why this door:</b> '+because+'</span></div>'
+      +offer
       +'<div class="acts" id="doorActs"></div>'
-      +'<div class="door-foot"><span class="small muted">'+p.n+' of '+p.of+' done here.</span>'
-      +(p.n===p.of?'<span class="tag gold">Door complete. The picture just got a gold piece.</span>':'')+'</div>';
+      +'<div class="door-foot"><span class="small muted">'+nd+' of '+nl+' done here.</span>'
+      +(nd===nl&&nl?'<span class="tag gold">Door complete. The picture just got a gold piece.</span>':'')+'</div>';
     var acts=$("doorActs"); d.acts.forEach(function(s){ acts.appendChild(actCard(s,d)); });
+    state.opened[d.key]=true;
   }
 
   function renderGrid(){
     var g=$("doorGrid"); g.innerHTML="";
     DOORS.forEach(function(d){
       if (d.key===state.door) return;
-      var p=doorProgress(d);
+      var st=doorState(d), nd=doorDone(d), nl=live(d).length;
       var el=document.createElement("button"); el.type="button";
-      el.className="dcard"+(p.n===p.of?" full":"");
-      el.innerHTML='<span class="num">'+d.n+'</span><h3>'+d.title+'</h3><p>'+d.blurb+'</p><div class="prog"><i style="width:'+(p.n/p.of*100)+'%"></i></div><span class="small muted">'+p.n+' of '+p.of+'</span>';
-      el.onclick=function(){ state.door=d.key; state.skipped=true; render(); $("doorPanel").scrollIntoView({behavior:"smooth",block:"start"}); };
+      el.className="dcard"+(nd===nl&&nl?" full":"")+(st==="aside"?" aside":"");
+      /* A bar only exists for a door she has opened. An untouched door
+         shows nothing to be behind on. */
+      var foot = st==="aside" ? '<span class="small muted">Set aside</span>'
+               : st==="open" ? '<div class="prog"><i style="width:'+(nl?nd/nl*100:0)+'%"></i></div><span class="small muted">'+nd+' of '+nl+'</span>'
+               : '<span class="small muted">Haven\u2019t opened this one</span>';
+      el.innerHTML='<span class="num">'+d.n+'</span><h3>'+d.title+'</h3><p>'+d.blurb+'</p>'+foot;
+      el.onclick=function(){ state.door=d.key; state.skipped=true; state.opened[d.key]=true; render(); $("doorPanel").scrollIntoView({behavior:"smooth",block:"start"}); };
       g.appendChild(el);
     });
   }
 
   function renderRail(){
+    /* Your answers, unchanged. */
     var y=$("youSummary");
     if (state.a[0]){
-      var lbl=function(i){ var o=QUESTIONS[i].opts.filter(function(x){return x.v===state.a[i];})[0]; return o?o.t:"—"; };
+      var lbl=function(i){ var o=QUESTIONS[i].opts.filter(function(x){return x.v===state.a[i];})[0]; return o?o.t:"\u2014"; };
       y.innerHTML='<div><span>Clarity</span><span>'+lbl(0)+'</span></div><div><span>Why now</span><span>'+lbl(1)+'</span></div><div><span>Work</span><span>'+lbl(2)+'</span></div>';
-      $("youChip").textContent="Signed in · "+lbl(2);
+      $("youChip").textContent="Signed in \u00b7 "+lbl(2);
     } else {
-      y.innerHTML='<div><span class="muted">You skipped the questions. That\'s allowed.</span></div>';
+      y.innerHTML='<div><span class="muted">You skipped the questions. That\u2019s allowed.</span></div>';
     }
-    /* staircase: one step per activity, gold for completed doors */
-    var st=$("stair"); st.innerHTML="";
-    var allSlugs=[]; DOORS.forEach(function(d){ d.acts.forEach(function(s){ if(allSlugs.indexOf(s)<0) allSlugs.push(s); }); });
-    var goldSet={}; DOORS.forEach(function(d){ var p=doorProgress(d); if(p.n===p.of) d.acts.forEach(function(s){goldSet[s]=true;}); });
-    allSlugs.forEach(function(s,i){
-      var b=document.createElement("i");
-      b.style.height=(18+ (i/allSlugs.length)*82)+"%";
-      if (state.done[s]) b.className="on"+(goldSet[s]?" gold":"");
-      st.appendChild(b);
+
+    /* Progress: a bar for every door she has opened, then the quiet ones.
+       Nothing untouched gets a bar, so nothing untouched can look unfinished. */
+    var host=$("progress"), h="";
+    var open=DOORS.filter(function(d){ return doorState(d)==="open"; });
+    var untouched=DOORS.filter(function(d){ return doorState(d)==="untouched"; });
+    var aside=DOORS.filter(function(d){ return doorState(d)==="aside"; });
+
+    if (!open.length) h+='<p class="small muted">Finish something and your progress shows up here.</p>';
+    open.forEach(function(d){
+      var nd=doorDone(d), nl=live(d).length, nx=nextIn(d), full=nd===nl&&nl;
+      h+='<div class="prog'+(full?" full":"")+'"><div class="top"><b>'+d.title+'</b><span>'+nd+' of '+nl+'</span></div>'
+        +'<div class="pbar"><i style="width:'+(nl?nd/nl*100:0)+'%"></i></div>'
+        +'<p class="nextline">'+(nx
+            ? (nl-nd)+" left: <b>"+ACTS[nx].name+"</b>, "+ACTS[nx].min+" minutes."
+            : full ? "Finished. Still True? will check in with you in a month."
+            : "Everything else here is set aside.")+'</p></div>';
     });
-    $("stairCaption").textContent=doneCount()+" of "+allSlugs.length+" steps taken.";
-    /* facts */
-    var f=$("facts"); f.innerHTML="";
-    allSlugs.forEach(function(s){ var li=document.createElement("li"); li.className=state.done[s]?"on":""; li.textContent=ACTS[s].fact; f.appendChild(li); });
-    /* next step */
-    var d=DOORS.filter(function(x){return x.key===state.door;})[0];
-    var nxt=d.acts.filter(function(s){return !state.done[s] && !ACTS[s].soon;})[0];
-    if (!nxt){ DOORS.some(function(dd){ nxt=dd.acts.filter(function(s){return !state.done[s] && !ACTS[s].soon;})[0]; return !!nxt; }); }
-    $("nextStep").innerHTML = nxt ? '<div><b>'+ACTS[nxt].name+'</b><span>'+ACTS[nxt].min+' minutes. '+ACTS[nxt].tag+'</span></div>' : '<div><b>You\'ve done every live activity.</b><span>Come back when something changes.</span></div>';
+
+    if (untouched.length){
+      h+='<div class="quiet-doors"><div class="qhead"><span>Haven\u2019t opened yet</span></div>'
+        +untouched.map(function(d){ return '<div class="qd"><span class="nm">'+d.title+'</span><button class="lnk" onclick="YNS.asideDoor(\''+d.key+'\')">Set aside</button></div>'; }).join("")+'</div>';
+    }
+    if (aside.length){
+      h+='<div class="quiet-doors"><div class="qhead"><span>Set aside</span><span>'+aside.length+'</span></div>'
+        +aside.map(function(d){ return '<div class="qd aside"><span class="nm">'+d.title+'</span><button class="lnk" onclick="YNS.revisit(\''+d.key+'\')">Revisit</button></div>'; }).join("")+'</div>';
+    }
+    host.innerHTML=h;
+
+    /* All 17, closed by default, grouped by door, summarised by what she
+       has done rather than what she has not. */
+    var acc=$("allActs");
+    acc.innerHTML=DOORS.map(function(d){
+      var nd=doorDone(d), nl=live(d).length, st=doorState(d);
+      var label = st==="aside" ? "Set aside" : nd===nl&&nl ? "All "+nd+" done" : nd ? nd+" done" : "Nothing yet";
+      return '<details><summary><span class="car">\u203a</span><span class="nm">'+d.title+'</span><span class="st">'+label+'</span></summary><div class="accbody">'
+        + d.acts.map(function(s){
+            var a=ACTS[s], cls = state.done[s] ? "done" : (state.asideAct[s]||st==="aside") ? "aside" : "";
+            return '<div class="arow '+cls+'"><span class="dot"></span><span class="nm">'+a.name+'</span><span class="mins">'+(a.soon?"soon":a.min+" min")+'</span></div>';
+          }).join("")
+        + '</div></details>';
+    }).join("");
   }
 
   function render(){ renderAvatar(); renderDoor(); renderGrid(); renderRail(); }
@@ -496,7 +567,11 @@
     /* Review build only: mark activities done without playing them, so
        the team can see the scene fill. Remove with the demo strip. */
     demoFill: function(list){ (list||Object.keys(ACTS)).forEach(function(k){ if(!ACTS[k].soon) state.done[k]=true; }); render(); },
-    reset: function(){ state={a:[null,null,null],q:0,done:{},door:null,skipped:false,body:"n",tone:"3",facts:window.YNSMock.facts}; Object.keys(state.facts).forEach(function(k){ delete state.facts[k]; }); $("youChip").textContent="Not signed in"; renderPicker(); showQ(0); show("intake"); }
+    acceptOffer: function(){ notNeeded().forEach(function(k){ state.aside[k]=true; }); state.offerAnswered=true; render(); toast("Set aside. They're in the panel on the right whenever you want them."); },
+    declineOffer: function(){ state.offerAnswered=true; render(); },
+    asideDoor: function(k){ state.aside[k]=true; render(); },
+    revisit: function(k){ delete state.aside[k]; byKey(k).acts.forEach(function(s){ delete state.asideAct[s]; }); render(); toast(byKey(k).title+" is back."); },
+    reset: function(){ state={a:[null,null,null],q:0,done:{},door:null,skipped:false,body:"n",tone:"3",facts:window.YNSMock.facts,opened:{},aside:{},asideAct:{},offerAnswered:false}; Object.keys(state.facts).forEach(function(k){ delete state.facts[k]; }); $("youChip").textContent="Not signed in"; renderPicker(); showQ(0); show("intake"); }
   });
 
   window.YNSMock.mount($("actModal"), function(slug){ state.done[slug]=true; lastAdded=slug; bubbleIdx=Math.max(0,bubbleLines().length-1); render(); toast("Done: "+ACTS[slug].name+". One more piece of you."); });
