@@ -319,3 +319,52 @@ body.modal-open{overflow:hidden}
 .scene-list>div{display:flex;align-items:center;gap:12px;background:var(--yns-sunk);border-radius:var(--r-sm);padding:8px 12px}
 .scene-list svg{width:34px;height:34px;flex:none}
 @media (prefers-reduced-motion:reduce){.avatar .scene .sc{animation:none}}
+
+/* ---- rail: per-door progress, quiet doors, collapsed list --------- */
+.prog{margin-bottom:14px}
+.prog:last-child{margin-bottom:0}
+.prog .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:.88rem;margin-bottom:5px}
+.prog .top b{font-family:var(--yns-display);font-weight:500}
+.prog .top span{font-size:.8rem;color:var(--yns-muted)}
+.prog .pbar{height:8px;border-radius:4px;background:var(--yns-line-soft);overflow:hidden}  /* not .bar: that class is the top nav */
+.prog .pbar i{display:block;height:100%;background:var(--yns-blue);transition:width .5s}
+.prog.full .pbar i{background:var(--yns-gold)}
+.prog .nextline{font-size:.8rem;color:var(--yns-muted);margin-top:5px}
+.prog .nextline b{color:var(--yns-ink);font-family:var(--yns-display);font-weight:500}
+.quiet-doors{border-top:1px solid var(--yns-line-soft);margin-top:14px;padding-top:10px}
+.quiet-doors .qhead{display:flex;justify-content:space-between;font-size:.78rem;color:var(--yns-muted);margin-bottom:2px}
+.qd{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.85rem;padding:5px 0;color:var(--yns-muted)}
+.qd .nm{flex:1}
+.qd.aside .nm{opacity:.6}
+.qd .lnk{background:none;border:0;color:var(--yns-blue-deep);text-decoration:underline;cursor:pointer;font-family:var(--yns-body);font-size:.78rem;padding:0}
+.acc{border:1px solid var(--yns-line);border-radius:var(--r-sm);overflow:hidden}
+.acc details{border-bottom:1px solid var(--yns-line-soft)}
+.acc details:last-child{border-bottom:0}
+.acc summary{cursor:pointer;list-style:none;padding:9px 11px;display:flex;align-items:center;gap:9px}
+.acc summary::-webkit-details-marker{display:none}
+.acc summary:hover{background:var(--yns-tint)}
+.acc summary .car{color:var(--yns-muted);transition:transform .2s}
+.acc details[open] summary .car{transform:rotate(90deg)}
+.acc summary .nm{font-family:var(--yns-display);flex:1;font-size:.9rem}
+.acc summary .st{font-size:.74rem;color:var(--yns-muted)}
+.accbody{padding:0 11px 10px 30px;display:grid}
+.arow{display:flex;align-items:center;gap:9px;font-size:.85rem;padding:4px 0}
+.arow .dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--yns-line);flex:none;display:grid;place-items:center}
+.arow.done .dot{background:var(--yns-ok);border-color:var(--yns-ok)}
+.arow.done .dot::after{content:"";width:6px;height:3px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(1px,-1px)}
+.arow.aside{opacity:.5}
+.arow.aside .dot{border-style:dashed}
+.arow .nm{flex:1}
+.arow .mins{font-size:.75rem;color:var(--yns-muted)}
+/* ---- the offer on the door panel ---- */
+.offer{display:flex;gap:12px;align-items:flex-start;background:var(--yns-gold-tint);border:1px solid #e7d96a;border-radius:var(--r);padding:14px;margin-bottom:var(--s4)}
+.offer svg{flex:none;width:20px;height:20px;margin-top:2px;stroke:var(--yns-gold-deep)}
+.offer p{margin:0 0 10px;font-size:.92rem}
+.offer-acts{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+/* ---- set-aside state on an activity card ---- */
+.act .notme{align-self:flex-start;background:none;border:0;color:var(--yns-muted);text-decoration:underline;cursor:pointer;font-family:var(--yns-body);font-size:.75rem;padding:6px 0 0}
+.act .notme:hover{color:var(--yns-blue-deep)}
+
+.act.aside{opacity:.55}
+.act.aside:hover{border-color:var(--yns-line-soft);background:var(--yns-sunk)}
+.dcard.aside{opacity:.6}
