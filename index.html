@@ -13,9 +13,8 @@
 <div class="wrap">
 
   <div class="bar">
-    <a class="brand" href="#">
-      <svg viewBox="0 0 640 640" aria-hidden="true"><rect width="640" height="640" rx="132" fill="#0057E1"/><path fill="#fff" d="M176 452h72v-72h72v-72h72v-72h72v-72h72v72h-72v72h-72v72h-72v72h-72v72h-144z"/></svg>
-      Your Next Step
+    <a class="brand" href="#" aria-label="Your Next Step">
+      <img src="assets/yns-lockup.svg" alt="Your Next Step" class="brand-lockup">
     </a>
     <div class="acct"><span class="chip" id="youChip">Not signed in</span><a href="#">Sign in</a></div>
   </div>
@@ -40,11 +39,11 @@
 
       <div class="q is-on" data-q="0">
         <h2>First, pick someone to walk with you.</h2>
-        <p class="hint">This is you, in cartoon form. It starts as a blank and fills in, piece by piece, with every activity you finish. Change it any time, or skip this and we'll pick one for you.</p>
+        <p class="hint">This is you, in cartoon form. Everything you finish adds something to the world around her. Change it any time, or skip this and we'll pick one for you.</p>
         <div class="pick">
           <div><div class="pick-row" role="radiogroup" id="pickBody"></div></div>
           <div><div class="label">Skin tone</div><div class="pick-row" role="radiogroup" id="pickTone"></div></div>
-          <div class="preview"><div id="pickPreview"></div><div><b style="font-family:var(--yns-display);font-weight:500">Here's how it starts.</b><p class="small muted">Mostly blank on purpose. Every activity fills in a piece.</p></div></div>
+          <div class="preview"><div id="pickPreview"></div><div><b style="font-family:var(--yns-display);font-weight:500">Here's how it starts.</b><p class="small muted">She starts on an empty page. Every activity puts something around her.</p></div></div>
         </div>
       </div>
 
@@ -85,16 +84,18 @@
 
         <div class="hero">
           <div>
-            <div class="avatar" id="avatarBox" data-stage="1">
-              <div class="art" id="avatarArt" aria-label="Your character, coming into focus as you go"></div>
-              <span class="pct" id="avatarPct">0%</span>
+            <div class="avatar" id="avatarBox">
+              <svg class="scene" id="avatarScene" viewBox="0 0 200 200" aria-hidden="true"></svg>
+              <div class="art" id="avatarArt" aria-label="Your character"></div>
+              <span class="pct" id="avatarPct">0 of 17</span>
             </div>
+            <div class="scene-legend" id="sceneLegend"></div>
             <p class="avatar-caption" id="avatarCaption">A blank page. That's fine, that's where everyone starts.</p>
           </div>
           <div class="hero-text">
             <div>
               <h1 id="heroH1">What should you do with your life?</h1>
-              <p class="lead" id="heroLead">You didn't get this far just to feel stuck. Every short activity you finish fills in a piece of the picture, and gives your character one more thing to say about you.</p>
+              <p class="lead" id="heroLead">You didn't get this far just to feel stuck. Every short activity you finish adds something to the picture, and gives your character one more thing to say about you.</p>
             </div>
             <div class="bubble" id="bubble" aria-live="polite"><span class="lead-in" id="bubbleLead"></span><span class="say" id="bubbleSay"></span><div class="dots" id="bubbleDots"></div></div>
           </div>
@@ -135,7 +136,7 @@
     </div>
 
     <footer class="foot">
-      <span class="brand" style="font-size:.9rem"><svg viewBox="0 0 640 640" style="width:20px;height:20px"><rect width="640" height="640" rx="132" fill="#0057E1"/><path fill="#fff" d="M176 452h72v-72h72v-72h72v-72h72v-72h72v72h-72v72h-72v72h-72v72h-72v72h-144z"/></svg>Your Next Step</span>
+      <img src="assets/yns-mark.svg" alt="Your Next Step" class="foot-mark">
       <a href="#">Your data</a><a href="#">Privacy</a><a href="#">Terms</a>
     </footer>
   </section>
