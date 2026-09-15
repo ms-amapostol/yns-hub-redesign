@@ -249,6 +249,36 @@ M.chain = function(r){
 function chainPick(k){ run.ui.chainPick=k; renderStep(); }
 function submitChain(){ var s=cur(), r=s.rung, id=s.slot.id, k=run.ui.chainPick; var o=r.options.filter(function(x){return x.k===k;})[0]; run.answers[id]=k; run.extra[id+"_label"]=o?o.t:k; if (r.asks) facts[r.asks]=(o&&o.fact!=null)?o.fact:k; run.ui.chainPick=null; next(); }
 
+/* A batch of short items, each answered from the same small set. Built
+   for interest inventories: many questions, one tap each, no scrolling
+   back and forth between a question and its answer. Answers accumulate
+   across every rate screen in the activity under extra.rate_all, so the
+   results function sees the whole instrument in one place. */
+M.rate = function(r){
+  var all=run.extra.rate_all||(run.extra.rate_all={});
+  var done=r.items.every(function(it){ return all[it.k]; });
+  var h = prompt(r)+'<div class="am-rate">'+r.items.map(function(it){
+    return '<div class="am-ritem" data-k="'+it.k+'"><span class="am-rq">'+esc(it.t)+'</span><div class="am-ropts">'
+      + r.options.map(function(o){ return '<button type="button" data-v="'+o.k+'" class="'+(all[it.k]===o.k?"on":"")+'" onclick="YNSMock.rate(\''+it.k+'\',\''+o.k+'\')">'+esc(o.t)+'</button>'; }).join("")
+      + '</div></div>';
+  }).join("")+'</div>';
+  shell(r, h, '<span></span>'+primary(r.cta,"YNSMock.submitRate()", !done));
+};
+function rate(k,v){
+  run.extra.rate_all[k]=v;
+  /* Patch the one row rather than repainting the screen. Repainting on
+     every tap loses the scroll position, which on a phone means the
+     list jumps under your thumb between question two and question
+     three. */
+  var row=host.querySelector('.am-ritem[data-k="'+k+'"]');
+  if (row) row.querySelectorAll(".am-ropts button").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-v")===v); });
+  var r=cur().rung, all=run.extra.rate_all;
+  var done=r.items.every(function(it){ return all[it.k]; });
+  var cta=host.querySelector(".am-foot .btn-primary");
+  if (cta) cta.disabled=!done;
+}
+function submitRate(){ next(); }
+
 M.compare = function(r){
   var v=view(), routes=val(r.routes,v)||[], p=run.ui.picks||(run.ui.picks={});
   var h = prompt(r)+'<div class="am-table"><table><thead><tr><th>'+esc(r.rowHeader||"")+'</th>'+r.columns.map(function(c){return '<th>'+esc(c.t)+'</th>';}).join("")+'<th></th></tr></thead><tbody>'+
@@ -269,6 +299,13 @@ function renderResults(){
   var d=run.d;
   var r={ esc:esc, extra:run.extra, ctx:ctx(), state:{answers:run.answers, extra:run.extra, allocation:run.allocation||{}}, Quiz:global.Quiz||null, DB:null };
   var html=""; try { html=d.results(r); } catch(e){ html="<h1>Done.</h1><p class='am-note'>results() threw: "+esc(e.message)+"</p>"; }
+  /* onComplete is where an activity writes facts it could not write from
+     a single `asks` — a whole instrument's worth, in the case of the
+     interest profiler. Called once, before the result renders. */
+  if (d.onComplete && !run.completed){
+    run.completed=true;
+    try { d.onComplete({ extra:run.extra, ctx:ctx(), state:{answers:run.answers}, setFact:function(k,v){ facts[k]=v; }, DB:null }); } catch(e){}
+  }
   var acts=[]; try { acts=d.actions({answers:run.answers, extra:run.extra}, ctx())||[]; } catch(e){}
   var h='<div class="am-card am-results"><div class="am-top"><span class="am-eyebrow">'+esc(d.title)+'</span><button class="am-x" onclick="YNSMock.close()" aria-label="Close">×</button></div>'+html;
   h+='<div class="am-seven"><h3>Seven days</h3><p class="am-scene">Pick one thing to do this week. It goes on your hub until you tick it off.</p>'+acts.map(function(a){return '<button class="opt" onclick="YNSMock.finish(this)"><i class="dot"></i><div><strong>'+esc(a)+'</strong></div></button>';}).join("")+'<button class="btn-quiet" onclick="YNSMock.finish(null)">Skip for now</button></div></div>';
@@ -301,6 +338,6 @@ global.YNSMock = {
   diffMark: diffMark, submitDiff: submitDiff,
   chainPick: chainPick, submitChain: submitChain,
   compareMark: compareMark, submitCompare: submitCompare,
-  finish: finish, skipStep: skipStep
+  finish: finish, skipStep: skipStep, rate: rate, submitRate: submitRate
 };
 })(window);

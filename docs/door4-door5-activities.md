@@ -28,3 +28,7 @@ Content files for the YNS activity runtime, written to `ACTIVITY-SPEC.md` as pub
 | Your Six Months | Module 6 begin-with-the-end-in-mind: five-year line → six-month objective → month-by-month; Module 4 SMART as five plain questions; the C → B+ achievability example; rinse and repeat |
 
 Not covered, and worth their own activities later: credit scores and credit management (Module 5), retirement and compound interest (Module 5), the vision board itself (Module 1 / Module 6 check-in), MBTI and VARK (Module 1).
+
+
+## Your Why → the five whys (Sept 14)
+`activities/why.js` now walks five "why?" screens, each quoting the last answer, with a stop-here link from the third on. The sentence screen is prefilled from the deepest answer and tagged as before. `why_statement`, `why_who`, `why_test` are unchanged so nothing downstream moves. New free-text keys `why_1`–`why_5`. Note for Delante: the five rungs carry `needs: {not:{fact:"why_statement"}}`, which reads true for a first-timer and drops the screens for anyone with a why on file. `skipLabel` and `skipTo: "<slot id>"` are two small optional rung fields the mock runtime honors (custom skip wording; skip jumps to a named slot instead of the next one). Without `skipTo` the live runtime would show why 4 and 5 after a stop at 3, so this one is worth adopting: it is about six lines in the run loop.

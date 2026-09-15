@@ -375,3 +375,17 @@ body.modal-open{overflow:hidden}
 .act .bringin:hover{color:var(--yns-blue)}
 .act .after{font-size:.78rem;color:var(--yns-muted);background:var(--yns-tint);border-radius:var(--r-sm);padding:6px 9px;margin:0 0 8px}
 .am-frame .am-x{font-size:.9rem;font-family:var(--yns-display);white-space:nowrap}
+
+/* ---- the rate mechanic (interest items) --------------------------- */
+.am-rate{display:grid;gap:8px;margin:var(--s3) 0}
+.am-ritem{display:flex;gap:12px;align-items:center;justify-content:space-between;background:var(--yns-sunk);border-radius:var(--r-sm);padding:10px 12px}
+.am-rq{flex:1;font-size:.94rem}
+.am-ropts{display:flex;gap:6px;flex:none}
+.am-ropts button{font:inherit;font-size:.82rem;padding:7px 12px;border-radius:999px;border:1px solid var(--yns-line);background:#fff;cursor:pointer;min-width:58px}
+.am-ropts button:hover{border-color:var(--yns-blue-deep)}
+.am-ropts button.on{background:var(--yns-blue);color:#fff;border-color:var(--yns-blue)}
+.am-results .ya-fine{font-size:.78rem;color:var(--yns-muted);margin-top:4px}
+@media (max-width:560px){
+  .am-ritem{flex-direction:column;align-items:stretch;gap:8px}
+  .am-ropts button{flex:1}
+}

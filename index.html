@@ -21,7 +21,7 @@
 
   <div class="demo" id="demoStrip">
     <b>Demo controls</b>
-    <span>All 19 play here: 13 from their content files, the three quizzes and the three Career ABCs stages from their real pages. Your answers feed the bubble and later activities. Nothing is saved to the live database in this build.</span>
+    <span>All 20 play here: 14 from their content files, the three quizzes and the three Career ABCs stages from their real pages. Your answers feed the bubble and later activities. Nothing is saved to the live database in this build.</span>
     <button class="lnk" onclick="YNS.retake()">Retake the three questions</button>
     <button class="lnk" onclick="YNS.reset()">Reset everything</button>
     <button class="lnk" onclick="document.getElementById('demoStrip').remove()">Hide this bar</button>
@@ -119,7 +119,7 @@
           <div id="progress"></div>
         </div>
         <div class="rail-card">
-          <h3>All 19 activities</h3>
+          <h3>All 20 activities</h3>
           <p class="small muted" style="margin-bottom:8px">Everything that's here, grouped by door. Open one any time.</p>
           <div class="acc" id="allActs"></div>
         </div>
@@ -142,8 +142,10 @@
 <div class="toast" id="toast"></div>
 
 <script src="vendor/yns-taxonomy.js"></script>
+<script>/* real wage bands, used by the interest profiler results */fetch("data/roles.json").then(function(r){return r.json();}).then(function(d){window.YNS_ROLES=d;}).catch(function(){});</script>
 <script src="vendor/quiz-shared.js"></script>
 <script src="js/mock-runtime.js"></script>
+<script src="activities/interests.js"></script>
 <script src="activities/why.js"></script>
 <script src="activities/proof.js"></script>
 <script src="activities/hours168.js"></script>

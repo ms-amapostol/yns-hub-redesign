@@ -42,7 +42,7 @@
     { key:"explore", n:"Door 2", title:"Explore what's out there",
       blurb:"Try on a few futures. See which one fits.",
       why:"You have a rough shape of what you want. These help you see real options side by side, and name the kinds of work that match what you'd actually enjoy.",
-      acts:["cyoa","dayinlife","budget","doors","conversations"] },
+      acts:["interests","cyoa","dayinlife","budget","doors","conversations"] },
     { key:"get", n:"Door 3", title:"Get the job",
       blurb:"Resume, cover letter, interview. Built from what you've already done.",
       why:"You know the direction, or you just need work now. These three run on the same raw material: things you have actually done. Start at A, or jump in wherever you need to.",
@@ -63,6 +63,7 @@
     proof:        { name:"Proof",                tag:"Three things you're good at, with the evidence.",   min:8, fact:"Your strengths", tile:1, play:true },
     hours168:     { name:"168 Hours",            tag:"Where your week actually goes.",                    min:4, fact:"Where your time goes", tile:2, play:true },
     constraints:  { name:"Fixed or Assumed",     tag:"Which of your reasons are actually true.",          min:5, fact:"What's really fixed", tile:3, play:true },
+    interests:    { name:"What Kind of Work", tag:"Thirty quick questions about what you\u2019d enjoy doing all day.", min:6, fact:"What fits you", tile:4, play:true },
     cyoa:         { name:"The Story",            tag:"Seven chapters of a life eighteen months from now.",min:5, fact:"Work that fits", tile:4, live:"apps/prototype-1-choose-your-own-adventure.html" },
     dayinlife:    { name:"A Day In The Life",    tag:"Six moments in a day you'd actually want.",         min:5, fact:"A day you'd want", tile:5, live:"apps/prototype-2-day-in-the-life.html" },
     budget:       { name:"Spend Your 100",       tag:"What you'd really pay for in a job.",               min:4, fact:"What you value in work", tile:6, live:"apps/prototype-3-budget-allocation.html" },
@@ -340,11 +341,12 @@
     bounce:[6,46], constraints:[6,84], conversations:[6,122],
     doors:[158,46], money101:[158,84], abcs_b:[158,122],
     proof:[6,156], hours168:[44,156], budget:[82,156], smart6:[120,156], premortem:[158,156],
-    abcs_a:[44,84], abcs_c:[120,84]
+    abcs_a:[44,84], abcs_c:[120,84], interests:[82,84]
   };
   var SCENE = {
     why:        { title:"Your why \u2014 the sun",              d:'<circle cx="18" cy="18" r="9" fill="var(--yns-gold)"/><g stroke="var(--yns-gold)" stroke-width="2" stroke-linecap="round"><path d="M18 3v-2M18 33v2M3 18H1M33 18h2M7.5 7.5l-1.5-1.5M28.5 28.5l1.5 1.5M28.5 7.5l1.5-1.5M7.5 28.5l-1.5 1.5"/></g>' },
     dayinlife:  { title:"A Day In The Life \u2014 a window with the light on", d:'<rect x="5" y="5" width="26" height="28" rx="2" fill="var(--yns-gold-tint)" stroke="var(--yns-blue-deep)" stroke-width="2"/><path d="M18 5v28M5 19h26" stroke="var(--yns-blue-deep)" stroke-width="2"/>' },
+    interests:  { title:"What Kind of Work \u2014 a compass, pointing", d:'<circle cx="18" cy="18" r="15" fill="var(--yns-paper)" stroke="var(--yns-blue-deep)" stroke-width="2"/><path d="M24 12l-4.5 9.5L10 26l4.5-9.5z" fill="var(--yns-blue)"/><path d="M10 26l4.5-9.5 5 5z" fill="var(--yns-gold)"/><circle cx="18" cy="18" r="1.6" fill="var(--yns-ink)"/>' },
     cyoa:       { title:"The Story \u2014 the path out",        d:'<path d="M8 33c0-9 20-10 20-18 0-5-6-6-6-11" fill="none" stroke="var(--yns-tint-2)" stroke-width="7" stroke-linecap="round"/><path d="M8 33c0-9 20-10 20-18 0-5-6-6-6-11" fill="none" stroke="var(--yns-blue)" stroke-width="1.5" stroke-dasharray="3 4" stroke-linecap="round"/>' },
     grit:       { title:"Bounce Back \u2014 the storm, and the light after", d:'<path d="M6 16a8 8 0 0113-6 7 7 0 019 2 6 6 0 01-2 11H10a6 6 0 01-4-7z" fill="var(--yns-tint-2)"/><path d="M20 24l-6 8h5l-4 7" fill="none" stroke="var(--yns-gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' },
     stilltrue:  { title:"Still True? \u2014 the flag at the top", d:'<path d="M12 34V4" stroke="var(--yns-blue-deep)" stroke-width="2.5" stroke-linecap="round"/><path d="M12 5l18 6-18 6z" fill="var(--yns-gold)"/>' },
@@ -366,7 +368,7 @@
   };
   /* Back to front. The ground lands last so it sits in front of the feet
      of everything standing on it. */
-  var SCENE_ORDER = ["why","dayinlife","cyoa","grit","stilltrue","bounce","constraints","conversations","doors","money101","abcs_a","abcs_b","abcs_c","proof","hours168","budget","smart6","premortem","floor"];
+  var SCENE_ORDER = ["why","dayinlife","interests","cyoa","grit","stilltrue","bounce","constraints","conversations","doors","money101","abcs_a","abcs_b","abcs_c","proof","hours168","budget","smart6","premortem","floor"];
 
   /* ---------- hub render -------------------------------------------- */
   function doneCount(){ return Object.keys(state.done).length; }
@@ -450,6 +452,7 @@
   var WHO = { me:"me", kids:"my kids", family:"my family", partner:"my partner", someone_specific:"one person in particular", community:"people like me" };
   function catLabel(k){ var T=window.YNSTaxonomy; return (T&&k)?T.label(k):k; }
   var REAL = {
+    interests:    function(f){ return f.interest_top ? {lead:"What I\u2019d actually enjoy:", say:f.interest_top} : null; },
     cyoa:         function(f){ return f.top_category ? {lead:"Work that fits the life I picked:", say:catLabel(f.top_category)+" came out on top."} : null; },
     dayinlife:    function(f){ return f.top_category ? {lead:"A day I'd actually want:", say:"The one that points at "+catLabel(f.top_category)+"."} : null; },
     budget:       function(f){ return f.top_category ? {lead:"What I'd pay for in a job:", say:"My hundred pointed at "+catLabel(f.top_category)+"."} : null; },
