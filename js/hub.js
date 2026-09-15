@@ -455,16 +455,23 @@
   YNS.planner=function(){
     var all=steps(), open=all.filter(function(s){return !s.done;}), done=all.filter(function(s){return s.done;});
     var f=state.facts;
+    /* The dated things. Each one belongs to an activity, so each one can
+       be edited or cleared the same way a weekly step can. */
     var dated=[];
-    if (f.smart_goal) dated.push({ t:"Six months from now", v:f.smart_goal });
-    if (f.smart_first_step) dated.push({ t:"This week, from your plan", v:f.smart_first_step });
-    if (f.hard_week_plan) dated.push({ t:"If it gets hard", v:String(f.hard_week_plan).split("\n")[0] });
-    if (f.contact_named) dated.push({ t:"A message you\u2019ve written", v:"Two Conversations has it ready to send." });
+    if (f.smart_goal)      dated.push({ k:"smart_goal",      slug:"smart6",   t:"Six months from now", v:f.smart_goal });
+    if (f.smart_month1)    dated.push({ k:"smart_month1",    slug:"smart6",   t:"Month one",           v:String(f.smart_month1).split("\n")[0] });
+    if (f.hard_week_plan)  dated.push({ k:"hard_week_plan",  slug:"bounce",   t:"If it gets hard",     v:String(f.hard_week_plan).split("\n")[0] });
+    if (f.able_step)       dated.push({ k:"able_step",       slug:"able",     t:"The ten minutes you picked", v:f.able_step });
 
     var m=$("actModal"); m.style.display="block"; document.body.classList.add("modal-open");
     var list = open.length
       ? open.map(function(s){
-          return '<label class="pl-row"><input type="checkbox" onchange="YNS.tickStep(\''+s.id+'\')"><span class="pl-t">'+s.text+'</span><span class="pl-from">'+s.from+' \u00b7 '+weekOf(s.at)+'</span></label>';
+          return '<div class="pl-row" id="row-'+s.id+'">'
+            + '<input type="checkbox" onchange="YNS.tickStep(\''+s.id+'\')" aria-label="Done">'
+            + '<span class="pl-t" id="t-'+s.id+'">'+s.text+'</span>'
+            + '<span class="pl-acts"><button class="lnk" onclick="YNS.editStep(\''+s.id+'\')">Edit</button>'
+            + '<button class="lnk" onclick="YNS.askDeleteStep(\''+s.id+'\')">Delete</button></span>'
+            + '<span class="pl-from">'+s.from+' \u00b7 '+weekOf(s.at)+'</span></div>';
         }).join("")
       : '<p class="am-scene">Nothing on the list yet. Every activity ends by asking for one thing to do this week, and whatever you pick lands here.</p>';
     var doneList = done.length
@@ -474,11 +481,92 @@
       : "";
     m.innerHTML='<div class="am-card am-results"><div class="am-top"><span class="am-eyebrow">Your planner</span><button class="am-x" onclick="YNS.closeList()" aria-label="Close">\u00d7</button></div>'
       +'<h1>What you said you\u2019d do</h1>'
-      +'<p class="am-scene">One line for every thing you picked at the end of an activity. Tick them off as they happen.</p>'
-      +'<section class="pf-sec"><h3>This week</h3>'+list+doneList+'</section>'
-      +(dated.length ? '<section class="pf-sec"><h3>Further out</h3>'+dated.map(function(d){ return '<div class="pf-row"><div class="pf-t">'+d.t+'</div><div class="pf-v">'+d.v+'</div></div>'; }).join("")+"</section>" : "")
+      +'<p class="am-scene">One line for every thing you picked at the end of an activity. Tick them off as they happen, change the wording, or clear one and plan it again.</p>'
+      +'<section class="pf-sec"><h3>This week</h3>'+list+doneList+"</section>"
+      +(dated.length
+        ? '<section class="pf-sec"><h3>Further out</h3>'
+          + dated.map(function(d){
+              return '<div class="pl-row pl-dated" id="row-'+d.k+'"><span class="pl-t" id="t-'+d.k+'"><b>'+d.t+'</b><br>'+d.v+'</span>'
+                + '<span class="pl-acts"><button class="lnk" onclick="YNS.editFact(\''+d.k+'\')">Edit</button>'
+                + '<button class="lnk" onclick="YNS.askDeleteFact(\''+d.k+'\',\''+d.slug+'\')">Delete</button></span></div>';
+            }).join("")
+          + "</section>"
+        : "")
       +'<div class="am-foot"><span class="small muted">Signed out, this lives in this browser only.</span><button class="btn btn-primary" onclick="YNS.closeList()">Close</button></div></div>';
   };
+
+  /* Editing is not a big deal and does not need a warning: it is their
+     wording, and changing it changes nothing else. */
+  function inlineEdit(cellId, current, onSave){
+    var cell=$(cellId); if (!cell) return;
+    cell.innerHTML='<input class="pl-edit" type="text" value="'+String(current).replace(/"/g,"&quot;")+'">';
+    var input=cell.querySelector("input"); input.focus(); input.select();
+    /* Enter and blur both land here, and repainting the panel fires blur
+       again. One flag stops the second pass rebuilding a panel that is
+       already being rebuilt. */
+    var settled=false;
+    function save(){
+      if (settled) return; settled=true;
+      input.onblur=null;
+      var v=input.value.trim(); if (v) onSave(v);
+      YNS.planner();
+    }
+    function cancel(){ if (settled) return; settled=true; input.onblur=null; YNS.planner(); }
+    input.onkeydown=function(e){ if (e.key==="Enter"){ e.preventDefault(); save(); } if (e.key==="Escape") cancel(); };
+    input.onblur=save;
+  }
+  YNS.editStep=function(id){
+    var s=steps().filter(function(x){return x.id===id;})[0]; if (!s) return;
+    inlineEdit("t-"+id, s.text, function(v){ s.text=v; });
+  };
+  YNS.editFact=function(k){
+    inlineEdit("t-"+k, String(state.facts[k]).split("\n")[0], function(v){ state.facts[k]=v; });
+  };
+
+  /* Deleting is a different matter, because the commitment came out of an
+     activity and clearing it puts that activity back to unanswered. Say
+     which one, by name, before doing it. */
+  function confirmPanel(title, body, onYes){
+    var m=$("actModal");
+    m.innerHTML='<div class="am-card"><div class="am-top"><span class="am-eyebrow">Just checking</span><button class="am-x" onclick="YNS.planner()" aria-label="Back">\u00d7</button></div>'
+      +"<h2>"+title+"</h2>"
+      +'<p class="am-scene">'+body+"</p>"
+      +'<div class="am-foot"><button class="btn-quiet" onclick="YNS.planner()">Keep it</button>'
+      +'<button class="btn btn-primary" id="confirmYes">Delete and start that one again</button></div></div>';
+    $("confirmYes").onclick=onYes;
+  }
+  function resetActivity(slug){
+    if (!slug) return;
+    var cleared = window.YNSMock.resetActivity ? window.YNSMock.resetActivity(slug) : [];
+    delete state.done[slug];
+    state.evidence=(state.evidence||[]).filter(function(e){ return e.source!==slug; });
+    resolveDirection();
+    return cleared;
+  }
+  YNS.askDeleteStep=function(id){
+    var s=steps().filter(function(x){return x.id===id;})[0]; if (!s) return;
+    var name=s.from;
+    confirmPanel("Delete this, and start " + name + " again?",
+      "This came out of <b>"+name+"</b>. Clearing it also clears what you told that activity, so it asks you properly next time rather than skipping the questions it already has answers for. Everything else stays exactly as it is.",
+      function(){
+        state.facts.steps_open = steps().filter(function(x){ return x.id!==id; });
+        resetActivity(s.slug);
+        render(); YNS.planner();
+        toast(name+" is ready to do again.");
+      });
+  };
+  YNS.askDeleteFact=function(k, slug){
+    var name = (window.YNSMock.title && window.YNSMock.title(slug)) || slug;
+    confirmPanel("Delete this, and start " + name + " again?",
+      "This came out of <b>"+name+"</b>. Clearing it also clears what you told that activity, so you can plan it from scratch rather than editing around an old answer.",
+      function(){
+        delete state.facts[k];
+        resetActivity(slug);
+        render(); YNS.planner();
+        toast(name+" is ready to do again.");
+      });
+  };
+
   YNS.tickStep=function(id){
     steps().forEach(function(s){ if (s.id===id) s.done=true; });
     render(); YNS.planner();

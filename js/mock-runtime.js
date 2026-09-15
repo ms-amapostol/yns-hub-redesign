@@ -530,7 +530,7 @@ function finish(el){
   if (el){
     var text=el.textContent.trim();
     facts.steps_open = (facts.steps_open||[]).filter(function(x){ return x.text!==text; });
-    facts.steps_open.push({ id: slug+"-"+Date.now(), text: text, from: (DEFS[slug]||{}).title || slug, at: Date.now(), done: false });
+    facts.steps_open.push({ id: slug+"-"+Date.now(), slug: slug, text: text, from: (DEFS[slug]||{}).title || slug, at: Date.now(), done: false });
   } if (el) facts.next_action=el.textContent.trim(); facts.activities_completed=(facts.activities_completed||[]).concat([slug]); close(); hooks.onDone(slug); }
 
 /* ---------- public --------------------------------------------------- */
@@ -543,6 +543,23 @@ global.YNSActivity = {
 global.YNSMock = {
   mount: function(el, onDone){ host=el; hooks.onDone=onDone||hooks.onDone; },
   has: function(slug){ return !!DEFS[slug]; },
+  title: function(slug){ return (DEFS[slug]||{}).title || slug; },
+  /* Put an activity back to never-answered: forget its saved results and
+     clear the facts it owns, so the ladders ask again instead of
+     skipping every question whose answer is still on file. An activity
+     owns a fact if one of its rungs declares it with `asks`. */
+  resetActivity: function(slug){
+    var d=DEFS[slug]; delete lastRun[slug];
+    if (!d) return [];
+    var cleared=[];
+    (d.slots||[]).forEach(function(sl){
+      (sl.ladder||[]).forEach(function(rung){
+        if (rung.asks && facts[rung.asks]!=null){ delete facts[rung.asks]; cleared.push(rung.asks); }
+        if (rung.tagAsks && facts[rung.tagAsks]!=null){ delete facts[rung.tagAsks]; cleared.push(rung.tagAsks); }
+      });
+    });
+    return cleared;
+  },
   hasResults: function(slug){ return !!lastRun[slug]; },
   facts: facts,
   setFact: function(k,v){ facts[k]=v; },
