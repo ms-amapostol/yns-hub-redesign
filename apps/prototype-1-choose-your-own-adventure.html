@@ -148,6 +148,17 @@ if(!window.Quiz){
 /* Resolves once we know whether this person has done anything before.
    Everything below renders off the back of it, so Chapter One can
    already reflect what a previous activity learned. */
+/* "a Tuesday night", read off the person's clock rather than hardcoded,
+   because a line whose job is to sound like it knows you should not be
+   wrong six days a week. Before 5am counts as the night before. */
+function whenPhrase(){
+  try {
+    var d=new Date(), h=d.getHours(), shift=h<5?-1:0;
+    var day=new Date(d.getTime()+shift*86400000).toLocaleDateString(undefined,{weekday:"long"});
+    var part=h<5?"night":h<12?"morning":h<17?"afternoon":h<21?"evening":"night";
+    return "a "+day+" "+part;
+  } catch(e){ return "a weeknight"; }
+}
 const READY = Quiz.init('cyoa');
 
 /* ------------------------------------------------------------------
@@ -161,7 +172,7 @@ const BEATS = [
   id:"wake", eyebrow:"Chapter One", title:"Eighteen months from now.",
   scene:[
     "You wake up before your alarm, and not because you're anxious. Because you're <em>ready</em>.",
-    "Something changed this year. You can't quite point to the day it happened, but the version of you lying here is not the version who took a career quiz on a Tuesday night.",
+    "Something changed this year. You can't quite point to the day it happened, but the version of you lying here is not the version who took a career quiz on " + whenPhrase() + ".",
     "You open your eyes. Where are you?"
   ],
   prompt:"Pick the one that gives you a small, involuntary yes.",

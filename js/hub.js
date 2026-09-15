@@ -13,6 +13,11 @@
       { v:"clear", t:"I know what I want",             s:"I've picked the thing. Now it's about actually getting there." }
     ]},
     { key:"reason", opts:[
+      /* First, because the people arriving through a college or a program
+         have not stalled; they have chosen. The site should not presume a
+         crisis before it has asked. Everyone else still gets their own
+         language in the options below. */
+      { v:"enrolled", t:"I'm in a program and want to make the most of it", s:"College, a certificate, an apprenticeship. Already moving. Want to move well." },
       { v:"stuck",    t:"I feel stuck and I'm done standing still",  s:"Same shifts, same paycheck, costs going up. Something in me clicked." },
       { v:"fit",      t:"I want to find work that actually fits me", s:"I've had jobs. I want to understand what I'd be good at and enjoy." },
       { v:"job",      t:"I need a job, soon",                        s:"There's a deadline. A resume, an application, an interview coming." },
@@ -188,6 +193,7 @@
      decision and the thing to argue about. */
   function route(a){
     var clarity=a[0], reason=a[1];
+    if (reason==="enrolled")                return clarity==="clear" ? "plan" : clarity==="rough" ? "explore" : "know";
     if (reason==="job")                     return "get";
     if (reason==="plan"  && clarity==="clear") return "plan";
     if (reason==="mindset")                 return "mind";
@@ -204,6 +210,13 @@
       experienced:"you've got real experience behind you",
       leader:"you're already running things"
     }[stage] || "you're where you are";
+    if (reason==="enrolled"){
+      return {
+        plan:    "You're already in a program and you know where it's going. This door turns that into six months with dates on it, and it's the one that keeps you moving when the semester gets heavy.",
+        explore: "You're in a program and you've got a rough idea of where it leads. These help you see the real options inside it, so the choice is yours rather than the default.",
+        know:    "You're in a program, which is a real step, and you said you're still working out what it's for. Two or three of these and that gets clearer."
+      }[route(a)];
+    }
     var map = {
       know:    "You said you're still figuring it out, and "+st+". So we start with you, before any of the career stuff. Two or three of these and the picture starts to show.",
       explore: "You said you've got a rough idea, and "+st+". These let you try the idea on before you commit to it.",
@@ -433,6 +446,59 @@
     toggle(slug);
   }
 
+  /* ---------- the next step, said in one sentence --------------------
+
+     Direction, route and month one already exist as separate facts. Said
+     together they become the thing the site is named after. No partner
+     is involved: the sentence is the person's own, and the places under
+     it are ones they chose. */
+  var CATEGORY_KEYWORD = { health:"medical assistant", social:"community health worker", edu:"teaching assistant", gov:"public service", creative:"graphic designer", trades:"electrician apprentice", biz:"operations coordinator", tech:"IT support", finance:"bookkeeper" };
+  function nextStepSentence(){
+    var f=state.facts;
+    if (!f.top_category) return null;
+    var route = ROUTE_WORD[f.route_preference] ? ROUTE_WORD[f.route_preference].toLowerCase() : null;
+    var m1 = f.smart_month1 ? String(f.smart_month1).split("\n")[0].replace(/^By /,"by ") : null;
+    var s2 = "Your next step is <b>" + catLabel(f.top_category) + "</b>";
+    if (route) s2 += ", " + route;
+    s2 += ".";
+    if (m1) s2 += " First move: " + m1;
+    return s2;
+  }
+  /* Public search tools from the same government source the wage data
+     comes from. No partner, no payment, no ranking by anyone but the
+     person. The keyword is a plain example role for the category; the
+     person can change it on the page. */
+  function searchLinks(){
+    var f=state.facts; if (!f.top_category) return [];
+    var kw=encodeURIComponent(CATEGORY_KEYWORD[f.top_category]||catLabel(f.top_category));
+    var loc=encodeURIComponent(f.zip||"");
+    return [
+      { t:"Jobs near you",        u:"https://www.careeronestop.org/Toolkit/Jobs/find-jobs.aspx?keyword="+kw+"&location="+loc },
+      { t:"Training programs",    u:"https://www.careeronestop.org/Toolkit/Training/find-local-training.aspx?keyword="+kw+"&location="+loc },
+      { t:"Apprenticeships",      u:"https://www.careeronestop.org/Toolkit/Training/find-apprenticeships.aspx?keyword="+kw+"&location="+loc },
+      { t:"Scholarships",         u:"https://www.careeronestop.org/Toolkit/Training/find-scholarships.aspx?keyword="+kw }
+    ];
+  }
+
+  /* The places. School, program or company: what it's called, what it is,
+     and where it stands. This is the log that makes the next step real,
+     and, aggregated one day, the evidence for who to partner with. */
+  var PLACE_TYPE = { school:"School", program:"Program", company:"Company" };
+  var PLACE_STATUS = { looking:"Looking into it", applied:"Applied", heard:"Heard back", in:"I\u2019m in", no:"Not this one" };
+  function places(){ return state.facts.places || (state.facts.places = []); }
+  YNS.addPlace=function(){
+    var name=($("plName").value||"").trim(); if (!name) return;
+    places().push({ id:"p"+Date.now(), name:name, type:$("plType").value, status:"looking", note:"", at:Date.now() });
+    YNS.profile(); toast("Added. Come back and update it as it moves.");
+  };
+  YNS.placeStatus=function(id,v){ places().forEach(function(p){ if (p.id===id) p.status=v; }); render(); };
+  YNS.removePlace=function(id){ state.facts.places=places().filter(function(p){ return p.id!==id; }); YNS.profile(); };
+  YNS.editPlace=function(id){
+    var p=places().filter(function(x){return x.id===id;})[0]; if (!p) return;
+    inlineEdit("pn-"+id, p.name, function(v){ p.name=v; }, YNS.profile);
+  };
+  YNS.setZip=function(v){ state.facts.zip=(v||"").trim(); };
+
   /* ---------- the portfolio ------------------------------------------
 
      Everything they have done, on paper. Built into a hidden container
@@ -463,6 +529,16 @@
     out.push('<header class="pp-head"><img src="assets/yns-lockup.svg" alt="Your Next Step" class="pp-logo">'
       +'<h1>What I\u2019ve worked out so far</h1>'
       +'<p class="pp-sub">'+n+" of "+total+" activities \u00b7 "+fmtDate(Date.now())+"</p></header>");
+
+    /* 0. The next step, and the places */
+    var ns=nextStepSentence();
+    if (ns) out.push('<section class="pp-sec"><h2>My next step</h2><p class="pp-big">'+ns+"</p></section>");
+    var pl=places();
+    if (pl.length){
+      out.push('<section class="pp-sec"><h2>Places I\u2019m looking at</h2><ul>'
+        + pl.map(function(p){ return "<li>"+p.name+" \u00b7 "+(PLACE_TYPE[p.type]||"")+" \u00b7 "+(PLACE_STATUS[p.status]||"")+"</li>"; }).join("")
+        + "</ul></section>");
+    }
 
     /* 1. Direction */
     if (f.top_category){
@@ -615,7 +691,8 @@
 
   /* Editing is not a big deal and does not need a warning: it is their
      wording, and changing it changes nothing else. */
-  function inlineEdit(cellId, current, onSave){
+  function inlineEdit(cellId, current, onSave, rerender){
+    rerender = rerender || YNS.planner;
     var cell=$(cellId); if (!cell) return;
     cell.innerHTML='<input class="pl-edit" type="text" value="'+String(current).replace(/"/g,"&quot;")+'">';
     var input=cell.querySelector("input"); input.focus(); input.select();
@@ -627,9 +704,9 @@
       if (settled) return; settled=true;
       input.onblur=null;
       var v=input.value.trim(); if (v) onSave(v);
-      YNS.planner();
+      rerender();
     }
-    function cancel(){ if (settled) return; settled=true; input.onblur=null; YNS.planner(); }
+    function cancel(){ if (settled) return; settled=true; input.onblur=null; rerender(); }
     input.onkeydown=function(e){ if (e.key==="Enter"){ e.preventDefault(); save(); } if (e.key==="Escape") cancel(); };
     input.onblur=save;
   }
@@ -753,6 +830,25 @@
   YNS.profile=function(){
     var sec=profileSections();
     var m=$("actModal"); m.style.display="block"; document.body.classList.add("modal-open");
+    var ns=nextStepSentence(), links=searchLinks();
+    var nextStep = ns
+      ? '<section class="pf-sec pf-next"><h3>Your next step</h3><p class="pf-next-line">'+ns+'</p>'
+        + (links.length ? '<p class="am-note">Real places to take it, from the same public source as the pay figures. Add your zip code and they narrow to near you.</p>'
+          + '<div class="pf-links">'+links.map(function(l){ return '<a class="btn btn-ghost" href="'+l.u+'" target="_blank" rel="noopener">'+l.t+' \u2197</a>'; }).join("")+'</div>'
+          + '<label class="pf-zip">Zip code <input type="text" inputmode="numeric" maxlength="5" value="'+(state.facts.zip||"")+'" onchange="YNS.setZip(this.value);YNS.profile()"></label>' : '')
+        + "</section>"
+      : "";
+    var pl=places();
+    var placesSec = '<section class="pf-sec"><h3>Places I\u2019m looking at</h3>'
+      + '<p class="am-note">Schools, programs, companies. Log them here as you look, and move them along as things happen. They go on your PDF and into your six-month plan.</p>'
+      + (pl.length ? pl.map(function(p){
+          return '<div class="pf-place" id="row-'+p.id+'"><div><span class="pf-place-name" id="pn-'+p.id+'">'+p.name+'</span><span class="pf-place-type">'+(PLACE_TYPE[p.type]||"")+'</span></div>'
+            + '<select onchange="YNS.placeStatus(\''+p.id+'\',this.value)">'
+            + Object.keys(PLACE_STATUS).map(function(k){ return '<option value="'+k+'"'+(p.status===k?" selected":"")+'>'+PLACE_STATUS[k]+'</option>'; }).join("")
+            + '</select><span class="pl-acts"><button class="lnk" onclick="YNS.editPlace(\''+p.id+'\')">Edit</button><button class="lnk" onclick="YNS.removePlace(\''+p.id+'\')">Remove</button></span></div>';
+        }).join("") : '')
+      + '<div class="pf-add"><input type="text" id="plName" placeholder="Name of the school, program or company"><select id="plType"><option value="school">School</option><option value="program">Program</option><option value="company">Company</option></select><button class="btn btn-ghost" onclick="YNS.addPlace()">Add</button></div>'
+      + "</section>";
     var body = sec.length
       ? sec.map(function(s){
           return '<section class="pf-sec"><h3>'+s.h+'</h3><p class="am-note">'+s.note+'</p>'
@@ -765,6 +861,8 @@
     m.innerHTML='<div class="am-card am-results"><div class="am-top"><span class="am-eyebrow">Everything you\u2019ve told us</span><button class="am-x" onclick="YNS.closeList()" aria-label="Close">\u00d7</button></div>'
       +'<h1>What we know about you</h1>'
       +'<p class="am-scene">Your own words, the direction they add up to, and the facts worth having to hand. Take any of it straight into an application or a message.</p>'
+      +nextStep
+      +placesSec
       +body
       +'<div class="am-foot"><button class="btn btn-ghost" onclick="YNS.copyProfile(this)">Copy it all as text</button><button class="btn btn-ghost" onclick="YNS.portfolio()">Save as PDF</button><button class="btn btn-primary" onclick="YNS.closeList()">Close</button></div></div>';
   };
@@ -824,7 +922,7 @@
             : n<total ? "Nearly all of it, and every bit is in your own words."
             : "That\u2019s everything. You did all of it.";
     $("avatarCaption").textContent=(n?n+" of "+total+" \u00b7 ":"")+cap;
-    $("heroH1").textContent = n===0 ? "What should you do with your life?" : fr<.7 ? "You\u2019re getting somewhere." : "Look at what you\u2019ve built.";
+    $("heroH1").textContent = n===0 ? "What\u2019s your next step?" : fr<.7 ? "You\u2019re getting somewhere." : "Look at what you\u2019ve built.";
     renderBubble();
   }
 
@@ -1019,6 +1117,7 @@
             ? '<p class="dir-note">All of them point the same way, which makes this a stronger read than any one on its own.</p>'
             : '<p class="dir-note">These do not all point the same way, and that is worth knowing rather than hiding. Each one measures something different, so the answer above is the weight of all of them together.</p>');
         }
+        var ns2=nextStepSentence(); if (ns2) parts.push('<p class="dir-next">'+ns2+'</p>');
         parts.push('<button class="btn btn-ghost dir-more" onclick="YNS.profile()">See everything we know</button>');
         dir.innerHTML = parts.join("");
       }
@@ -1066,7 +1165,8 @@
   /* ---------- public ------------------------------------------------ */
   Object.assign(window.YNS, {
     next: function(){ if (state.q<3) showQ(state.q+1); else {
-      if (state.a[2]) state.facts.level=state.a[2]; state.door=route(state.a); state.skipped=false; render(); show("hub"); } },
+      if (state.a[2]) state.facts.level=state.a[2];
+      state.facts.enrolled = state.a[1]==="enrolled"; state.door=route(state.a); state.skipped=false; render(); show("hub"); } },
     back: function(){ showQ(state.q-1); },
     skip: function(){ state.skipped=true; state.door="know"; render(); show("hub"); },
     retake: function(){ state.a=[null,null,null]; renderPicker(); renderQ(1);renderQ(2);renderQ(3); showQ(1); show("intake"); },
