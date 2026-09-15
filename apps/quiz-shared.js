@@ -516,6 +516,13 @@
   /* A level handed in by the hub, so the person is not asked the same
      boring question in every activity. The hub owns it; whoever asks
      first writes it; everyone after reads it. */
+  /* The hub asks for a fresh run with ?fresh=1. Without it, re-opening
+     lands wherever the person left off, which is what "see my results"
+     needs. */
+  function wantsFresh() {
+    try { return /[?&]fresh=1/.test(window.location.search || ""); } catch (e) { return false; }
+  }
+
   function presetLevel() {
     try {
       var m = /[?&]lvl=([a-z_]+)/.exec(window.location.search || "");
@@ -855,6 +862,7 @@
 
     wireBackToHub: wireBackToHub,
     presetLevel: presetLevel,
+    wantsFresh: wantsFresh,
     emailFormHTML: emailFormHTML,
     wireEmailForm: wireEmailForm,
     shareHTML: shareHTML,

@@ -387,3 +387,15 @@ body.modal-open{overflow:hidden}
 /* ---- picker preview, portrait only -------------------------------- */
 .mini-card{width:88px;height:88px;border-radius:50%;background:var(--yns-warm)}
 .mini-art{position:absolute;inset:0;width:100%;height:100%;transform:none;border-radius:50%;box-shadow:none}
+
+/* ---- the full profile readout ------------------------------------- */
+.dir-more{margin-top:10px;width:100%;font-size:.85rem;padding:8px 12px}
+.pf-sec{margin-top:var(--s5)}
+.pf-sec h3{color:var(--yns-blue-deep);font-size:1.05rem}
+.pf-row{display:grid;grid-template-columns:180px 1fr;gap:4px 16px;padding:10px 0;border-top:1px solid var(--yns-line-soft)}
+.pf-t{font-family:var(--yns-display);font-size:.92rem}
+.pf-v{font-size:.95rem}
+.pf-from{grid-column:2;font-size:.75rem;color:var(--yns-muted)}
+@media (max-width:560px){.pf-row{grid-template-columns:1fr}.pf-from{grid-column:1}}
+/* two actions on a finished card */
+.act-actions{display:flex;gap:14px;flex-wrap:wrap;padding-top:6px}

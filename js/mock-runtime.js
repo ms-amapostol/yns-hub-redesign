@@ -58,8 +58,21 @@ function resolve(slot){
 }
 
 /* ---------- open / navigate ---------------------------------------- */
-function play(slug){
+/* The last finished run of each activity, kept so its results can be
+   shown again without making anyone answer everything a second time. */
+var lastRun = {};
+
+function play(slug, opts){
   var d = DEFS[slug]; if (!d) return false;
+  opts = opts || {};
+  /* Re-open at the results of the run they already did. */
+  if (opts.results && lastRun[slug]) {
+    run = { slug:slug, d:d, i:0, answers:lastRun[slug].answers, extra:lastRun[slug].extra,
+            ui:{}, steps:[], completed:true, allocation:lastRun[slug].allocation };
+    document.body.classList.add("modal-open");
+    host.style.display="block";
+    renderResults(); return true;
+  }
   run = { slug:slug, d:d, i:0, answers:{}, extra:{}, ui:{} };
   d.slots.forEach(function(s){ var r=resolve(s); if (r) run.steps=(run.steps||[]).concat([{slot:s, rung:r}]); });
   run.steps = run.steps || [];
@@ -311,7 +324,9 @@ function renderResults(){
   h+='<div class="am-seven"><h3>Seven days</h3><p class="am-scene">Pick one thing to do this week. It goes on your hub until you tick it off.</p>'+acts.map(function(a){return '<button class="opt" onclick="YNSMock.finish(this)"><i class="dot"></i><div><strong>'+esc(a)+'</strong></div></button>';}).join("")+'<button class="btn-quiet" onclick="YNSMock.finish(null)">Skip for now</button></div></div>';
   host.innerHTML=h; host.scrollTop=0;
 }
-function finish(el){ var slug=run.slug; if (el) facts.next_action=el.textContent.trim(); facts.activities_completed=(facts.activities_completed||[]).concat([slug]); close(); hooks.onDone(slug); }
+function finish(el){
+  var slug=run.slug;
+  lastRun[slug] = { answers: run.answers, extra: run.extra, allocation: run.allocation || {} }; if (el) facts.next_action=el.textContent.trim(); facts.activities_completed=(facts.activities_completed||[]).concat([slug]); close(); hooks.onDone(slug); }
 
 /* ---------- public --------------------------------------------------- */
 global.YNSActivity = {
@@ -323,6 +338,7 @@ global.YNSActivity = {
 global.YNSMock = {
   mount: function(el, onDone){ host=el; hooks.onDone=onDone||hooks.onDone; },
   has: function(slug){ return !!DEFS[slug]; },
+  hasResults: function(slug){ return !!lastRun[slug]; },
   facts: facts,
   setFact: function(k,v){ facts[k]=v; },
   play: play, close: close, next: next, back: back, pick: pick,

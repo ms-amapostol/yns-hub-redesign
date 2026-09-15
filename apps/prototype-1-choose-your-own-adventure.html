@@ -461,7 +461,10 @@ function renderResults(){
     ranked: all.map(r=>r.k),
     answers: {echoes: state.echoes, money: state.money, history_len: history.length}
   });
-  Quiz.clear();
+  /* Kept rather than cleared, so "See my results" can bring this back
+     without making anyone answer eighteen months of questions again.
+     "Do it again" arrives with ?fresh=1 and wipes it. */
+  Quiz.save({ state: state, history: history, done: true });
 }
 
 /* If a previous activity already asked where they're standing, don't ask
@@ -482,6 +485,19 @@ function applyPriorLevel(){
 }
 
 /* ---- resume an interrupted run ---- */
+/* Straight to the results of a finished run, unless the hub asked for a
+   fresh one. */
+function showSavedResults(){
+  if (Quiz.wantsFresh && Quiz.wantsFresh()) { Quiz.clear(); return false; }
+  const saved = Quiz.load(1000*60*60*24*30);
+  if (saved && saved.done && saved.state) {
+    state = saved.state; history = saved.history || [];
+    renderResults();
+    return true;
+  }
+  return false;
+}
+
 function offerResume(){
   const saved = Quiz.load(1000*60*60*24);
   if(saved && saved.state && saved.state.i > 0 && saved.state.i < BEATS.length){
@@ -503,6 +519,7 @@ function offerResume(){
 
 READY.then(function(){
   applyPriorLevel();
+  if (showSavedResults()) return;
   offerResume();
   render();
 });

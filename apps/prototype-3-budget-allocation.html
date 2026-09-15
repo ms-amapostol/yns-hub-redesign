@@ -501,7 +501,9 @@ function renderResults(){
     ranked: all.map(r=>r.k),
     answers: {chose: won, over: lost}
   });
-  Quiz.clear();
+  /* Kept rather than cleared, so "See my results" can bring this back.
+     "Do it again" arrives with ?fresh=1 and wipes it. */
+  Quiz.save({ alloc: alloc, won: won, lost: lost, level: level, done: true });
 }
 
 function render(){
@@ -514,6 +516,17 @@ function render(){
 READY.then(function(){
   const prior = Quiz.priorLevel();
   if(prior) level = prior;   // still confirmed on screen 2, just pre-set
+
+  /* Straight to the results of a finished run, unless the hub asked for
+     a fresh one. */
+  if (Quiz.wantsFresh && Quiz.wantsFresh()) Quiz.clear();
+  else {
+    const saved = Quiz.load(1000*60*60*24*30);
+    if (saved && saved.done && saved.alloc) {
+      alloc = saved.alloc; won = saved.won; lost = saved.lost;
+      level = saved.level || level; screen = 3;
+    }
+  }
   render();
 });
 </script>

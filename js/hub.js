@@ -414,6 +414,110 @@
     render();
   };
 
+  /* Re-open a finished activity, either at its results or from the top.
+     The in-hub activities keep their last run in the runtime. The three
+     quizzes and Career ABCs keep their own state, so re-opening them
+     lands where the person left off; only "do it again" clears it. */
+  function reopen(slug, atResults){
+    var a=ACTS[slug];
+    if (a.play){
+      if (atResults && window.YNSMock.hasResults(slug)) window.YNSMock.play(slug, {results:true});
+      else window.YNSMock.play(slug);
+      return;
+    }
+    if (a.app){ openApp(slug, ABCS_URL+"#"+a.app, a.name); return; }
+    if (a.live){ openApp(slug, withLevel(a.live)+(atResults?"":"&fresh=1"), a.name); return; }
+    toggle(slug);
+  }
+
+  /* ---------- everything we know, in one place ----------------------
+
+     The rail shows the headline. This is the whole thing, written the way
+     someone would need it when they are actually filling in an
+     application or messaging a stranger: their own sentences first, then
+     the roles and the numbers, then the practical facts.
+
+     Nothing here is invented. Every line is either something they typed
+     or something an activity resolved from their answers, and each one
+     says where it came from. */
+  var WHO_FOR = { me:"me", kids:"my kids", family:"my family", partner:"my partner", someone_specific:"one particular person", community:"people like me" };
+  var LEVEL_WORD = { early:"Just starting out", some:"A couple of years in", experienced:"Genuinely experienced", leader:"Running things already" };
+  var APPETITE_WORD = { none:"No training right now", short:"A short course", medium:"A year or two", long:"The full route" };
+  var ROUTE_WORD = { degree:"A degree", certificate:"A certificate", apprenticeship:"An apprenticeship", lateral:"Sideways, then up", self_taught:"Teach myself and show the work", none:"Straight in" };
+  var DRAIN_WORD = { commute:"the commute", work:"the job itself", chores:"keeping life running", none:"nothing \u2014 the week is the wrong shape" };
+  var PROTECT_WORD = { evenings:"my evenings", weekends:"my weekends", sleep:"sleep", own_time:"the one thing that\u2019s mine", flexible:"most of it, for the right thing" };
+
+  function money(n){ return "$" + Math.round(n/1000) + "k"; }
+
+  function profileSections(){
+    var f=state.facts, out=[];
+
+    /* In your own words. */
+    var own=[];
+    if (f.why_statement) own.push({ t:"Why you\u2019re doing this", v:"\u201c"+f.why_statement+"\u201d"+(WHO_FOR[f.why_who]?" Mostly for "+WHO_FOR[f.why_who]+".":""), from:"Your Why" });
+    if (f.why_test) own.push({ t:"How you\u2019ll know it worked", v:f.why_test, from:"Your Why" });
+    var st=Array.isArray(f.strengths)?f.strengths:[];
+    if (st.length) own.push({ t:"What you\u2019re good at", v:st.map(function(x){return x.moment;}).filter(Boolean).join("<br>"), from:"Proof" });
+    if (f.smart_goal) own.push({ t:"Your six-month goal", v:f.smart_goal+(f.smart_first_step?"<br><b>First step:</b> "+f.smart_first_step:""), from:"Your Six Months" });
+    if (own.length) out.push({ h:"In your own words", note:"Useful in a cover letter, and in the first message to anyone you reach out to.", rows:own });
+
+    /* Where you're pointing. */
+    var dir=[];
+    if (f.top_category){
+      var roles=[];
+      try {
+        var band=window.YNS_ROLES.categories[f.top_category][f.level||"early"] || window.YNS_ROLES.categories[f.top_category].early;
+        roles=(band||[]).slice(0,3).map(function(r){ return r.title+" \u00b7 "+money(r.low)+"\u2013"+money(r.high); });
+      } catch(e){}
+      dir.push({ t:"The work", v:catLabel(f.top_category)+(roles.length?"<br>"+roles.join("<br>"):""), from:(state.evidence||[]).length+" activities" });
+    }
+    if (f.interest_top) dir.push({ t:"What you\u2019d enjoy doing", v:f.interest_top, from:"What Kind of Work" });
+    if (f.route_preference) dir.push({ t:"How you\u2019d get in", v:(ROUTE_WORD[f.route_preference]||f.route_preference), from:"Three Doors" });
+    if (f.training_appetite) dir.push({ t:"Training you\u2019re up for", v:APPETITE_WORD[f.training_appetite]||f.training_appetite, from:"What Kind of Work" });
+    if (dir.length) out.push({ h:"Where you\u2019re pointing", note:"This is the answer to \u201cwhat are you looking for?\u201d in an interview.", rows:dir });
+
+    /* The practical facts. */
+    var prac=[];
+    if (f.level) prac.push({ t:"Experience", v:LEVEL_WORD[f.level]||f.level, from:"Your answers" });
+    if (f.floor_monthly) prac.push({ t:"What you need to earn", v:money(f.floor_monthly)+" a month", from:"The Floor" });
+    if (f.time_protected) prac.push({ t:"What you won\u2019t give up", v:PROTECT_WORD[f.time_protected]||f.time_protected, from:"168 Hours" });
+    if (f.time_drain) prac.push({ t:"What you\u2019d take back", v:DRAIN_WORD[f.time_drain]||f.time_drain, from:"168 Hours" });
+    if (f.premortem_risk) prac.push({ t:"What might trip you up", v:f.premortem_risk, from:"What Might Trip You Up" });
+    if (f.hard_week_plan) prac.push({ t:"Your plan for a hard week", v:String(f.hard_week_plan).split("\n")[0], from:"The Week It\u2019s Hard" });
+    if (prac.length) out.push({ h:"The practical facts", note:"Worth having in front of you before you accept anything.", rows:prac });
+
+    return out;
+  }
+
+  YNS.profile=function(){
+    var sec=profileSections();
+    var m=$("actModal"); m.style.display="block"; document.body.classList.add("modal-open");
+    var body = sec.length
+      ? sec.map(function(s){
+          return '<section class="pf-sec"><h3>'+s.h+'</h3><p class="am-note">'+s.note+'</p>'
+            + s.rows.map(function(r){
+                return '<div class="pf-row"><div class="pf-t">'+r.t+'</div><div class="pf-v">'+r.v+'</div><div class="pf-from">from '+r.from+'</div></div>';
+              }).join("")
+            + "</section>";
+        }).join("")
+      : '<p class="am-scene">Nothing here yet. Finish an activity and this fills in.</p>';
+    m.innerHTML='<div class="am-card am-results"><div class="am-top"><span class="am-eyebrow">Everything you\u2019ve told us</span><button class="am-x" onclick="YNS.closeList()" aria-label="Close">\u00d7</button></div>'
+      +'<h1>What we know about you</h1>'
+      +'<p class="am-scene">Your own words, the direction they add up to, and the facts worth having to hand. Take any of it straight into an application or a message.</p>'
+      +body
+      +'<div class="am-foot"><button class="btn btn-ghost" onclick="YNS.copyProfile(this)">Copy it all as text</button><button class="btn btn-primary" onclick="YNS.closeList()">Close</button></div></div>';
+  };
+  YNS.closeList=function(){ $("actModal").style.display="none"; $("actModal").innerHTML=""; document.body.classList.remove("modal-open"); };
+  YNS.copyProfile=function(btn){
+    var text=profileSections().map(function(s){
+      return s.h.toUpperCase()+"\n"+s.rows.map(function(r){
+        return r.t+": "+String(r.v).replace(/<br>/g,"\n  ").replace(/<[^>]+>/g,"");
+      }).join("\n");
+    }).join("\n\n");
+    try { navigator.clipboard.writeText(text); btn.textContent="Copied"; setTimeout(function(){btn.textContent="Copy it all as text";},1600); }
+    catch(e){ btn.textContent="Select and copy from the panel"; }
+  };
+
   /* ---------- hub render -------------------------------------------- */
   function doneCount(){ return Object.keys(state.done).length; }
   function live(d){ return d.acts.filter(function(s){ return !ACTS[s].soon; }); }
@@ -507,13 +611,25 @@
       +(a.after && !state.done[a.after] ? '<p class="after">Works best after A, and it pulls your stories in for you.</p>' : '')
       +'<div class="meta"><span>'+a.min+' min</span>'+(a.soon?'<span class="tag gold">Coming soon</span>':'')+((a.play||a.live)&&!aside?'<span class="tag gold">Play it here</span>':'')+(a.big?'<span class="tag">Bigger one</span>':'')+'</div>';
     if (!a.soon){
-      var link=document.createElement("button"); link.type="button"; link.className="notme";
-      link.textContent = done ? "Do it again" : aside ? "Bring it back" : "Not for me right now";
-      link.onclick=function(ev){ ev.stopPropagation();
-        if (done) { if (a.app) openApp(slug, ABCS_URL+"#"+a.app, a.name); else if (a.play) window.YNSMock.play(slug); else if (a.live) openApp(slug,withLevel(a.live),a.name); return; }
-        state.asideAct[slug]=!aside; render();
-      };
-      el.appendChild(link);
+      /* A finished activity gets two ways back in: look at what you said,
+         or answer it again. Re-opening used to drop straight into the
+         questions, which is a poor reward for having finished. */
+      var row=document.createElement("div"); row.className="act-actions";
+      if (done){
+        var see=document.createElement("button"); see.type="button"; see.className="notme";
+        see.textContent="See my results";
+        see.onclick=function(ev){ ev.stopPropagation(); reopen(slug, true); };
+        var again=document.createElement("button"); again.type="button"; again.className="notme";
+        again.textContent="Do it again";
+        again.onclick=function(ev){ ev.stopPropagation(); reopen(slug, false); };
+        row.appendChild(see); row.appendChild(again);
+      } else {
+        var link=document.createElement("button"); link.type="button"; link.className="notme";
+        link.textContent = aside ? "Bring it back" : "Not for me right now";
+        link.onclick=function(ev){ ev.stopPropagation(); state.asideAct[slug]=!aside; render(); };
+        row.appendChild(link);
+      }
+      el.appendChild(row);
     }
     /* Stage A offers the other way in: bring in a resume or cover letter
        you already have, and it becomes stories rather than a blank page. */
@@ -622,7 +738,8 @@
     if (dir) {
       var ev = state.evidence || [];
       if (!ev.length) {
-        dir.innerHTML = '<p class="small muted">Do one of the Explore activities and your direction shows up here.</p>';
+        dir.innerHTML = '<p class="small muted">Do one of the Explore activities and your direction shows up here.</p>'
+          + (Object.keys(state.facts).length ? '<button class="btn btn-ghost dir-more" onclick="YNS.profile()">See everything we know</button>' : "");
       } else {
         var rank = state.facts.category_ranking || [];
         var names = { interests: "What Kind of Work", cyoa: "The Story", dayinlife: "A Day In The Life", budget: "Spend Your 100" };
@@ -641,6 +758,7 @@
             ? '<p class="dir-note">All of them point the same way, which makes this a stronger read than any one on its own.</p>'
             : '<p class="dir-note">These do not all point the same way, and that is worth knowing rather than hiding. Each one measures something different, so the answer above is the weight of all of them together.</p>');
         }
+        parts.push('<button class="btn btn-ghost dir-more" onclick="YNS.profile()">See everything we know</button>');
         dir.innerHTML = parts.join("");
       }
     }
