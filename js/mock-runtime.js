@@ -126,6 +126,10 @@ function pick(k){
   var s=cur(), r=s.rung, id=s.slot.id; var o=r.options.filter(function(x){return x.k===k;})[0];
   run.answers[id]=k; run.extra[id+"_label"]=o?o.t:k; if (o&&o.echo) run.extra[id+"_echo"]=o.echo;
   if (r.asks) facts[r.asks] = (o && o.fact!=null) ? o.fact : k;
+  /* An activity can react to a single answer before the next screen
+     renders. Used where a later screen needs something derived from
+     this one plus a fact it does not carry. */
+  if (run.d.onStep) { try { run.d.onStep({ slot:id, answer:k, facts:facts, extra:run.extra, setFact:function(a,b){ facts[a]=b; } }); } catch(e){} }
   next();
 }
 
@@ -282,7 +286,16 @@ M.compose = function(r){
   shell(r, h, '<span></span>'+primary(r.cta,"YNSMock.submitCompose()"));
 };
 function blank(k,v){ run.ui.blanks[k]=v; var pre=host.querySelector(".am-msg"); var r=cur().rung; if (pre) pre.textContent=r.template.replace(/\{(\w+)\}/g,function(_,kk){ var bl=r.blanks.filter(function(x){return x.k===kk;})[0]; return run.ui.blanks[kk]||("["+(bl?bl.placeholder:kk)+"]"); }); }
-function submitCompose(){ var s=cur(), r=s.rung, id=s.slot.id, b=run.ui.blanks||{}; run.extra[id+"_blanks"]=b; if (r.asks) facts[r.asks]=!!(b.name||"").trim(); run.ui.blanks=null; next(); }
+function submitCompose(){
+  var s=cur(), r=s.rung, id=s.slot.id, b=run.ui.blanks||{};
+  run.extra[id+"_blanks"]=b;
+  /* Keep the assembled sentence, not just the pieces. Anything built from
+     a template is usually the thing you want to quote back. */
+  var msg=r.template.replace(/\{(\w+)\}/g,function(_,k){ var bl=r.blanks.filter(function(x){return x.k===k;})[0]; return b[k]||("["+(bl?bl.placeholder:k)+"]"); });
+  run.extra[id+"_text"]=msg;
+  if (r.asks) facts[r.asks] = r.asksText ? msg : !!(b.name||"").trim();
+  run.ui.blanks=null; next();
+}
 
 M.diff = function(r){
   var rows = run.ui.rows || (run.ui.rows = (function(){ try { return r.rows(ctx())||[]; } catch(e){ return []; } })());
@@ -344,6 +357,13 @@ M.budget = function(r){
   var income = facts[r.incomeFrom] || run.extra.income_total || 0;
   st.income=income;
   r.rows.forEach(function(row){ if (st.alloc[row.k]==null) st.alloc[row.k]=0; });
+  /* The savings decision made earlier arrives already filled in, so it is
+     in the budget before anything competes with it. */
+  if (r.seedFrom && !st.seeded){
+    var seed=facts[r.seedFrom];
+    if (seed && seed.k!=null && st.alloc[seed.k]!=null) st.alloc[seed.k]=seed.v;
+    st.seeded=true;
+  }
   var assigned=0; Object.keys(st.alloc).forEach(function(k){ assigned+=st.alloc[k]||0; });
   var left=income-assigned;
   var groups=[], seen={};

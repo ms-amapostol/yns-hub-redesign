@@ -85,3 +85,47 @@ first step, and the note for a hard week.
 
 `steps_open` is the key `stilltrue.js` already reads, so the check-in picks
 these up without changing.
+
+
+## Third pass (Sept 15): SMART built rather than described, and savings made a decision
+
+### Your Six Months
+
+The activity used to explain SMART and then check whether the answers happened
+to satisfy it. It now **produces** one.
+
+- **Month one is written as a SMART goal**, assembled from four blanks: what
+  you'll have done, how many, how you'll know, and by when. The sentence builds
+  as you type, so nobody has to hold five criteria in their head while writing.
+- **Months two to six are written to the same shape**, prefilled from month one,
+  and each line is checked for a number and a by-when. Flagged, never corrected,
+  because it is their plan. "2 of 5 are ready" is more use than five ticks.
+- The class's instruction to work backwards from the finish line is what that
+  screen does.
+
+**Bug fixed at the same time:** the results screen only read `extra`, so on a
+second run — where a slot whose fact is known gets dropped — every SMART part
+reported as thin even though the answers were on file. It falls back to facts now.
+
+### Every Dollar a Job
+
+**Pay yourself first is now a decision made before the budget screen**, not one
+row among fourteen. A savings line that competes with thirteen others loses
+every time. Options are $20 a month, 5%, 10%, or an honest "nothing yet", and
+the chosen amount arrives pre-filled in the budget.
+
+The result screen reads the savings line back: the amount, the share of income,
+and what it becomes over twenty years at the same 7% assumption the compounding
+activity uses, labelled as an assumption both times. If savings came out at
+zero it says so kindly and suggests moving $20 off the fun line. If there is no
+surprise fund it names that too, because that is the line that stops a flat tyre
+becoming a credit card balance.
+
+### Two small runtime additions
+
+- `compose` now keeps the assembled sentence in `extra.<slot>_text`, not just
+  the blanks, and can write it to a fact with `asksText: true`.
+- An activity can define `onStep({slot, answer, facts, setFact})` to react to a
+  single answer before the next screen renders. Used here so the savings
+  decision can be turned into an amount, which needs income that the choice
+  itself does not carry.

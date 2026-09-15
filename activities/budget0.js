@@ -46,6 +46,37 @@ var ROWS = [
   { k: "goal",     t: "Toward the plan",         s: "Course fees, tools, the certificate", group: "Choose to" }
 ];
 
+/* What the savings line is worth, said in the only terms that move
+   anybody: what it becomes, and what it protects against. Nothing here
+   recommends a product; the growth figure uses the same 7% assumption as
+   What Money Does Over Time and says so. */
+function savingsRead(savings, income, alloc) {
+  var rate = income ? Math.round(savings / income * 100) : 0;
+  var buffer = alloc.buffer || 0;
+
+  if (!savings) {
+    return '<div class="ya-readout"><h3>The line worth adding</h3>' +
+      "<p>Savings came out at zero this month. That is where a lot of budgets start and it is not a failure, though it is the one line worth fighting for. " +
+      "Twenty dollars a month is $240 a year, and more importantly it is the month you stop being one flat tyre away from a crisis.</p>" +
+      "<p>Try moving $20 out of the fun line and see whether the month still works. It usually does.</p></div>";
+  }
+
+  /* Twenty years at 7% a year, compounded monthly. Same assumption, and
+     the same honesty about it, as the compounding activity. */
+  var bal = 0, r = 0.07 / 12;
+  for (var i = 0; i < 240; i++) bal = (bal + savings) * (1 + r);
+
+  return '<div class="ya-readout"><h3>What you\u2019re keeping</h3>' +
+    "<p>" + money(savings) + " a month is going to you rather than to someone else" +
+    (rate ? ", which is about " + rate + "% of what comes in" : "") + ". " +
+    "Kept up for twenty years at a 7% average return, that is roughly <b>" + money(bal) + "</b>. " +
+    "That rate is an assumption rather than a promise, and What Money Does Over Time lets you change it.</p>" +
+    (buffer
+      ? "<p>You also set aside " + money(buffer) + " for surprises. That is the line that stops one bad week turning into debt, and it is doing more work than it looks like.</p>"
+      : "<p>One thing missing: a surprise fund. Even $25 a month builds the buffer that stops a flat tyre becoming a credit card balance.</p>") +
+    "</div>";
+}
+
 YNSActivity.define({
   slug: "budget0",
   title: "Every Dollar a Job",
@@ -119,7 +150,40 @@ YNSActivity.define({
     },
 
     /* ---------------------------------------------------------------
-       3. The budget itself.
+       3. Pay yourself first. Asked before the budget screen rather than
+       left as one row among fourteen, because a savings line that
+       competes with everything else loses every time. Asked as a
+       decision, with the smallest option a real one.
+       --------------------------------------------------------------- */
+    {
+      id: "first",
+      axes: [],
+      ladder: [
+        {
+          asks: "save_target",
+          mechanic: "choice",
+          eyebrow: "Before anything else",
+          title: "Decide what you keep, before you decide what you spend.",
+          scene: function (v) {
+            var inc = v && v.facts && v.facts.money_in;
+            return [
+              "This is the one habit that separates people whose money situation improves from people whose doesn\u2019t, and it has almost nothing to do with how much they earn.",
+              inc ? "Of the " + money(inc) + " coming in, how much goes to you first?" : "How much goes to you first?"
+            ];
+          },
+          prompt: "Pick something you would actually keep to.",
+          options: [
+            { k: "twenty",  t: "$20 a month",  s: "Small on purpose. The habit matters more than the amount at this stage.", echo: "$20 a month" },
+            { k: "five",    t: "5% of what comes in", s: "Scales with you, so a raise raises it without another decision.", echo: "5%" },
+            { k: "ten",     t: "10% of what comes in", s: "The number most advice starts at. Ambitious on a tight month.", echo: "10%" },
+            { k: "none",    t: "Nothing yet, honestly", s: "A real answer. The budget still works, and this comes back later.", echo: "nothing yet" }
+          ]
+        }
+      ]
+    },
+
+    /* ---------------------------------------------------------------
+       4. The budget itself.
        --------------------------------------------------------------- */
     {
       id: "plan",
@@ -137,7 +201,10 @@ YNSActivity.define({
           prompt: "Type the amounts. The number at the top tells you what\u2019s still unassigned.",
           rows: ROWS,
           incomeFrom: "money_in",
-          seedFrom: { rent: "floor_rent" },
+          /* The savings line arrives already filled in from the decision
+             two screens ago, so it is there before anything competes
+             with it. Everything else starts at zero. */
+          seedFrom: "save_seed",
           cta: "That\u2019s my month"
         }
       ]
@@ -169,6 +236,17 @@ YNSActivity.define({
       ]
     }
   ],
+
+  /* The savings decision becomes the seed for the budget screen. Done in
+     onComplete's sibling rather than in the choice itself because the
+     amount depends on income, which the choice does not carry. */
+  onStep: function (r) {
+    if (r.slot !== "first") return;
+    var income = r.facts.money_in || 0;
+    var pick = r.answer;
+    var v = pick === "twenty" ? 20 : pick === "five" ? Math.round(income * 0.05) : pick === "ten" ? Math.round(income * 0.10) : 0;
+    r.setFact("save_seed", { k: "save", v: v });
+  },
 
   /* ------------------------------------------------------------------ */
   results: function (r) {
@@ -208,6 +286,8 @@ YNSActivity.define({
       '<div class="ya-readout"><h3>The shape of it</h3>' +
       "<p>" + money(must) + " goes out whether you like it or not. " + money(choose) + " is yours to decide on." +
       (savings ? " Of that, " + money(savings) + " is going to you rather than to someone else." : "") + "</p></div>" +
+
+      savingsRead(savings, income, alloc) +
 
       (HABIT[habit] ? '<div class="ya-readout"><h3>Keeping it</h3><p>' + esc(HABIT[habit]) + "</p></div>" : "") +
 

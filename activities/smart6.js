@@ -35,6 +35,34 @@
 (function () {
 "use strict";
 
+/* A line with a number in it can be judged. A line with a when in it
+   gets started. Everything else is a wish, and saying so is more useful
+   than accepting it. */
+function monthCheck(months) {
+  if (!months) return "";
+  var lines = String(months).split("\n")
+    .map(function (l) { return l.trim(); })
+    .filter(function (l) { return l && /:/.test(l) && l.split(":")[1].trim(); });
+  if (!lines.length) return "";
+  var WHEN = /(by |before |week|month|friday|monday|tuesday|wednesday|thursday|saturday|sunday|\b\d{1,2}(st|nd|rd|th)\b|end of)/i;
+  var rows = lines.map(function (l) {
+    var body = l.split(":").slice(1).join(":");
+    var hasNum = /\d/.test(body);
+    var hasWhen = WHEN.test(body);
+    var flag = hasNum && hasWhen ? "ready"
+      : !hasNum && !hasWhen ? "needs a number and a by-when"
+      : !hasNum ? "needs a number"
+      : "needs a by-when";
+    return "<p><b>" + l.split(":")[0] + "</b> \u2014 " + (flag === "ready" ? "ready" : flag) + "</p>";
+  });
+  var ready = rows.filter(function (r) { return /ready/.test(r); }).length;
+  return '<div class="ya-readout"><h3>The other months, checked</h3>' + rows.join("") +
+    "<p>" + (ready === rows.length
+      ? "Every line has a number and a when. That is six SMART goals, not one."
+      : ready + " of " + rows.length + " are ready. The rest will still work, they just cannot be judged at the end of the month, which is the part that keeps a plan honest.") +
+    "</p></div>";
+}
+
 function inSixMonths() {
   try {
     var d = new Date(); d.setMonth(d.getMonth() + 6);
@@ -224,33 +252,46 @@ YNSActivity.define({
     },
 
     /* ---------------------------------------------------------------
-       6. The first step. The part that makes it real.
+       6. Month one, written as a SMART goal rather than described as
+       one. The class teaches the framework; this is where someone
+       actually produces one. Assembled from four blanks so nobody has to
+       hold five criteria in their head while writing a sentence.
        --------------------------------------------------------------- */
     {
-      id: "first",
+      id: "month1",
       axes: [],
       ladder: [
         {
-          asks: "smart_first_step",
-          mechanic: "text",
+          asks: "smart_month1",
+          asksText: true,
+          mechanic: "compose",
           eyebrow: "T \u00b7 Time-bound",
-          title: "When does it start, and what\u2019s the first week?",
+          title: "Now write month one as a SMART goal.",
           scene: [
-            "The date is already set: six months from today. So the only thing left is the first week, and it wants to be small enough that it would be embarrassing to skip. Look up one program. Email one person. Open one account. Fifteen minutes or less."
+            "The six-month goal is the destination. Month one is the first goal you will actually hit, so it is worth writing properly.",
+            "Fill in the four blanks and the sentence writes itself. Every part of SMART is in it: what, how much, how you\u2019ll check, and by when."
           ],
-          prompt: "This week, I will\u2026",
-          placeholder: "This week, I will\u2026",
-          rows: 3,
-          maxLength: 200,
-          cta: "That's the step"
+          prompt: "Fill these in and watch the sentence build.",
+          cta: "That\u2019s month one",
+          blanks: [
+            { k: "action", t: "What you\u2019ll have done",       placeholder: "called three training providers" },
+            { k: "number", t: "How many, or how much",         placeholder: "three" },
+            { k: "check",  t: "How you\u2019ll know it\u2019s done", placeholder: "I have their costs written down" },
+            { k: "by",     t: "By when",                       placeholder: "the last Friday of the month" }
+          ],
+          template:
+            "By {by}, I will have {action}.\n" +
+            "How much: {number}.\n" +
+            "I\u2019ll know it\u2019s done because {check}."
         }
       ]
     },
 
     /* ---------------------------------------------------------------
-       7. Month by month. The class breaks six months into six monthly
-       objectives. Prefilled scaffold, optional, because the first step
-       matters more than a perfect calendar.
+       7. The rest of the months, each to the same shape as month one.
+       The class works backwards from the finish line; the scaffold does
+       that for them, and the results screen checks each line for a
+       number and a when rather than accepting a wish.
        --------------------------------------------------------------- */
     {
       id: "months",
@@ -259,17 +300,35 @@ YNSActivity.define({
         {
           asks: "smart_months",
           mechanic: "text",
-          eyebrow: "Month by month",
-          title: "Rough it out, one line per month.",
+          eyebrow: "The other five",
+          title: "Now work backwards from month six.",
           scene: [
-            "The class does this with the home-library example: month 1 buy three books, month 2 three more, and so on. Yours can be that plain. Blank months are fine."
+            "The class does this with a home library: month six is three more books, month five is three before that. Yours can be exactly that plain.",
+            "Same shape as month one each time: a thing, a number, and a by-when. A line with no number is the one that quietly never gets judged."
           ],
-          prompt: "One line each. Change any of it.",
+          prompt: "One line per month. Leave any of them blank for now.",
           prefill: function (ctx) {
-            var first = (ctx && ctx.extra && ctx.extra.first_text) || "";
-            return "Month 1: " + (first || "") + "\nMonth 2: \nMonth 3: \nMonth 4: \nMonth 5: \nMonth 6: done.";
+            var b = (ctx && ctx.extra && ctx.extra.month1_blanks) || {};
+            var first = b.action
+              ? b.action + (b.number ? " (" + b.number + ")" : "") + (b.by ? ", by " + b.by : "")
+              : "";
+            return "Month 1: " + first + "\n" +
+                   "Month 2: \n" +
+                   "Month 3: \n" +
+                   "Month 4: \n" +
+                   "Month 5: \n" +
+                   "Month 6: ";
           },
-          rows: 8, maxLength: 900, cta: "Good enough for now", optional: true
+          rows: 8,
+          maxLength: 900,
+          cta: "That\u2019s the six months",
+          optional: true,
+          skipLabel: "I\u2019ll do the rest later",
+          examples: [
+            "Month 2: sit the entrance test, book it by the 10th",
+            "Month 3: save $300 toward the fee, $75 a week",
+            "Month 4: enrol, deposit paid by the 15th"
+          ]
         }
       ]
     }
@@ -278,13 +337,17 @@ YNSActivity.define({
   /* ------------------------------------------------------------------ */
   results: function (r) {
     var esc = r.esc;
-    var goal = r.extra.what_text || "";
-    var measure = r.extra.measure_text || "";
-    var why = r.extra.why_text || r.ctx.facts.why_statement || "";
-    var first = r.extra.first_text || "";
-    var conf = r.state.answers.doable || "";
-    var vision = r.extra.vision_text || "";
-    var months = r.extra.months_text || "";
+    /* A slot whose fact is already known gets dropped on a second run, so
+       `extra` is empty and everything would read as missing. Fall back to
+       what is on file. */
+    var f = r.ctx.facts;
+    var goal    = r.extra.what_text    || f.smart_goal   || "";
+    var measure = r.extra.measure_text || f.smart_measure|| "";
+    var why     = r.extra.why_text     || f.smart_why    || f.why_statement || "";
+    var first   = r.extra.month1_text  || f.smart_month1 || "";
+    var conf    = r.state.answers.doable || f.smart_confidence || "";
+    var vision  = r.extra.vision_text  || f.vision_line  || "";
+    var months  = r.extra.months_text  || f.smart_months || "";
 
     var CONF = {
       likely:  "You said the size is right. Then the only thing between you and it is the first week, and you've already written what that week holds.",
@@ -298,9 +361,9 @@ YNSActivity.define({
     var parts = [
       { L:"S", t:"Specific",    v:goal,    hint:"Say the thing itself, not the area it's in." },
       { L:"M", t:"Measurable",  v:measure, hint:"Something a person could check on the last day." },
-      { L:"A", t:"Achievable",  v:CONF[conf] ? r.state.answers.doable : "", hint:"Right size for the life you actually have." },
+      { L:"A", t:"Achievable",  v:conf,    hint:"Right size for the life you actually have." },
       { L:"R", t:"Relevant",    v:why,     hint:"Tied to why you're doing any of this." },
-      { L:"T", t:"Time-bound",  v:inSixMonths()+(first?" \u00b7 starting this week":""), hint:"A date, and a first week." }
+      { L:"T", t:"Time-bound",  v:first,   hint:"Month one needs a by-when, not just a direction." }
     ];
     var thin = parts.filter(function(p){ return !p.v; });
     var check = '<div class="ya-readout"><h3>Your goal, checked</h3>' +
@@ -318,13 +381,18 @@ YNSActivity.define({
       '<div class="ya-readout"><h3>Done by</h3><p>' + esc(inSixMonths()) + "</p></div>" +
       (measure ? '<div class="ya-readout"><h3>How you\u2019ll know</h3><p>' + esc(measure) + "</p></div>" : "") +
       (why ? '<div class="ya-readout"><h3>Why it matters</h3><p>' + esc(why) + "</p></div>" : "") +
-      (first ? '<div class="ya-readout"><h3>This week</h3><p>' + esc(first) + "</p></div>" : "") +
-      (months ? '<div class="ya-readout"><h3>Month by month</h3><p style="white-space:pre-line">' + esc(months) + "</p></div>" : "") +
+      (first
+        ? '<div class="ya-readout"><h3>Month one, as a SMART goal</h3><p style="white-space:pre-line">' + esc(first) + "</p></div>"
+        : "") +
+      monthCheck(months) +
       check +
       (CONF[conf] ? '<p class="ya-result-lead">' + esc(CONF[conf]) + "</p>" : "") +
       '<p class="ya-result-lead">When the six months are up, the class says to rinse and repeat: pick the next six-month piece of the same five-year picture. Still True? will ask you about this in a month. Say what changed. Plans that get checked are the ones that happen.</p>';
   },
 
+  /* Each month line gets the same two questions asked of it: is there a
+     number in it, and is there a when. Flagged rather than corrected,
+     because it is their plan. */
   actions: function (state) {
     var first = (state && state.extra && state.extra.first_text) || "";
     return [
