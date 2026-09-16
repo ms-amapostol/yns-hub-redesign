@@ -42,10 +42,10 @@ YNSActivity.define({
         {
           mechanic: "learn",
           eyebrow: "Six minutes",
-          title: "You've already bounced back from things.",
-          lead: "This activity looks at one of them, so you can see how you do it.",
+          title: "Think of a time you bounced back.",
+          lead: "This activity looks at one time, so you can see how you did it.",
           body: [
-            "Bouncing back works a lot like a habit. You already have a way of handling things that go wrong. It just hasn't been written down yet.",
+            "Bouncing back can work a lot like a habit. You may already have a way of handling things that go wrong. This is a chance to write it down.",
             "We'll pick one setback, look at what you did next, and name the pattern. Then you get one small thing to try the next time.",
             "Nothing here is graded. What you write stays private."
           ],
@@ -69,7 +69,7 @@ YNSActivity.define({
           eyebrow: "Quick check",
           title: "When something new and hard shows up, which is closer?",
           scene: [
-            "Three things to think about: a new challenge, a big task, a friend who's doing well. Pick the line that sounds most like you on a normal day. Nobody is one thing all the time."
+            "Three things to think about: a new challenge, a big task, a friend who's doing well. Pick the line that sounds most like you on a normal day. You might be different on different days, and that's okay."
           ],
           prompt: "Closest to you.",
           options: [
@@ -128,7 +128,7 @@ YNSActivity.define({
           eyebrow: "What happened next",
           title: "And what did you actually do after that?",
           scene: [
-            "The first thing you did, in the days after. Every one of these is a normal response. There's no right answer here. We're looking for your pattern."
+            "The first thing you did, in the days after. Any of these is okay to pick. There's no right answer here. We're looking for your pattern."
           ],
           prompt: "The closest one.",
           options: [
@@ -145,7 +145,7 @@ YNSActivity.define({
               s: "Took a break from it. Sometimes a long one.",
               echo: "you stepped back" },
             { k: "froze",   t: "I didn't do anything",
-              s: "It sat there. Lots of people have at least one of these.",
+              s: "It sat there.",
               echo: "you let it sit" }
           ]
         },
@@ -190,13 +190,13 @@ YNSActivity.define({
         {
           mechanic: "learn",
           eyebrow: "Worth knowing",
-          title: "Ability can grow. That one belief changes what you do after a setback.",
+          title: "Ability can grow. Believing that can change what you do after a setback.",
           lead: "A fixed mindset says you're either good at a thing or you're not. A growth mindset says you get better with effort, learning, and sticking with it.",
           points: [
             "<b>A common swap:</b> \u201cI'm just not good at this\u201d becomes \u201cI can get better with practice.\u201d Same situation, different next move.",
             "<b>Carol Dweck's research</b> found students who believed ability could be developed did better in school than students who believed it was fixed.",
             "<b>Angela Duckworth</b> calls the long version of this grit: passion and perseverance for a long-term goal. Resilience is the short version, bouncing back from one setback.",
-            "This is something you can practice. Every time you face a hard thing, you're practicing it."
+            "This is something you can practice. Each hard thing you face is a chance to practice it."
           ],
           note: "The optional paid Your Next Step course covers this, with video, if you want the full idea.",
           cta: "Got it"
@@ -243,18 +243,18 @@ YNSActivity.define({
     var reframe = r.extra.reframe_text || "";
 
     var PATTERN = {
-      pushed:  { name: "You push", body: "Your first move is to try again at the same thing. That's a strength when the door is real and just stuck. The thing to watch is a door that's actually closed, where a second try costs you time you could spend on a different door." },
-      pivoted: { name: "You pivot", body: "Your first move is to change the plan. That keeps you moving, and it's how a lot of people find the thing that fits. The thing to watch is pivoting before the first plan had a fair chance." },
-      asked:   { name: "You reach out", body: "Your first move is to bring in another person. Many people find this the hardest one to do, and it's usually the fastest route to an answer. Keep doing it." },
-      paused:  { name: "You step back", body: "Your first move is to take space. That's often the right call when you're running on empty. The thing to watch is a pause with no end date, because those turn into years without anyone deciding." },
-      froze:   { name: "You let it sit", body: "Your first move was no move, and you were able to say so. Usually this means the next step was too big to see. The fix is a smaller step." }
+      pushed:  { name: "You push", body: "Your first move is to try again at the same thing. That can be a strength when the door is just stuck. The thing to watch is a door that's actually closed, where a second try costs you time you could spend on a different door." },
+      pivoted: { name: "You pivot", body: "Your first move is to change the plan. That keeps you moving, and it can help you find the thing that fits. The thing to watch is pivoting before the first plan had a fair chance." },
+      asked:   { name: "You reach out", body: "Your first move is to bring in another person. Asking can feel hard, and it can get you to an answer faster. Keep doing it." },
+      paused:  { name: "You step back", body: "Your first move is to take space. That can be the right call when you're running on empty. The thing to watch is a pause with no end date, because those can stretch into years without anyone deciding." },
+      froze:   { name: "You let it sit", body: "Your first move was no move, and you were able to say so. Sometimes that happens when the next step feels too big. A smaller step can help." }
     };
     var p = PATTERN[resp];
     var lean = r.state.answers.check || "";
     var LEAN = {
       growth: "On the quick check you leaned toward growth: new things sound a bit exciting, you plan, you cheer people on. Keep that. It's the thing this activity is trying to build.",
-      mixed:  "On the quick check you said it depends on the day. That's true for a lot of people. The move is noticing which days, because the fixed days usually have a pattern too.",
-      fixed:  "On the quick check you leaned toward worry about failing. That's a mindset, and mindsets shift. The swap on the last screen is how: catch the sentence, change the sentence."
+      mixed:  "On the quick check you said it depends on the day. The move is noticing which days, because the harder days may have a pattern too.",
+      fixed:  "On the quick check you leaned toward worry about failing. That's a mindset, and mindsets can shift. The swap on the last screen is how: catch the sentence, change the sentence."
     };
 
     return "<h1>That's how you bounce back.</h1>" +
@@ -262,7 +262,7 @@ YNSActivity.define({
       (story ? '<div class="ya-quote">' + esc(story) + "</div>" : "") +
       (p ? '<div class="ya-readout"><h3>' + esc(p.name) + "</h3><p>" + esc(p.body) + "</p></div>" : "") +
       (reframe ? '<div class="ya-readout"><h3>Said the second way</h3><p>' + esc(reframe) + "</p></div>" : "") +
-      '<p class="ya-result-lead">The next time something goes wrong, you\u2019ll know your first move before you make it. That\u2019s a big part of what grit is.</p>';
+      '<p class="ya-result-lead">The next time something goes wrong, you can watch for your first move before you make it. That kind of awareness can help you build grit.</p>';
   },
 
   actions: function (state) {

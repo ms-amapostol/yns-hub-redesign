@@ -50,8 +50,8 @@ YNSActivity.define({
         {
           mechanic: "learn",
           eyebrow: "Eight minutes",
-          title: "Three numbers, and you already know all of them.",
-          lead: "What comes in. What has to go out. What's left. A lot of budgeting advice skips to step nine. This is steps one to three.",
+          title: "Three numbers, and you may already know them.",
+          lead: "What comes in. What has to go out. What's left. This is steps one to three.",
           body: [
             "Rough figures are fine. You can fix them later. Nothing here is shared, and nothing gets judged.",
             "If you did The Floor, we'll use that number and skip the question."
@@ -194,14 +194,14 @@ YNSActivity.define({
             return "So where does that leave you most months?";
           },
           scene: [
-            "This is the number that matters, and people rarely talk about it. It stays private. Pick what most months feel like."
+            "This number is worth knowing. It stays private. Pick what most months feel like."
           ],
           prompt: "Most months.",
           options: [
             { k: "room",  t: "There's room",            s: "Something is left, and I mostly decide where it goes.", echo: "there's some room" },
             { k: "tight", t: "It's tight but it works", s: "It clears, barely. One surprise and it doesn't.",       echo: "it's tight" },
             { k: "short", t: "It doesn't cover it",     s: "Most months I'm borrowing from next month.",            echo: "it's short" },
-            { k: "unsure",t: "I don't know",   s: "A very common answer. Now you have the numbers to find out.", echo: "you're not sure yet" }
+            { k: "unsure",t: "I don't know",   s: "Now you have the numbers to find out.", echo: "you're not sure yet" }
           ]
         }
       ]
@@ -220,11 +220,11 @@ YNSActivity.define({
           title: "Give every dollar a job. That's the whole budget.",
           lead: "A zero-based budget works like this: what comes in, minus everything you've assigned a purpose, equals zero. The money that's left after fixed costs is the part you're actually deciding about.",
           points: [
-            "<b>Name it before the month starts.</b> Fun money, a buffer, a payment. Money with no job gets spent on whatever is loudest.",
-            "<b>Many budgets pay you first, even $20.</b> The habit matters more than the amount.",
-            "<b>One surprise a month is normal.</b> A plan with no room for one is a plan that breaks in week two."
+            "<b>Name it before the month starts.</b> Fun money, a buffer, a payment. Money with no job can end up spent on whatever is loudest.",
+            "<b>Try paying yourself first, even $20.</b> Building the habit can count as much as the amount.",
+            "<b>Leave room for a surprise.</b> A plan with some slack can hold up when one comes."
           ],
-          note: "Managing money is mostly managing your habits around it, which is why a budget works best as a weekly habit. If your number is negative, the first job is getting it to zero. The Floor and Every Dollar a Job help you see which line can move.",
+          note: "Managing money can come down to habits, so a quick weekly check of your budget may help. If your number is negative, the first job is getting it to zero. The Floor and Every Dollar a Job help you see which line can move.",
           cta: "Got it"
         }
       ]
@@ -243,9 +243,9 @@ YNSActivity.define({
 
     var READ = {
       room:  "Some of it is yours to decide. That's the number to give a job before next month starts.",
-      tight: "It works until something breaks. Many people start a small buffer, built slowly, so one surprise stops being a crisis.",
-      short: "It doesn't cover it, and you were able to say so. The first plan is getting to zero, one bill at a time, and it's usually smaller than it looks.",
-      unsure:"You didn't know, and now you have three numbers. Watch one normal month against them and you'll know."
+      tight: "It works until something breaks. A small buffer, built slowly, can keep one surprise from turning into a crisis.",
+      short: "It doesn't cover it, and you were able to say so. The first plan is getting to zero, one bill at a time. It may be smaller than it looks.",
+      unsure:"You didn't know, and now you have three numbers. Watch one normal month against them to see where you land."
     };
 
     return "<h1>Your three numbers.</h1>" +

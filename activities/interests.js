@@ -169,8 +169,8 @@ YNSActivity.define({
           title: "Thirty small questions about what you'd enjoy doing.",
           lead: "Just what you'd like doing on an ordinary Tuesday. Pay and training come later.",
           points: [
-            "<b>Every question is a thing you'd be doing</b>, never a job title. People are much better at answering \u201cwould I like that\u201d than \u201cam I a creative person\u201d.",
-            "<b>Three answers: yes, maybe, no.</b> Go fast. Your first reaction is the honest one.",
+            "<b>Every question is a thing you'd be doing</b>, never a job title. A task can be easier to picture than a label like \u201ccreative person.\u201d",
+            "<b>Three answers: yes, maybe, no.</b> Go fast, and trust your first reaction.",
             "<b>You'll get a shortlist, with real roles and real pay.</b> Something concrete to look at next."
           ],
           note: "The six interest areas underneath are the ones used by O*NET, the US Department of Labor's careers database. The questions are ours, written plainly.",
@@ -204,12 +204,12 @@ YNSActivity.define({
           eyebrow: "One more",
           title: "How much training are you up for right now?",
           scene: [
-            "This changes what we show you. Plenty of good work needs none at all, and some of the best-paid needs a year or two. Both answers are fine, and you can change this later."
+            "This changes what we show you. Some good work needs no training, and some needs a year or two. Both answers are fine, and you can change this later."
           ],
           prompt: "Right now.",
           options: [
             { k: "none",   t: "None. I need to be earning",
-              s: "Start now, learn on the job, use tuition benefits later if you want them.", echo: "no training right now" },
+              s: "Start now, learn on the job, and look for tuition benefits later if you want them.", echo: "no training right now" },
             { k: "short",  t: "Something short. A few weeks or months",
               s: "A certificate, a license, a short course.", echo: "a short course" },
             { k: "medium", t: "A year or two, if it's worth it",
@@ -253,10 +253,10 @@ YNSActivity.define({
 
     var appetite = r.state.answers.appetite || r.ctx.facts.training_appetite || "";
     var APPETITE = {
-      none:   "You said no training right now, so the roles above are ones you can start from where you are. Some large employers, including retail and food chains, help pay for school, which can cut what a degree costs you. A job's benefits page usually says whether it does.",
-      short:  "You said something short. That's where certificates and licenses live, and in several of these fields a few weeks of training is the whole difference in pay.",
-      medium: "You said a year or two. That opens apprenticeships, trade programs and associate degrees, which is where a lot of the best pay-to-training ratios sit.",
-      long:   "You said you'd go the whole way. Worth checking which of these actually needs a four-year degree, because a few of them don't, and the ones that don't will get you earning sooner."
+      none:   "You said no training right now, so look for roles above that you could start from where you are. Some large employers, including retail and food chains, help pay for school, which can cut what a degree costs you. A job's benefits page may say whether it does.",
+      short:  "You said something short. That's where certificates and licenses live. In some fields, a short credential can change the pay, so it's worth checking for these roles.",
+      medium: "You said a year or two. That opens apprenticeships, trade programs and associate degrees, which are worth comparing on pay against time spent training.",
+      long:   "You said you'd go the whole way. Worth checking which of these needs a four-year degree. Any that skip it could get you earning sooner."
     };
 
     var out = "<h1>Here's what fits what you like doing.</h1>";
@@ -269,7 +269,7 @@ YNSActivity.define({
       out += '<div class="ya-readout"><h3>' + (i + 1) + ". " + esc(catLabel(c.k)) + "</h3>" +
         (lines.length
           ? "<p>" + lines.map(function (l) { return esc(l); }).join("<br>") + "</p>" +
-            '<p class="ya-fine">Pay is a national band for where you are now, from the US Bureau of Labor Statistics via CareerOneStop. We match your experience to a slice of the range, which is our estimate. It moves a lot by state.</p>'
+            '<p class="ya-fine">Pay is a national band for where you are now, from the US Bureau of Labor Statistics via CareerOneStop. We match your experience to a slice of the range, which is our estimate. It can vary by state.</p>'
           : "<p>Real roles and pay for this one load from the wage file.</p>") +
         "</div>";
     });
@@ -278,7 +278,7 @@ YNSActivity.define({
       top.map(function (a) { return "<b>" + esc(AREA[a].t) + "</b>. " + esc(AREA[a].s); }).join("<br>") +
       "</p>" +
       (flat
-        ? "<p>Your answers were fairly even across all six. That often means you'd be content in more places than you think, and the thing to weigh is the life around the job. A Day In The Life is the better activity for that.</p>"
+        ? "<p>Your answers were fairly even across all six. You might be content in more than one place, so the life around the job may be worth weighing. A Day In The Life can help with that.</p>"
         : "<p>Those are the three you said yes to most often. Hold any job you're considering against them.</p>") +
       "</div>";
 
@@ -287,7 +287,7 @@ YNSActivity.define({
     }
 
     out += '<p class="ya-result-lead">This is a shortlist to explore. ' +
-      "Three Doors takes the top one and lays out every realistic route in, with what each costs and how long it takes.</p>";
+      "Three Doors takes the top one and lays out routes in, with rough costs and timelines for each.</p>";
 
     return out;
   },

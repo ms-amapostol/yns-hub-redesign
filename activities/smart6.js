@@ -58,7 +58,7 @@ function monthCheck(months) {
   return '<div class="ya-readout"><h3>The other months, checked</h3>' + rows.join("") +
     "<p>" + (ready === rows.length
       ? "Every line has a number and a when. That makes six SMART goals."
-      : ready + " of " + rows.length + " are ready. The rest will still work, they just cannot be judged at the end of the month, which is the part that keeps a plan honest.") +
+      : ready + " of " + rows.length + " are ready. Give the rest a number and a by-when so you can check them at the end of the month.") +
     "</p></div>";
 }
 
@@ -85,11 +85,11 @@ YNSActivity.define({
         {
           mechanic: "learn",
           eyebrow: "Fifteen minutes",
-          title: "Six months is long enough to change something real.",
+          title: "What could change for you in six months?",
           lead: function () { return "Today plus six months is " + inSixMonths() + ". This activity decides what will be different by then."; },
           body: [
             "One goal. Small enough that you can picture the day it's done. Big enough to matter.",
-            "Five questions, one for each letter of SMART: Specific, Measurable, Achievable, Relevant, Time-bound. Then the first step, which is the part that makes the rest true."
+            "Five questions, one for each letter of SMART: Specific, Measurable, Achievable, Relevant, Time-bound. Then the first step, so you know where to begin."
           ],
           cta: "Let's plan it"
         }
@@ -111,7 +111,7 @@ YNSActivity.define({
           eyebrow: "Begin with the end in mind",
           title: "Five years from now, what's one thing that's true about your life?",
           scene: [
-            "Many plans start here: picture the end, then work backward. One line is enough. If you made a vision board, pick one thing off it."
+            "One way to plan: picture the end, then work backward. One line is enough. If you made a vision board, pick one thing off it."
           ],
           prompt: "Five years from now\u2026",
           placeholder: "Five years from now, I\u2026",
@@ -205,11 +205,11 @@ YNSActivity.define({
           eyebrow: "A \u00b7 Achievable",
           title: "With the life you actually have, how likely is this in six months?",
           scene: [
-            "Your hours, your money, your people. A common example: if you've got a C, aiming for a B+ first beats aiming for an A. Shrinking a goal is a good move."
+            "Your hours, your money, your people. For example, if you've got a C, you could aim for a B+ first, then an A. It's okay to shrink a goal to fit."
           ],
           prompt: "Your gut.",
           options: [
-            { k: "likely",  t: "Likely, if I actually start",   s: "The size is right. The risk is the first week.", echo: "the size is right" },
+            { k: "likely",  t: "Likely, if I actually start",   s: "The size feels right. Starting is the next part.", echo: "the size is right" },
             { k: "stretch", t: "A stretch, but possible",       s: "It'll take most of what I've got.", echo: "it's a stretch" },
             { k: "big",     t: "Too big",             s: "Say so now and cut it in half. That's the whole point of asking.", echo: "it's too big" },
             { k: "small",   t: "Too small. I could do more",    s: "Then make it a little bigger. One step up is plenty.", echo: "it's too small" }
@@ -230,7 +230,7 @@ YNSActivity.define({
           mechanic: "text",
           eyebrow: "R \u00b7 Relevant",
           title: "Why this goal, out of everything you could pick?",
-          scene: ["One line. It's what you'll read on the week it feels pointless."],
+          scene: ["One line. Something to reread on a week it feels pointless."],
           prompt: "Because\u2026",
           placeholder: "Because\u2026",
           rows: 3,
@@ -243,7 +243,7 @@ YNSActivity.define({
           eyebrow: "R \u00b7 Relevant",
           title: "You've already written this part.",
           lead: function (v) { return "\u201c" + ((v && v.facts && v.facts.why_statement) || "") + "\u201d"; },
-          body: ["That's your why, from Your Why. Hold this goal up against it. If they don't match, one of them needs changing, and it's usually the goal."],
+          body: ["That's your why, from Your Why. Hold this goal up against it. If they don't match, one of them may need changing. The goal is a good place to look first."],
           provenance: "You've told us your why already, so this shows it and skips the question.",
           cta: "They match"
         }
@@ -267,7 +267,7 @@ YNSActivity.define({
           eyebrow: "T \u00b7 Time-bound",
           title: "Now write month one as a SMART goal.",
           scene: [
-            "The six-month goal is the destination. Month one is the first goal you will actually hit, so it is worth writing properly.",
+            "The six-month goal is the destination. Month one is your first goal to aim for, so it is worth writing properly.",
             "Fill in the four blanks and the sentence writes itself. Every part of SMART is in it: what, how much, how you\u2019ll check, and by when."
           ],
           prompt: "Fill these in and watch the sentence build.",
@@ -303,7 +303,7 @@ YNSActivity.define({
           title: "Now work backwards from month six.",
           scene: [
             "Here's a simple example with a home library: month six is three more books, month five is three before that. Yours can be exactly that plain.",
-            "Write each month the way you wrote month one. The five letters are what turn a line into something you can actually finish."
+            "Write each month the way you wrote month one. The five letters can help turn a line into something you can finish."
           ],
           prompt: "One line per month. Leave any of them blank for now.",
           /* The acronym belongs here, on the screen where it gets used,
@@ -316,9 +316,9 @@ YNSActivity.define({
               "<b>M</b> \u00b7 Measurable. Put a number in it. Three calls. $300. Two shifts.",
               "<b>A</b> \u00b7 Achievable. Something that fits the month you are actually going to have.",
               "<b>R</b> \u00b7 Relevant. It has to move the six-month goal, or it does not belong on the list.",
-              "<b>T</b> \u00b7 Time-bound. A by-when inside the month. \u201cby the 10th\u201d beats \u201cthis month\u201d."
+              "<b>T</b> \u00b7 Time-bound. A by-when inside the month. \u201cby the 10th\u201d is easier to check than \u201cthis month\u201d."
             ],
-            note: "A line with a number and a by-when can be judged at the end of the month. That is the whole difference."
+            note: "A line with a number and a by-when can be judged at the end of the month."
           },
           prefill: function (ctx) {
             var b = (ctx && ctx.extra && ctx.extra.month1_blanks) || {};
@@ -367,9 +367,9 @@ YNSActivity.define({
     var months  = r.extra.months_text  || f.smart_months || "";
 
     var CONF = {
-      likely:  "You said the size is right. Then the only thing between you and it is the first week, and you've already written what that week holds.",
-      stretch: "You said it's a stretch. Stretches are fine as long as the first step is small. Keep the goal, and keep the step tiny.",
-      big:     "You said it's too big, which is the most useful thing anyone says on this screen. Come back in and cut it to the first half. A finished half beats an abandoned whole.",
+      likely:  "You said the size is right. Next comes the first week, and you've already written what that week holds.",
+      stretch: "You said it's a stretch. That's okay. Keep the goal, and keep the first step tiny.",
+      big:     "You said it's too big, and that's useful to know. Come back in and cut it to the first half. A finished half is still progress.",
       small:   "You said you could do more. Add one thing to it. One is plenty."
     };
 
@@ -388,7 +388,7 @@ YNSActivity.define({
         return "<p><b>" + p.L + " \u00b7 " + p.t + "</b> \u2014 " + (p.v ? "done" : "still thin. " + p.hint) + "</p>";
       }).join("") +
       (thin.length
-        ? "<p>" + (thin.length === 1 ? "One part" : thin.length + " parts") + " could be sharper. A goal missing its M is the one that quietly never gets judged, and a goal missing its T is the one that never starts.</p>"
+        ? "<p>" + (thin.length === 1 ? "One part" : thin.length + " parts") + " could be sharper. Without an M, it's hard to tell when you're done. Without a T, starting can slip.</p>"
         : "<p>All five parts are there. That is a SMART goal, written down.</p>") +
       "</div>";
 
@@ -404,7 +404,7 @@ YNSActivity.define({
       monthCheck(months) +
       check +
       (CONF[conf] ? '<p class="ya-result-lead">' + esc(CONF[conf]) + "</p>" : "") +
-      '<p class="ya-result-lead">When the six months are up, a common next step is to rinse and repeat: pick the next six-month piece of the same five-year picture. In a month, you\u2019ll see a reminder here to check in with Still True? Say what changed. Plans that get checked are the ones that happen.</p>';
+      '<p class="ya-result-lead">When the six months are up, one next step is to rinse and repeat: pick the next six-month piece of the same five-year picture. In a month, you\u2019ll see a reminder here to check in with Still True? Say what changed. Plans that get checked are the ones that happen.</p>';
   },
 
   /* Each month line gets the same two questions asked of it: is there a

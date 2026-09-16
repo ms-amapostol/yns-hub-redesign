@@ -36,20 +36,20 @@ var ROUTES = {
     { k: "certificate", t: "Certificate program", s: "Nursing assistant, taking blood, medical assistant",
       time: "4–12 months", cost: "$1k–6k", entry: "A high school diploma", risk: "Low" },
     { k: "degree", t: "Associate or bachelor's", s: "Nursing, scanning and imaging, and similar roles",
-      time: "2–4 years", cost: "$10k–60k", entry: "A few classes first, and places are limited", risk: "Medium" },
-    { k: "lateral", t: "Support role first", s: "Get inside the building first, then train with their help",
-      time: "6 months–2 years", cost: "Often paid for by the employer", entry: "Entry-level hiring", risk: "Low" }
+      time: "2–4 years", cost: "$10k–60k", entry: "Some programs ask for a few classes first, and places may be limited", risk: "Medium" },
+    { k: "lateral", t: "Support role first", s: "Get inside the building first, then train, sometimes with their help",
+      time: "6 months–2 years", cost: "Sometimes paid for by the employer", entry: "Entry-level hiring", risk: "Low" }
   ],
   tech: [
     { k: "self_taught", t: "Self-taught + portfolio", s: "Build things in public until they speak for you",
-      time: "6–24 months", cost: "Near zero", entry: "Nothing formal needed", risk: "High, because it rests entirely on you keeping at it" },
-    { k: "certificate", t: "Bootcamp or certification", s: "Intense, structured and expensive",
+      time: "6–24 months", cost: "Near zero", entry: "Nothing formal needed", risk: "Higher, since it depends on you keeping at it" },
+    { k: "certificate", t: "Bootcamp or certification", s: "Structured, and it can be intense and costly",
       time: "3–9 months", cost: "$5k–20k", entry: "A short test", risk: "Medium, and it varies a lot by provider" },
     { k: "lateral", t: "Sideways from where you are", s: "Support, operations or data where you already work",
       time: "6–18 months", cost: "None", entry: "Apply internally", risk: "Low" }
   ],
   edu: [
-    { k: "certificate", t: "Teaching assistant, or teaching English", s: "The fastest way into the room",
+    { k: "certificate", t: "Teaching assistant, or teaching English", s: "A shorter way into the room",
       time: "1–6 months", cost: "$500–3k", entry: "A background check", risk: "Low" },
     { k: "degree", t: "The teaching license route", s: "A degree, then the license",
       time: "1–4 years", cost: "$10k–50k", entry: "You need a degree", risk: "Medium" },
@@ -61,39 +61,39 @@ var ROUTES = {
       time: "6–18 months", cost: "None", entry: "Apply internally", risk: "Low" },
     { k: "certificate", t: "A recognized certification", s: "Project management, process improvement, bookkeeping",
       time: "3–9 months", cost: "$500–4k", entry: "Some ask for hours of experience first", risk: "Medium" },
-    { k: "degree", t: "Business degree", s: "The traditional route, and the slowest one",
+    { k: "degree", t: "Business degree", s: "The traditional route, and it can take longer",
       time: "2–4 years", cost: "$15k–70k", entry: "Normal admissions", risk: "Medium" }
   ],
   social: [
-    { k: "certificate", t: "Community health worker training", s: "Short and practical, often run by a hospital or a charity",
+    { k: "certificate", t: "Community health worker training", s: "Short and practical, sometimes run by a hospital or a charity",
       time: "3–9 months", cost: "$0–3k", entry: "A high school diploma, and some are free", risk: "Low" },
-    { k: "lateral", t: "Support role first", s: "Case aide, outreach or residential support, then train with their help",
-      time: "6 months–2 years", cost: "None", entry: "They hire entry level all year", risk: "Low" },
+    { k: "lateral", t: "Support role first", s: "Case aide, outreach or residential support, then train, sometimes with their help",
+      time: "6 months–2 years", cost: "None", entry: "Look for entry-level openings", risk: "Low" },
     { k: "degree", t: "Social work degree", s: "A social work degree, plus a license if you want to do clinical work",
       time: "2–6 years", cost: "$15k–70k", entry: "Normal admissions, though the master's needs a bachelor's first", risk: "Medium" }
   ],
   gov: [
-    { k: "lateral", t: "Apply straight in", s: "Government hires from outside all the time and posts the jobs openly",
+    { k: "lateral", t: "Apply straight in", s: "Look for public job postings from government employers",
       time: "2–9 months of process", cost: "None", entry: "An application, and sometimes an exam", risk: "Low" },
     { k: "certificate", t: "A specialist certificate", s: "Planning, buying, compliance, permits",
       time: "3–12 months", cost: "$500–5k", entry: "Some ask for hours of experience first", risk: "Medium" },
-    { k: "degree", t: "A public administration degree", s: "The usual route into policy and management jobs",
+    { k: "degree", t: "A public administration degree", s: "One route into policy and management jobs",
       time: "2–4 years", cost: "$12k–60k", entry: "Normal admissions", risk: "Medium" }
   ],
   creative: [
     { k: "self_taught", t: "Portfolio first", s: "Build the work in the open until it speaks for you",
-      time: "6–24 months", cost: "Near zero", entry: "No formal requirement; the work is the credential", risk: "High, because it rests entirely on you keeping at it" },
+      time: "6–24 months", cost: "Near zero", entry: "No formal requirement; the work is the credential", risk: "Higher, since it depends on you keeping at it" },
     { k: "lateral", t: "Start nearby, then move across", s: "Coordinator, production assistant, in-house marketing",
       time: "6–18 months", cost: "None", entry: "They hire at entry level", risk: "Low" },
     { k: "certificate", t: "A focused short course", s: "One tool or one craft, learned properly",
       time: "2–9 months", cost: "$300–6k", entry: "Usually open to anyone", risk: "Medium" }
   ],
   finance: [
-    { k: "certificate", t: "Bookkeeping or accounting certificate", s: "The fastest proper way in",
+    { k: "certificate", t: "Bookkeeping or accounting certificate", s: "A shorter way in",
       time: "3–12 months", cost: "$500–5k", entry: "Usually open to anyone", risk: "Low" },
     { k: "lateral", t: "Operations, then finance", s: "Invoices, billing or payroll, inside a company that has a finance team",
       time: "6–24 months", cost: "None", entry: "They hire at entry level", risk: "Low" },
-    { k: "degree", t: "Accounting or finance degree", s: "What you need to become a licensed accountant, and for many analyst jobs",
+    { k: "degree", t: "Accounting or finance degree", s: "What you need to become a licensed accountant, and asked for in some analyst jobs",
       time: "2–4 years", cost: "$15k–70k", entry: "Normal admissions", risk: "Medium" }
   ]
 };
@@ -125,7 +125,7 @@ var BLOCKERS = [
 var GENERIC = [
   { k: "certificate", t: "A short qualification", s: "A community college or an accredited provider",
     time: "3–18 months", cost: "$500–8k", entry: "Usually open to anyone", risk: "Low" },
-  { k: "degree", t: "A degree", s: "The one most job ads assume you have",
+  { k: "degree", t: "A degree", s: "A credential some job ads ask for",
     time: "2–4 years", cost: "$10k–60k", entry: "Normal admissions", risk: "Medium" },
   { k: "lateral", t: "A sideways move", s: "The nearest job to it where you already work",
     time: "6–18 months", cost: "None", entry: "Apply internally", risk: "Low" },
@@ -205,10 +205,9 @@ YNSActivity.define({
           eyebrow: "The routes",
           title: "There is more than one way in.",
           scene: [
-            "Many people assume the door they know about is the only door. Often it is the slowest and most expensive one.",
-            "Here are the realistic routes into the work you keep pointing at. Mark the ones you could see yourself doing."
+            "Here are some common routes into the work you keep pointing at. Mark the ones you could see yourself doing."
           ],
-          prompt: "Yes means \"I could start this within a year.\" No means \"not with my life as it stands.\"",
+          prompt: "Yes means \"I could start this within a year.\" No means \"not with my life as it stands.\" Times and costs are rough estimates we wrote, and they vary by state and provider.",
           rowHeader: "Route",
           cta: "That's my read",
           columns: [
@@ -226,10 +225,9 @@ YNSActivity.define({
           eyebrow: "The routes",
           title: "There is more than one way in.",
           scene: [
-            "Many people assume the door they know about is the only door. Often it is the slowest and most expensive one.",
-            "These are the realistic routes into the field your answers keep pointing at. Mark the ones you could see yourself doing."
+            "These are some common routes into the field your answers keep pointing at. Mark the ones you could see yourself doing."
           ],
-          prompt: "Yes means \"I could start this within a year.\" No means \"not with my life as it stands.\"",
+          prompt: "Yes means \"I could start this within a year.\" No means \"not with my life as it stands.\" Times and costs are rough estimates we wrote, and they vary by state and provider.",
           provenance: "These are the routes into the field your other answers keep pointing at.",
           rowHeader: "Route",
           cta: "That's my read",
@@ -359,22 +357,18 @@ YNSActivity.define({
     var lead, reading;
     if (yes.length) {
       lead = yes.length === 1 ? "One door is open." : yes.length + " doors are open.";
-      reading = "That's the useful part, because which route fits the life you're living " +
-        "matters far more than which one looks best on paper.";
+      reading = "That's the useful part: these are routes you think could fit the life you're living now.";
     } else if (unmarked) {
       lead = no.length === 1
         ? "You ruled one out."
         : "You ruled " + no.length + " out.";
       reading = "You left " + (unmarked === 1 ? "the other one" : "the other " + unmarked) +
         " unmarked, so this rules out one route and leaves the rest of the " +
-        "field open. Ruling one out on purpose still helps, because it stops being a nagging maybe. " +
+        "field open. Ruling one out on purpose can help, so it stays off your mind. " +
         "Come back and mark the rest whenever you want.";
     } else {
       lead = "You closed all of them.";
-      reading = "Sit with that for a minute. It means one of two things. Either the field is " +
-        "out of reach right now, and one option is to look at a different field. Or the routes " +
-        "as written don't match what you'd be willing to do. The second one is much easier to " +
-        "fix.";
+      reading = "Sit with that for a minute. It could mean the field is out of reach right now, and one option is to look at a different field. It could also mean the routes as written don't match what you'd be willing to do, and that may be worth a closer look.";
     }
 
     var fastest = yes.slice().sort(function (a, b) {
@@ -391,7 +385,7 @@ YNSActivity.define({
             return "<p><b>" + esc(x.t) + "</b>. " + esc(x.time) + ", " + esc(x.cost).toLowerCase() +
               ". " + esc(x.s) + "</p>";
           }).join("") +
-          (fastest ? "<p>The shortest distance between here and being in the room is <b>" +
+          (fastest ? "<p>Of these, the one with the shortest estimated time is <b>" +
             esc(fastest.t) + "</b>.</p>" : "") +
           "</div>"
         : "") +
@@ -399,21 +393,19 @@ YNSActivity.define({
       (no.length
         ? '<div class="ya-readout"><h3>What you ruled out</h3><p>' +
           no.map(function (x) { return esc(x.t); }).join(" · ") +
-          ". Worth writing down, because a route you have deliberately ruled out stops being a " +
-          "nagging maybe, and stops other people talking you into it.</p></div>"
+          ". Worth writing down, because a route you've ruled out on purpose can stop being a nagging maybe.</p></div>"
         : "") +
 
       (BLOCKER_WORDS[blocker]
         ? '<div class="ya-quote">You said the thing in the way is <b>' + esc(BLOCKER_WORDS[blocker]) +
-          "</b>. Everything below is aimed at that and nothing else.</div>"
+          "</b>. The next steps below are picked with that in mind.</div>"
         : "") +
 
       '<p class="ya-note"><b>Use these numbers as a rough guide.</b> These are typical ' +
       "ranges for " + esc(catName(cat)) + ", and we wrote them. The pay figures elsewhere in " +
       "this product come from published government data. These don't. Cost and length vary a " +
       "lot by state and by provider. Funding you qualify for can bring the cost down to " +
-      "nothing. The only figure worth acting on is the one you get from the provider you'd " +
-      "actually use.</p>";
+      "nothing. Check the figure with the provider you'd actually use before you act on it.</p>";
   },
 
   actions: function (state, ctx) {

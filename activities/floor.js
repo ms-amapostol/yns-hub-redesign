@@ -40,7 +40,7 @@ YNSActivity.define({
           title: "What does your month cost?",
           scene: [
             "Think of the month where you pay what has to be paid and nothing breaks.",
-            "Many people have never added this up, so they end up negotiating against a number they guessed."
+            "Adding it up gives you a real number to bring to any pay talk."
           ],
           prompt: "Nudge each one until it looks about right.",
           totalLabel: "a month, to keep the lights on",
@@ -86,14 +86,14 @@ YNSActivity.define({
           title: "How long could you hold out?",
           scene: [
             "If your income stopped tomorrow, how long before it got serious? Count savings, help from people, anything you could sell.",
-            "This is the number that decides whether a change is a leap or a series of steps."
+            "This number can help you see whether a change would be one big leap or a few smaller steps."
           ],
           prompt: "Whichever is closest.",
           options: [
             { k: "none", t: "Not even a month",    s: "This month's money pays this month's bills.", fact: 0, echo: "nothing saved up" },
             { k: "thin", t: "A month or two",      s: "There's a cushion, but it's a thin one.",           fact: 2, echo: "a month or two saved" },
-            { k: "some", t: "Three to six months", s: "Enough to retrain part-time, or take a cut for a while.", fact: 4, echo: "three to six months saved" },
-            { k: "lots", t: "More than six months", s: "You've got real room to move.",              fact: 9, echo: "more than six months saved" }
+            { k: "some", t: "Three to six months", s: "Maybe enough to retrain part-time, or take a cut for a while.", fact: 4, echo: "three to six months saved" },
+            { k: "lots", t: "More than six months", s: "That could give you room to move.",              fact: 9, echo: "more than six months saved" }
           ]
         },
         {
@@ -110,8 +110,8 @@ YNSActivity.define({
           options: [
             { k: "none", t: "Less than one",      s: "This month's money pays this month's bills.", fact: 0, echo: "nothing saved up" },
             { k: "thin", t: "One or two of them", s: "There's a cushion, but it's a thin one.",           fact: 2, echo: "a month or two saved" },
-            { k: "some", t: "Three to six",       s: "Enough to retrain part-time, or take a cut for a while.", fact: 4, echo: "three to six months saved" },
-            { k: "lots", t: "More than six",      s: "You've got real room to move.",               fact: 9, echo: "more than six months saved" }
+            { k: "some", t: "Three to six",       s: "Maybe enough to retrain part-time, or take a cut for a while.", fact: 4, echo: "three to six months saved" },
+            { k: "lots", t: "More than six",      s: "That could give you room to move.",               fact: 9, echo: "more than six months saved" }
           ]
         }
       ]
@@ -138,11 +138,10 @@ YNSActivity.define({
           eyebrow: "A quick test",
           title: "What do you think this job pays?",
           scene: [
-            "Here's a job many people have an opinion about, and fewer know the figure for.",
             "Slide to your guess for what someone a few years into it earns in a year, before tax."
           ],
           subject: function () { return guessRole("trades", "some").title + ", a few years in"; },
-          prompt: "Many people are out by more than they expect.",
+          prompt: "See how close you can get.",
           min: 20000, max: 160000, step: 1000,
           truthLabel: "a year, about the middle of the national pay band",
           truth: function () { return guessRole("trades", "some").mid; },
@@ -165,7 +164,7 @@ YNSActivity.define({
             return guessRole(d && d.top_category, "some").title + ", a few years in";
           },
           provenance: "Using a job from the field your other answers keep pointing at.",
-          prompt: "Many people are out by more than they expect.",
+          prompt: "See how close you can get.",
           min: 20000, max: 200000, step: 1000,
           truthLabel: "a year, about the middle of the national pay band",
           truth: function () {
@@ -199,13 +198,13 @@ YNSActivity.define({
           prompt: "Which is closest?",
           options: [
             { k: "clears", t: "It clears my floor with room to spare",
-              s: "Something other than money is in the way.",
+              s: "Anything in the way may be something other than money.",
               fact: "clears", echo: "the pay clears what I need", a: { analysis: 2, order: 1 } },
             { k: "tight",  t: "It clears it, barely",
               s: "It works, but nothing can go wrong.",
               fact: "tight", echo: "the pay only just covers it", a: { order: 3 } },
             { k: "short",  t: "It doesn't clear it",
-              s: "At that level, anyway. Better to know that now than in year two.",
+              s: "At that level, anyway. Good to know now, while you can plan around it.",
               fact: "short", echo: "the pay doesn't cover what I need yet", a: { leading: 2, analysis: 1 } }
           ]
         }
@@ -229,9 +228,9 @@ YNSActivity.define({
         {
           mechanic: "learn",
           eyebrow: "Worth knowing",
-          title: "Pay usually grows the longer you do the job",
+          title: "Pay can grow the longer you do the job",
 
-          lead: "For the same job, people with more experience are usually paid a lot more.",
+          lead: "For the same job, pay can be a lot higher once you have more experience.",
 
           example: function (v) {
             var e = payExample(v && v.derived && v.derived.top_category);
@@ -248,9 +247,9 @@ YNSActivity.define({
           },
 
           points: [
-            "<b>Starting out</b>, you're near the bottom of that job's range.",
-            "<b>A few years in</b>, you're around the middle.",
-            "<b>Once you're experienced</b>, you're near the top."
+            "<b>Starting out</b>, we match you to the bottom of that job's range.",
+            "<b>A few years in</b>, we match you to the middle.",
+            "<b>Once you're experienced</b>, we match you to the top."
           ],
 
           note: function () {
@@ -294,18 +293,16 @@ YNSActivity.define({
     var roles = (r.Quiz && cat) ? r.Quiz.rolesFor(cat, level) : [];
 
     var VERDICT = {
-      clears: "Something other than money is in the way. That's good news, and also a harder " +
-              "problem, because it means the thing stopping you hasn't been named yet.",
-      tight:  "It works, with nothing spare. So the thing to protect is your cushion: " +
+      clears: "Whatever is in the way may be something other than money. That can be good news, and it may " +
+              "mean the thing stopping you still needs a name.",
+      tight:  "It works, with nothing spare. Your cushion is worth protecting: " +
               "enough slack that one bad month doesn't undo the whole thing.",
-      short:  "At that level it doesn't clear yet, and knowing today is worth a great deal more " +
-              "than finding out in year two. It turns the question from <em>should I</em> into " +
-              "<em>what would have to change</em>."
+      short:  "At that level it doesn't clear yet, and knowing that today gives you time to plan. " +
+              "A good next question: <em>what would have to change</em>?"
     };
     var verdict = VERDICT[gap] ||
-      "You haven't said yet what that number means against what the work pays. That's the one " +
-      "call nobody else can make for you, and it decides whether the floor is useful or just " +
-      "sits there.";
+      "You haven't said yet what that number means against what the work pays. That call is " +
+      "yours to make, and it's what puts the floor to use.";
 
     if (!monthly) {
       return "<h1>No number yet.</h1>" +
@@ -323,7 +320,7 @@ YNSActivity.define({
       '<p class="ya-result-lead">That\'s your floor: about ' + fmt(annual) +
       " a year after tax, just to cover the month. Before tax, a job needs to pay more than that. " +
       "How much more depends on your state and your benefits. " +
-      "Below this line, a job doesn't work for you, however much you like it.</p>" +
+      "A job that pays below this line won't cover your month on its own, however much you like it.</p>" +
 
       '<div class="ya-readout"><h3>What that changes</h3><p>' + verdict + "</p></div>" +
 

@@ -106,9 +106,9 @@ YNSActivity.define({
           mechanic: "learn",
           eyebrow: "Five minutes",
           title: "Ask why five times.",
-          lead: "The first answer is usually a job or a complaint. The fifth is usually the real reason. That's the whole trick.",
+          lead: "Your first answer might be a job or a complaint. By the fifth, you may reach the real reason.",
           body: [
-            "Each screen asks why about the thing you just wrote. It gets uncomfortable around the third one, which is a sign it's working. You can stop early if you hit the real one sooner.",
+            "Each screen asks why about the thing you just wrote. It can get uncomfortable around the third one, and that's okay. You can stop early if you hit the real one sooner.",
             "Any reason counts, as long as it's true. Nothing here is shared."
           ],
           cta: "Start"
@@ -141,13 +141,13 @@ YNSActivity.define({
       function (v) { return ["You said: \u201c" + last(v) + "\u201d", "Think only about you here."]; },
       "Because\u2026", false, null),
     WHY(3, "Why?",
-      function (v) { return ["\u201c" + last(v) + "\u201d", "One more layer. This is often where the real thing shows up."]; },
+      function (v) { return ["\u201c" + last(v) + "\u201d", "One more layer. The real thing might show up here."]; },
       "Because\u2026", true, null),
     WHY(4, "And underneath that?",
       function (v) { return ["\u201c" + last(v) + "\u201d", "If that came true, what would it give you?"]; },
       "It would mean\u2026", true, null),
     WHY(5, "Last one. Why does that matter?",
-      function (v) { return ["\u201c" + last(v) + "\u201d", "This is usually where the real reason lives. Say it plainly."]; },
+      function (v) { return ["\u201c" + last(v) + "\u201d", "This may be where the real reason is. Say it plainly."]; },
       "Because\u2026", true, null),
 
     /* ---------------------------------------------------------------
@@ -166,7 +166,7 @@ YNSActivity.define({
           scene: function (v) {
             var chain = whys(v);
             return chain.length
-              ? ["Here's the trail you just walked: " + chain.map(function (x) { return "\u201c" + x + "\u201d"; }).join(" \u2192 "), "The last one is usually the real one. We've put it in the box. Change it if a different rung was the true one."]
+              ? ["Here's the trail you just walked: " + chain.map(function (x) { return "\u201c" + x + "\u201d"; }).join(" \u2192 "), "We've put your last answer in the box. Change it if a different rung was the true one."]
               : ["One sentence is plenty."];
           },
           prompt: "In your own words.",
@@ -217,9 +217,8 @@ YNSActivity.define({
         title: "You have already done the hard part",
         stat: "Written down",
         body: [
-          "You've got both a reason and a test for it, saved. Many people never write either " +
-          "one down, so their career changes get judged against a standard that moves every " +
-          "time the mood does.",
+          "You've got both a reason and a test for it, saved. Having both in writing " +
+          "gives you a steady standard to check your choices against.",
           "Keep it where you'll see it. It sits at the top of your Portfolio, and a free account keeps it there on any device. It's there for the week you can't remember why you started."
         ],
         cta: "Good"
@@ -239,7 +238,7 @@ YNSActivity.define({
           eyebrow: "Last one",
           title: "And how long has this been true?",
           scene: [
-            "This just helps us know where you are. Something you've sat with for three years needs a different next step than something that started last month."
+            "This just helps us know where you are. Something you've sat with for three years may call for a different next step than something that started last month."
           ],
           prompt: "Roughly.",
           options: [
@@ -247,7 +246,7 @@ YNSActivity.define({
               s: "Something changed recently and this is new.",
               echo: "this started recently" },
             { k: "year",   t: "About a year",
-              s: "Long enough to know it's more than a bad week.",
+              s: "Long enough to feel like more than a bad week.",
               echo: "this has been building for about a year" },
             { k: "years",  t: "A few years",
               s: "You've thought about this more than once and haven't moved yet.",
@@ -284,14 +283,13 @@ YNSActivity.define({
        to be un-matched with a second test — the sort of thing that breaks
        silently the first time someone rewords an option. */
     var LONG = {
-      "new": "It's new. That's the easiest time to move and the hardest time to trust yourself. " +
+      "new": "It's new. That can be a good time to move, and a hard time to trust yourself. " +
              "Give it one honest test before you decide it was a mood.",
-      year:  "A year is long enough to know this is more than a bad week. It deserves a real " +
+      year:  "You've carried this for about a year. That's worth a real " +
              "next step.",
-      years: "A few years, and you haven't moved yet. For most people that's not about wanting " +
-             "it enough. Usually nobody has ever handed them a first step small enough to take, " +
-             "which is what the bottom of this page is for.",
-      always: "If it predates the job you're in, then this goes deeper than the job. So the " +
+      years: "A few years, and you haven't moved yet. A smaller first step might help, " +
+             "and that's what the bottom of this page is for.",
+      always: "If it predates the job you're in, it may go deeper than the job. The " +
               "thing that needs to change may be bigger than you've been assuming, or much smaller."
     };
     var longNote = LONG[howLong] || "";
@@ -308,7 +306,7 @@ YNSActivity.define({
       (chain.length > 1
         ? '<div class="ya-readout"><h3>How you got there</h3>' +
           chain.map(function (x, i) { return "<p><b>" + (i + 1) + ".</b> " + esc(x) + "</p>"; }).join("") +
-          "<p>The first line is what you'd have said a week ago. The last one is the reason.</p></div>"
+          "<p>The first line is where you started. The last one is where you landed.</p></div>"
         : "") +
       '<p class="ya-result-lead">' +
       (signedIn

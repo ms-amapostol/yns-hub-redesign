@@ -39,7 +39,7 @@ var ROWS = [
   { k: "health",   t: "Health",                  s: "Insurance, prescriptions, the dentist", group: "Have to" },
 
   { k: "save",     t: "Savings",                 s: "Pay yourself. Even $20 counts", group: "Choose to" },
-  { k: "buffer",   t: "The surprise fund",       s: "Because there is one most months", group: "Choose to" },
+  { k: "buffer",   t: "The surprise fund",       s: "For costs you didn't plan for", group: "Choose to" },
   { k: "fun",      t: "Fun",                     s: "Eating out, going out, the subscriptions", group: "Choose to" },
   { k: "clothes",  t: "Clothes and the rest",    s: "Haircuts, household bits", group: "Choose to" },
   { k: "extra",    t: "Extra at the debt",       s: "Anything above the minimum", group: "Choose to" },
@@ -56,8 +56,8 @@ function savingsRead(savings, income, alloc) {
 
   if (!savings) {
     return '<div class="ya-readout"><h3>The line worth adding</h3>' +
-      "<p>Savings came out at zero this month. That is where a lot of budgets start, and it\u2019s a line worth fighting for. " +
-      "Twenty dollars a month is $240 a year, and more importantly it is the month you stop being one flat tire away from a crisis.</p>" +
+      "<p>Savings came out at zero this month. That\u2019s a fine place to start, and it\u2019s a line worth adding when you can. " +
+      "Twenty dollars a month is $240 a year, and it can start a cushion for surprises like a flat tire.</p>" +
       "<p>Some people move $20 out of the fun line to see whether the month still works.</p></div>";
   }
 
@@ -69,11 +69,11 @@ function savingsRead(savings, income, alloc) {
   return '<div class="ya-readout"><h3>What you\u2019re keeping</h3>' +
     "<p>" + money(savings) + " a month is going to you" +
     (rate ? ", which is about " + rate + "% of what comes in" : "") + ". " +
-    "If this were invested and averaged 7% a year (an assumption; a savings account usually earns less), in twenty years it would be about <b>" + money(bal) + "</b>. " +
+    "If this were invested and averaged 7% a year (an assumption; a savings account may earn less), in twenty years it would be about <b>" + money(bal) + "</b>. " +
     "7% is based on past stock market returns before inflation. What Money Does Over Time lets you change the rate.</p>" +
     (buffer
-      ? "<p>You also set aside " + money(buffer) + " for surprises. That is the line that stops one bad week turning into debt, and it is doing more work than it looks like.</p>"
-      : "<p>One thing missing: a surprise fund. Even $25 a month builds the buffer that stops a flat tire becoming a credit card balance.</p>") +
+      ? "<p>You also set aside " + money(buffer) + " for surprises. That line can help keep one bad week from turning into debt.</p>"
+      : "<p>One thing missing: a surprise fund. Even $25 a month can start a buffer for surprises like a flat tire.</p>") +
     "</div>";
 }
 
@@ -97,7 +97,7 @@ YNSActivity.define({
           lead: "You make it in advance. This kind is called zero-based: what comes in, minus everything you\u2019ve given a job, equals zero.",
           points: [
             "<b>Zero means every dollar has a job.</b> Savings is a job. Fun is a job.",
-            "<b>Money with no job gets spent on whatever is loudest.</b> That\u2019s the whole reason to plan before the month starts.",
+            "<b>Money with no job can get spent without you noticing.</b> Planning before the month starts helps you decide first.",
             "<b>You\u2019ll take it with you.</b> At the end there\u2019s a spreadsheet to download, so this can become a habit."
           ],
           note: "Managing money is mostly managing your behavior around money. If you\u2019ve done Money, Plainly or The Floor, your numbers are already filled in.",
@@ -174,9 +174,9 @@ YNSActivity.define({
           },
           prompt: "Pick something you would actually keep to.",
           options: [
-            { k: "twenty",  t: "$20 a month",  s: "Small on purpose. The habit matters more than the amount at this stage.", echo: "$20 a month" },
+            { k: "twenty",  t: "$20 a month",  s: "Small on purpose, so it's easy to keep up.", echo: "$20 a month" },
             { k: "five",    t: "5% of what comes in", s: "Scales with you, so a raise raises it without another decision.", echo: "5%" },
-            { k: "ten",     t: "10% of what comes in", s: "A number a lot of advice starts at. Ambitious on a tight month.", echo: "10%" },
+            { k: "ten",     t: "10% of what comes in", s: "A bigger goal. It can be a stretch on a tight month.", echo: "10%" },
             { k: "none",    t: "Nothing yet", s: "A real answer. The budget still works, and this comes back later.", echo: "nothing yet" }
           ]
         }
@@ -196,7 +196,7 @@ YNSActivity.define({
           eyebrow: "Give every dollar a job",
           title: "Now hand it out until there\u2019s nothing left.",
           scene: [
-            "Work down the list. The first group happens whether you like it or not. The second group is where you actually have choices, and it\u2019s the part many budgets forget to include.",
+            "Work down the list. The first group happens whether you like it or not. The second group is where you actually have choices.",
             "You\u2019re aiming for zero dollars left without a job."
           ],
           prompt: "Type the amounts. The number at the top tells you what\u2019s still unassigned.",
@@ -224,11 +224,11 @@ YNSActivity.define({
           eyebrow: "Making it stick",
           title: "When will you look at this again?",
           scene: [
-            "A budget written once is a document. A budget looked at weekly is a habit, and the habit is the thing that changes the number in your account."
+            "A budget written once is a document. Checking it on a set day can help it become a habit."
           ],
           prompt: "Pick the one you\u2019d actually keep.",
           options: [
-            { k: "weekly",  t: "Once a week, same day",   s: "Ten minutes, and it works for a lot of people.", echo: "weekly" },
+            { k: "weekly",  t: "Once a week, same day",   s: "About ten minutes each time.", echo: "weekly" },
             { k: "payday",  t: "Every payday",            s: "Tied to something that already happens.", echo: "every payday" },
             { k: "monthly", t: "Once a month",            s: "Right before the month starts.", echo: "monthly" },
             { k: "unsure",  t: "Probably not often", s: "Then set one reminder and let that be enough.", echo: "when you can" }
@@ -269,13 +269,13 @@ YNSActivity.define({
     var read = Math.abs(left) < 1
       ? "Every dollar has a job. That\u2019s a zero-based budget."
       : left > 0
-      ? money(left) + " is still unassigned. That\u2019s a decision you haven\u2019t made yet. Unassigned money is the money that disappears."
-      : money(-left) + " more is assigned than comes in. Good to know now, well before the 28th. For the month to work, something in the second group would need to come down.";
+      ? money(left) + " is still unassigned. That\u2019s a decision you haven\u2019t made yet. Money without a job can be easy to spend without noticing."
+      : money(-left) + " more is assigned than comes in. Good to know now, well before the 28th. For the month to work, something would need to come down, and the second group is a good place to look.";
 
     var HABIT = {
-      weekly:  "Once a week works for a lot of people. A phone reminder with the day and the time helps it stick.",
-      payday:  "Tying it to payday is clever, because payday already happens without you remembering it.",
-      monthly: "Once a month works well when you do it right before the month starts.",
+      weekly:  "Once a week is a steady rhythm. A phone reminder with the day and the time can help it stick.",
+      payday:  "Tying it to payday means the reminder comes built in.",
+      monthly: "Once a month, right before the month starts, gives you a fresh plan each time.",
       unsure:  "That\u2019s a fair answer. One reminder, once a month, is a real plan."
     };
 

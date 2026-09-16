@@ -56,14 +56,14 @@ var OPENER = {
 };
 
 var SKILL_READING = {
-  fixing:     "diagnosis. You go straight at the cause, and in more fields than people realize that is the entire job",
-  explaining: "translation. Taking something you understand and getting it into someone else's head is a rarer skill than being the expert",
-  calming:    "steadiness under pressure. It is hard to teach, and it is one of the first things anyone hiring for a hard room looks for",
-  organising: "coordination. The boring skill everything else depends on, and the one people only notice in its absence",
+  fixing:     "diagnosis. You go straight at the cause, and in some fields that is a big part of the job",
+  explaining: "translation. Getting something you understand into someone else's head is a real skill in its own right",
+  calming:    "steadiness under pressure. It can be hard to teach, and it's worth naming when you apply for work in a hard room",
+  organising: "coordination. Other work can lean on it, and it can go unnoticed until it's missing",
   building:   "making. You would rather have the thing existing than the plan for it perfect",
-  persuading: "moving people. It is part of many senior jobs, and it rarely shows up in the job description",
-  noticing:   "attention. Catching the detail that was going to cost everyone a week",
-  finishing:  "completion. It sounds like the least impressive of these, and many teams are short of it"
+  persuading: "moving people. It can matter in senior jobs, even when a job description leaves it out",
+  noticing:   "attention. Catching the detail that could have cost everyone time",
+  finishing:  "completion. It can sound modest, and it's worth saying out loud when you describe yourself"
 };
 
 YNSActivity.define({
@@ -86,9 +86,9 @@ YNSActivity.define({
           eyebrow: "Three moments",
           title: "When were you the reason it went well?",
           scene: [
-            "Think of a moment where something worked out and you were the reason for it. It doesn't need to be your biggest achievement, and something small and recent usually works better.",
+            "Think of a moment where something worked out and you were the reason for it. It doesn't need to be your biggest achievement, and something small and recent can be easier to write about.",
             "Any part of your life counts. The thing you sorted out for your mom counts. The thing you fixed that nobody asked you to fix counts. The shift where you were the one who stayed calm counts.",
-            "Many people discount everything that wasn't paid. Here, all of it counts."
+            "If you're tempted to leave out unpaid work, keep it in. Here, all of it counts."
           ],
           prompt: "Write one, tag what the skill was, then add it. One will do, though three gives us more to work with.",
           placeholder: "There was a time when…",
@@ -116,15 +116,15 @@ YNSActivity.define({
           eyebrow: "The evidence",
           title: "Did anybody else notice?",
           scene: [
-            "A strength only you can see is hard to argue for. One someone else has remarked on is a reference waiting to happen."
+            "If someone else has noticed a strength of yours, they might be willing to speak for it."
           ],
           prompt: "Whichever is closest to the truth.",
           options: [
             { k: "said",   t: "Yes, someone said so at the time",
-              s: "That person is a reference, and they don't know it yet.",
+              s: "That person could be a reference. It may be worth asking.",
               echo: "someone said so at the time" },
             { k: "unsaid", t: "People rely on me for it, but nobody's ever said it out loud",
-              s: "A common answer, and the one people undersell.",
+              s: "That still counts as evidence.",
               echo: "people rely on me for it without saying so" },
             { k: "alone",  t: "It was mostly on my own",
               s: "Which makes it yours entirely.",
@@ -205,12 +205,10 @@ YNSActivity.define({
     var topLabel = (SKILLS.filter(function (s) { return s.k === top; })[0] || {}).t;
 
     var WITNESS = {
-      said:   "Someone has already said this to you out loud. That person is a reference and doesn't " +
-              "know it yet. The ask is smaller than you think. Many people are quietly pleased to " +
-              "be asked.",
-      unsaid: "People rely on you for it and nobody has ever said so. It is a common answer " +
-              "here, and it is part of why capable people freeze on \"what are you good at\" in " +
-              "an interview. The proof is all there. It has just never been said out loud.",
+      said:   "Someone has already said this to you out loud. That person could be a reference. " +
+              "Asking can take one short message, and some people are glad to be asked.",
+      unsaid: "People rely on you for it and nobody has ever said so. That can make \"what are you good at\" " +
+              "a hard interview question. The proof is still there, and you can be the one to say it.",
       alone:  "You did it on your own, which makes the story entirely yours. It also means " +
               "you'll have to be the one who tells it, and that's what the line below is for."
     };
@@ -241,8 +239,8 @@ YNSActivity.define({
 
       '<div class="ya-readout"><h3>Where this goes next</h3><p>Treat these as raw material. ' +
       '<button type="button" class="lnk" onclick="YNS.open(\'abcs_a\')">Career ABCs</button> turns them into ' +
-      "resume bullets and interview answers, and that is far easier with these in front of you " +
-      "than from a blank page.</p></div>";
+      "resume bullets and interview answers, and having these in front of you " +
+      "can make that easier.</p></div>";
   },
 
   actions: function (state) {

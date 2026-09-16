@@ -38,14 +38,14 @@ YNSActivity.define({
         {
           mechanic: "learn",
           eyebrow: "Ten minutes",
-          title: "Retirement is a pot, and there are three ways people fill it.",
+          title: "Retirement is a pot, and here are three common ways to fill it.",
           lead: "You don\u2019t need a plan for retirement today. You do need to know what the deduction on your pay stub is buying, and which of these you have access to.",
           points: [
             "<b>A 401k or 403b</b> comes through work. Money goes in before tax, and some employers add money on top.",
             "<b>A Roth IRA</b> you open yourself. Money goes in after tax, and nothing is taxed when it comes out, if you take it out after 59\u00bd and the account is at least five years old.",
             "<b>A pension</b> is a promise from an employer to pay you a set amount every month for life."
           ],
-          note: "The one thing that matters more than any of it: the earlier money goes in, the more of the final number is growth.",
+          note: "One thing to keep in mind: the earlier money goes in, the more years it has to grow.",
           cta: "Start with the free money"
         }
       ]
@@ -60,7 +60,7 @@ YNSActivity.define({
           asks: "match_pay",
           mechanic: "calc",
           eyebrow: "401k and 403b only",
-          title: "The match is the closest thing to free money you will be offered.",
+          title: "An employer match adds money on top of what you put in.",
           scene: [
             "This screen is about workplace plans only: a <b>401k</b> if you work somewhere for-profit, a <b>403b</b> if you work for a non-profit, a school or a hospital. A Roth IRA you open yourself has no match, and neither does a pension.",
             "If your employer matches, they add their money to yours. If you put in less than the match, the unmatched part is money your employer doesn\u2019t add.",
@@ -117,8 +117,8 @@ YNSActivity.define({
           prompt: "Put in what you could save a year, and see both.",
           inputs: [
             { k: "annual", t: "What you\u2019d put in a year", prefix: "$", start: 3000, step: 500, max: 24500, s: "Roth IRAs cap at $7,500 a year in 2026. Workplace plans cap at $24,500." },
-            { k: "now",    t: "Your tax rate now",           prefix: "", suffix: "%", start: 12, step: 1, max: 37, s: "Most early-career pay lands in the 12% or 22% bracket." },
-            { k: "later",  t: "Your tax rate in retirement",  prefix: "", suffix: "%", start: 12, step: 1, max: 37, s: "Nobody knows yet, which is why many people hold both." },
+            { k: "now",    t: "Your tax rate now",           prefix: "", suffix: "%", start: 12, step: 1, max: 37, s: "12% and 22% are two of the federal brackets. The IRS site lists which income goes in each." },
+            { k: "later",  t: "Your tax rate in retirement",  prefix: "", suffix: "%", start: 12, step: 1, max: 37, s: "Nobody knows yet, so some people hold both to spread the bet." },
             { k: "years",  t: "Years of growing",             prefix: "", start: 30, step: 5, max: 45, s: "" }
           ],
           compute: function (v) {
@@ -163,7 +163,7 @@ YNSActivity.define({
           mechanic: "learn",
           eyebrow: "The fine print that matters",
           title: "What each one is good and bad at.",
-          lead: "Many people end up holding more than one. You can pay into a workplace plan and a Roth IRA in the same year.",
+          lead: "You can hold more than one. For example, you can pay into a workplace plan and a Roth IRA in the same year.",
           points: [
             "<b>401k / 403b, good:</b> the match, a high limit ($24,500 in 2026), it lowers this year\u2019s tax bill, and it comes out of pay before you see it.",
             "<b>401k / 403b, bad:</b> every dollar is taxed on the way out, you pick from the plan\u2019s menu, and taking it out before 59\u00bd usually costs <b>a 10% penalty on top of the tax</b>.",
@@ -190,10 +190,10 @@ YNSActivity.define({
             "With a 401k you carry the risk: you choose what it\u2019s invested in, and what you retire with depends on how the market did.",
             "With a pension the employer carries it. They promise a monthly check for life, usually worked out as <b>years worked \u00d7 a percentage \u00d7 your final salary</b>. If the market has a bad decade, that is their problem."
           ],
-          prompt: "Most public pensions use 1.5% to 2.5% per year worked.",
+          prompt: "The plan documents list the percentage per year worked. The 2% below is only an example.",
           inputs: [
             { k: "years",  t: "Years you\u2019d work there", prefix: "", start: 25, step: 5, max: 45, s: "" },
-            { k: "salary", t: "Your final salary",          prefix: "$", start: 60000, step: 5000, max: 250000, s: "Usually an average of your best few years." },
+            { k: "salary", t: "Your final salary",          prefix: "$", start: 60000, step: 5000, max: 250000, s: "Some plans use an average of your best few years. Check yours." },
             { k: "factor", t: "The plan\u2019s percentage",  prefix: "", suffix: "%", start: 2, step: 1, max: 3, s: "Per year worked. It is in the plan documents." }
           ],
           compute: function (v) {
@@ -213,9 +213,9 @@ YNSActivity.define({
           eyebrow: "Pensions, in full",
           title: "Who still has them, and what the catch is.",
           points: [
-            "<b>Where they still exist:</b> state and local government, teaching and school districts, police and fire, the military, many hospitals and universities, and some union trades and large manufacturers.",
+            "<b>Where you might find them:</b> state and local government, teaching and school districts, police and fire, the military, and some hospitals, universities, union trades and manufacturers.",
             "<b>Good:</b> a check for life that doesn\u2019t run out, no investment decisions to make, and the employer carries the market risk. Some include a survivor benefit for a spouse.",
-            "<b>Bad:</b> <b>vesting</b>. Leave before you\u2019re vested, often five years, and you may walk away with little or nothing. The amount is tied to staying, which makes leaving expensive.",
+            "<b>Bad:</b> <b>vesting</b>. Leave before you\u2019re vested and you may walk away with little or nothing. Ask how many years vesting takes. The amount grows with the years you stay, so leaving early can cost you.",
             "<b>Also worth knowing:</b> a pension is usually taxed as income when it pays out, some don\u2019t rise with inflation, and a few public workers don\u2019t pay into Social Security, so the pension is most of the picture."
           ],
           note: "If a job offers one, ask two questions at the offer stage: how many years until I\u2019m vested, and what is the percentage per year worked.",
@@ -237,7 +237,7 @@ YNSActivity.define({
           scene: ["The honest answer is the useful one."],
           prompt: "Closest to true.",
           options: [
-            { k: "match_unused", t: "There\u2019s a match at work I\u2019m not taking",  s: "A match adds money on top of yours, and signing up is often one form.", echo: "a match you\u2019re not taking" },
+            { k: "match_unused", t: "There\u2019s a match at work I\u2019m not taking",  s: "A match adds money on top of yours. HR can tell you what signing up takes.", echo: "a match you\u2019re not taking" },
             { k: "match_used",   t: "I\u2019m taking the full match",                 s: "Next, you could compare an IRA.", echo: "taking the match" },
             { k: "pension",      t: "My job has a pension",                        s: "Then vesting is the number to find out.", echo: "a pension" },
             { k: "none",         t: "No plan at work, or no job right now",        s: "An IRA is an account you can open yourself. You can put money in for any year you had earned income.", echo: "nothing at work yet" }
@@ -253,14 +253,14 @@ YNSActivity.define({
     var ro = r.extra.roth_result || {};
     var st = r.state.answers.intent || "";
     var S = {
-      match_unused: "You said there\u2019s a match you\u2019re not taking. Many people put in at least enough to get the full match before anything else on this page. HR or the benefits page can tell you the percentage.",
+      match_unused: "You said there\u2019s a match you\u2019re not taking. One option to look at is putting in at least enough to get the full match. HR or the benefits page can tell you the percentage.",
       match_used:   "You\u2019re taking the full match. Some people also open an IRA alongside it. The screens above show how the two compare.",
       pension:      "You have a pension. Two numbers decide what staying is worth: the years until you\u2019re vested, and the percentage per year worked. HR and the plan documents have both.",
       none:         "Nothing at work yet. An IRA doesn\u2019t need an employer. You can put money in for any year you had earned income, up to $7,500 in 2026."
     };
     return "<h1>Three ways to fill the pot.</h1>" +
       (m.end ? '<div class="ya-quote">Your match is worth ' + money(m.end - m.endAlone) + " over " + m.years + " years if the account grows 7% a year. That rate is an assumption. This also assumes they match dollar for dollar, and many plans match half.</div>" : "") +
-      (ro.trad ? '<div class="ya-readout"><h3>Taxed now or later</h3><p>On your numbers, the 401k lands at ' + money(ro.tradNet) + " after tax and the Roth at " + money(ro.roth) + ". The gap is " + money(Math.abs(ro.tradNet - ro.roth)) + ", and it flips entirely on what tax rate you retire into, which nobody knows. That is why plenty of people hold both.</p></div>" : "") +
+      (ro.trad ? '<div class="ya-readout"><h3>Taxed now or later</h3><p>On your numbers, the 401k lands at ' + money(ro.tradNet) + " after tax and the Roth at " + money(ro.roth) + ". The gap is " + money(Math.abs(ro.tradNet - ro.roth)) + ", and it flips entirely on what tax rate you retire into, which nobody knows yet. Some people hold both for that reason.</p></div>" : "") +
       '<div class="ya-readout"><h3>The rules that bite</h3><p>Money out of a 401k or 403b before 59\u00bd usually costs a <b>10% penalty on top of the income tax</b>. A Roth is gentler: what you put in can come out at any time. The growth comes out tax-free if you take it out after 59\u00bd and the account is at least five years old. IRS limits for 2026 are $24,500 for workplace plans and $7,500 for IRAs.</p></div>' +
       (S[st] ? '<div class="ya-readout"><h3>Where you are</h3><p>' + esc(S[st]) + "</p></div>" : "") +
       '<div class="ya-readout"><h3>What this covers</h3><p>This explains how the accounts work. It doesn\u2019t recommend a provider, a fund or an amount. Your plan documents and HR have the final word.</p></div>';

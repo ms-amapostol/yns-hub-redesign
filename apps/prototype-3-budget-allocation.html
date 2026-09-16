@@ -167,7 +167,7 @@
 <script src="yns-supabase.js?v=d872a971"></script>
 <script src="yns-taxonomy.js?v=4bb570b3"></script>
 <script src="yns-profile.js?v=17ae72a5"></script>
-<script src="quiz-shared.js?v=77c966fb"></script>
+<script src="quiz-shared.js?v=26"></script>
 <script>
 if(!window.Quiz){
   document.getElementById('app').innerHTML =
@@ -185,37 +185,37 @@ const VALUES = [
    desc:"How high the number can go if you're good at it.",
    w:{finance:.79,biz:.77,tech:.62,trades:.43,health:.38,gov:.22,creative:.21,edu:.11,social:0},
    hi:"Pay is your loudest signal. That's allowed, and it just means we'll lean toward paths with higher ceilings.",
-   lo:"You've priced money low. That opens doors most people close on themselves."},
+   lo:"You've priced money low. That can open doors you might otherwise skip."},
 
   {k:"flex",  name:"Flexibility & time", color:"#0ea5a4", avg:22,
    desc:"Where you work, when you work, and whether evenings are yours.",
    w:{creative:.93,tech:.69,biz:.48,social:.43,finance:.35,gov:.33,edu:.32,trades:.21,health:.09},
-   hi:"Time is the thing you're really buying. Worth knowing: a lot of shift-based and on-site work won't give you this.",
-   lo:"You'll trade your calendar for the right work. That widens the field a lot."},
+   hi:"Time is the thing you're really buying. Worth checking: some shift-based and on-site work may not give you this.",
+   lo:"You'll trade your calendar for the right work. That can widen the field."},
 
   {k:"impact",name:"Impact on people",   color:"#e11d48", avg:19,
    desc:"Whether a specific human is better off because you showed up.",
    w:{social:1.43,edu:.96,health:.84,gov:.78,creative:.31,trades:.21,biz:.19,tech:.15,finance:.09},
    hi:"You need the work to land on someone. That's a real filter, and it points somewhere specific.",
-   lo:"You don't need the job to be the meaning. That's honest, and it's more common than people admit."},
+   lo:"You don't need the job to be the meaning. That's honest."},
 
   {k:"stable",name:"Stability & security",color:"#7c3aed", avg:17,
    desc:"Predictable hours, predictable paycheck, low chance of a bad surprise.",
    w:{gov:1.11,edu:.75,health:.75,finance:.71,trades:.64,biz:.48,social:.43,tech:.31,creative:.10},
-   hi:"You want solid ground. That's a legitimate strategy and it favors licensed, regulated, and public-sector paths.",
-   lo:"You can tolerate volatility. That's the entry fee for the highest-upside paths."},
+   hi:"You want solid ground. That's a legitimate strategy, and licensed, regulated, and public-sector paths are worth a look.",
+   lo:"You can tolerate volatility. That can open paths with more upside."},
 
   {k:"growth",name:"Growth & advancement",color:"#ea580c", avg:12,
    desc:"A ladder that keeps going, and a job that looks different in five years.",
    w:{biz:.87,finance:.71,tech:.69,creative:.52,edu:.43,social:.43,trades:.43,health:.38,gov:.33},
    hi:"You're optimizing for the job after this one. That changes which first step is right.",
-   lo:"A ladder matters less to you. That makes craft-based and steady-state work a good fit."},
+   lo:"A ladder matters less to you. Craft-based and steady-state work may suit you."},
 
   {k:"craft", name:"Craft & mastery",     color:"#65a30d", avg:6,
    desc:"Getting provably good at one hard thing.",
    w:{trades:1.07,creative:.93,health:.56,tech:.54,edu:.43,finance:.35,social:.29,gov:.22,biz:.19},
    hi:"You want to be good at something, more than you want to be senior in it. That points at a different kind of career.",
-   lo:"You'd rather be broad than deep. That points toward generalist and management paths."}
+   lo:"You'd rather be broad than deep. Generalist and management paths may suit you."}
 ];
 
 
@@ -343,7 +343,7 @@ function renderTradeoff(){
     <p class="sub">Your budget was clear about <b>${topName}</b>.</p>
     <p class="sub" style="margin-top:10px">You put <b>${alloc[a.k]}</b> on ${a.name.toLowerCase()} and <b>${alloc[b.k]}</b> on ${b.name.toLowerCase()}. ${
       tight ? "Close enough that we can't call it."
-            : "A job will rarely hand you both of them properly." }</p>
+            : "Some jobs won't give you both of them properly." }</p>
     <p class="sub" style="margin-top:14px"><b>A job comes along with one of them, properly, and not the other. Which do you take?</b></p>
     <div style="height:18px"></div>
     ${[a,b].map(v=>`

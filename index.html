@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Questrial&display=swap">
-<link rel="stylesheet" href="css/hub.css?v=24">
+<link rel="stylesheet" href="css/hub.css?v=26">
 </head>
 <body>
 <div class="wrap">
@@ -43,19 +43,19 @@
 
       <div class="q" data-q="1">
         <h2>Do you know what you want yet?</h2>
-        <p class="hint">Be honest. Most people who land here are somewhere in the middle, and that's completely normal.</p>
+        <p class="hint">Be honest. Anywhere from unsure to certain is a fine place to be.</p>
         <div class="opts" role="radiogroup" id="q1"></div>
       </div>
 
       <div class="q" data-q="2">
         <h2>What brought you here right now?</h2>
-        <p class="hint">Something usually shifts before someone opens a page like this. Whatever it was, it counts.</p>
+        <p class="hint">Maybe something shifted. Whatever it was, it counts.</p>
         <div class="opts" role="radiogroup" id="q2"></div>
       </div>
 
       <div class="q" data-q="3">
         <h2>How much experience have you got?</h2>
-        <p class="hint">This is the one boring question, and we only ask it here. It decides which roles we show you, so the numbers you see are ones you could actually reach. Nothing on this list is a disadvantage.</p>
+        <p class="hint">This is the one boring question, and we only ask it here. It decides which roles we show you, so the numbers you see are ones you could actually reach. Every answer on this list is a fine place to start.</p>
         <div class="opts" role="radiogroup" id="q3"></div>
       </div>
 
@@ -81,12 +81,12 @@
             <div class="avatar" id="avatarBox">
               <div class="art" id="avatarArt" role="img" aria-label="Your character"></div>
             </div>
-            <p class="avatar-caption" id="avatarCaption">A blank page. That's fine, that's where everyone starts.</p>
+            <p class="avatar-caption" id="avatarCaption">A blank page. That's a fine place to start.</p>
           </div>
           <div class="hero-text">
             <div>
               <h1 id="heroH1">What’s your next step?</h1>
-              <p class="lead" id="heroLead">Wherever you're starting from, the next step is smaller than it looks. We'll take it one piece at a time, and everything you tell us shows up right here.</p>
+              <p class="lead" id="heroLead">Wherever you're starting from, we'll take it one piece at a time, and everything you tell us shows up right here.</p>
             </div>
             <div class="bubble" id="bubble"><span class="lead-in" id="bubbleLead"></span><span class="say" id="bubbleSay"></span><div class="dots" id="bubbleDots"></div></div>
           </div>
@@ -139,31 +139,31 @@
 <div class="toast" id="toast"></div>
 <div id="srStatus" role="status" class="sr-only"></div>
 
-<script src="vendor/yns-taxonomy.js?v=24"></script>
+<script src="vendor/yns-taxonomy.js?v=26"></script>
 <script>/* real wage bands, used by the interest profiler results */fetch("data/roles.json").then(function(r){return r.json();}).then(function(d){window.YNS_ROLES=d;}).catch(function(){});</script>
-<script src="vendor/quiz-shared.js?v=24"></script>
+<script src="vendor/quiz-shared.js?v=26"></script>
 <script>/* load the real wage bands into Quiz, so rolesFor() uses them. The hub is not an activity, so no start event. */if (window.Quiz && Quiz.init) { try { Quiz.init("hub", { chrome: false, track: false }); } catch (e) {} }</script>
-<script src="js/mock-runtime.js?v=24"></script>
-<script src="activities/interests.js?v=24"></script>
-<script src="activities/able.js?v=24"></script>
-<script src="activities/budget0.js?v=24"></script>
-<script src="activities/compound.js?v=24"></script>
-<script src="activities/invest.js?v=24"></script>
-<script src="activities/retire.js?v=24"></script>
-<script src="activities/taxes.js?v=24"></script>
-<script src="activities/why.js?v=24"></script>
-<script src="activities/proof.js?v=24"></script>
-<script src="activities/hours168.js?v=24"></script>
-<script src="activities/constraints.js?v=24"></script>
-<script src="activities/floor.js?v=24"></script>
-<script src="activities/doors.js?v=24"></script>
-<script src="activities/conversations.js?v=24"></script>
-<script src="activities/premortem.js?v=24"></script>
-<script src="activities/stilltrue.js?v=24"></script>
-<script src="activities/grit.js?v=24"></script>
-<script src="activities/bounce.js?v=24"></script>
-<script src="activities/money101.js?v=24"></script>
-<script src="activities/smart6.js?v=24"></script>
-<script src="js/hub.js?v=24"></script>
+<script src="js/mock-runtime.js?v=26"></script>
+<script src="activities/interests.js?v=26"></script>
+<script src="activities/able.js?v=26"></script>
+<script src="activities/budget0.js?v=26"></script>
+<script src="activities/compound.js?v=26"></script>
+<script src="activities/invest.js?v=26"></script>
+<script src="activities/retire.js?v=26"></script>
+<script src="activities/taxes.js?v=26"></script>
+<script src="activities/why.js?v=26"></script>
+<script src="activities/proof.js?v=26"></script>
+<script src="activities/hours168.js?v=26"></script>
+<script src="activities/constraints.js?v=26"></script>
+<script src="activities/floor.js?v=26"></script>
+<script src="activities/doors.js?v=26"></script>
+<script src="activities/conversations.js?v=26"></script>
+<script src="activities/premortem.js?v=26"></script>
+<script src="activities/stilltrue.js?v=26"></script>
+<script src="activities/grit.js?v=26"></script>
+<script src="activities/bounce.js?v=26"></script>
+<script src="activities/money101.js?v=26"></script>
+<script src="activities/smart6.js?v=26"></script>
+<script src="js/hub.js?v=26"></script>
 </body>
 </html>

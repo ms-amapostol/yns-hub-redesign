@@ -77,10 +77,10 @@ YNSActivity.define({
         {
           mechanic: "learn",
           eyebrow: "Eight minutes",
-          title: "There will be a week you want to quit.",
-          lead: "Many people who change something have one. The people who get through it usually decided what to do before it arrived.",
+          title: "There may be a week you want to quit.",
+          lead: "If that week comes, a plan you made ahead of time can help you get through it.",
           body: [
-            "Right now you can think clearly. On the hard week you won't be able to. So this activity writes the plan now and hands it to future you.",
+            "Right now you can think it through. On a hard week, that can be harder. So this activity writes the plan now and hands it to future you.",
             "You'll name your warning sign, pick one person, walk one real problem through four steps called ABLE (Assess, Brainstorm, List, Execute), and write a short note to future you."
           ],
           cta: "Let's write it"
@@ -101,7 +101,7 @@ YNSActivity.define({
           eyebrow: "The warning sign",
           title: "How do you usually know a hard week has started?",
           scene: [
-            "Many people have a tell. Naming it means you'll notice it a day or two earlier next time."
+            "You may have a tell. Naming it can help you notice it sooner next time."
           ],
           prompt: "The most familiar one.",
           options: [
@@ -129,13 +129,13 @@ YNSActivity.define({
           eyebrow: "The person",
           title: "Who will you text when it's a hard week?",
           scene: [
-            "Not for advice. Just so one person knows. It's easier to keep going when someone is watching, and it's very hard to keep going when nobody is."
+            "Not for advice. Just so one person knows. Knowing someone is in your corner can make it easier to keep going."
           ],
           prompt: "Do you have someone?",
           options: [
             { k: "yes",   t: "Yes, I know who",           s: "Keep them in mind for the note at the end.", echo: "you have someone" },
             { k: "maybe", t: "Maybe. Someone I'd have to ask", s: "That's fine. Asking is the step.", echo: "you have someone to ask" },
-            { k: "no",    t: "Not right now",             s: "A lot of people are here. The plan still works.", echo: "you don't have someone yet" }
+            { k: "no",    t: "Not right now",             s: "The plan can still help.", echo: "you don't have someone yet" }
           ]
         }
       ]
@@ -202,7 +202,7 @@ YNSActivity.define({
           title: "Three ways it could be solved. Bad ideas welcome.",
           scene: function (v) {
             var pr = (v && v.extra && v.extra.able_a_text) || (v && v.facts && v.facts.able_problem);
-            return [ (pr ? "\u201c" + escHTML(pr) + "\u201d " : "") + "There's usually more than one way. Write three, even if two are silly. The point is getting past the first one." ];
+            return [ (pr ? "\u201c" + escHTML(pr) + "\u201d " : "") + "There may be more than one way. Write three, even if two are silly. The point is getting past the first one." ];
           },
           prompt: "One per line.",
           placeholder: "1.\n2.\n3.",
@@ -227,7 +227,7 @@ YNSActivity.define({
           },
           prompt: "Your top one.",
           options: [
-            { k: "first",  t: "The first one I wrote",  s: "Usually the obvious one, and obvious is fine.", echo: "your first idea" },
+            { k: "first",  t: "The first one I wrote",  s: "Maybe the obvious one, and obvious is fine.", echo: "your first idea" },
             { k: "second", t: "The second one",         s: "", echo: "your second idea" },
             { k: "third",  t: "The third one",          s: "The one you almost didn't write.", echo: "your third idea" },
             { k: "none",   t: "None of them yet",       s: "Then the next step is asking someone for a fourth.", echo: "none yet" }
@@ -304,7 +304,7 @@ YNSActivity.define({
           title: "The hard week is a week.",
           lead: function (v) {
             var why = v && v.facts && v.facts.why_statement;
-            return why ? "You wrote down why you're doing this. Here it is: \u201c" + why + "\u201d" : "It ends. Plans made on a good week are how you get to the other side of it.";
+            return why ? "You wrote down why you're doing this. Here it is: \u201c" + why + "\u201d" : "It ends. A plan made on a good week can help you get through it.";
           },
           body: function (v) {
             var why = v && v.facts && v.facts.why_statement;
@@ -332,7 +332,7 @@ YNSActivity.define({
         : "Right now this only lives in this browser. Screenshot it, or make an account and it'll be on your profile when you need it.") +
       "</p>" +
       (person === "no"
-        ? '<div class="ya-readout"><h3>About the person</h3><p>You said there\u2019s nobody to text right now. The plan works without one. Two Conversations is built for finding that person, when you\u2019re ready.</p></div>'
+        ? '<div class="ya-readout"><h3>About the person</h3><p>You said there\u2019s nobody to text right now. The plan can still help without one. Two Conversations is built for finding that person, when you\u2019re ready.</p></div>'
         : "");
   },
 

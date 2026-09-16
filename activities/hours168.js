@@ -58,7 +58,7 @@ var ROWS = [
   { k: "people",   t: "Being with people you like", s: "Time you chose to spend.",
     max: 50, a: { people: 3 } },
 
-  { k: "rest",     t: "Actually resting",      s: "The kind that actually restores you, rather than scrolling and feeling guilty.",
+  { k: "rest",     t: "Actually resting",      s: "The kind that leaves you feeling restored.",
     max: 50, a: {} }
 ];
 
@@ -86,8 +86,8 @@ YNSActivity.define({
           eyebrow: "One week",
           title: "There are 168 hours in a week.",
           scene: [
-            "Everybody gets the same number, and what separates one life from another is where those hours go.",
-            "Rough is fine. Nobody knows this exactly, and the estimate is usually more revealing than the truth would be."
+            "Everybody gets the same number. Where do yours go?",
+            "Rough is fine. Your best guess can tell you a lot."
           ],
           prompt: "The first few are per day, because that's how you know them. We'll do the multiplying.",
           total: 168,
@@ -114,7 +114,7 @@ YNSActivity.define({
           ],
           prompt: "Pick the one you resent most.",
           options: [
-            { k: "commute", t: "The commute",          fact: "commute", s: "Time that's neither work nor life.",        echo: "the commute takes the most" },
+            { k: "commute", t: "The commute",          fact: "commute", s: "The hours spent getting there and back.",        echo: "the commute takes the most" },
             { k: "work",    t: "The job itself",        fact: "work",    s: "The hours inside the job itself.",  echo: "the job itself takes the most" },
             { k: "chores",  t: "Keeping life running",  fact: "chores",  s: "The admin that never finishes.",             echo: "keeping life running takes the most" },
             { k: "none",    t: "Nothing. The problem is what's missing", fact: "none", s: "The week has the wrong shape.", echo: "my week is the wrong shape" }
@@ -137,7 +137,7 @@ YNSActivity.define({
           eyebrow: "The line",
           title: "And what would you not give up?",
           scene: [
-            "A new job will ask for something. Better to know in advance what the answer is."
+            "A new job may ask for some of your time. Worth knowing your answer ahead of time."
           ],
           prompt: "The one you would say no to a good offer over.",
           options: [
@@ -196,7 +196,7 @@ YNSActivity.define({
       "The other " + pctYours + "% covers making, learning, the people you chose and actual rest.</p>" +
       stack +
 
-      '<div class="ya-readout"><h3>The two numbers that matter</h3>' +
+      '<div class="ya-readout"><h3>Two numbers to look at</h3>' +
       "<p>Your biggest single claim on the week, after sleep, is <b>" +
       esc(LABEL[biggest] || "work") + "</b>, at about " + h(alloc[biggest] || 0) + " hours a week.</p>" +
       "<p>The smallest thing you kept for yourself is <b>" + esc(LABEL[smallest] || "rest") +
@@ -205,14 +205,14 @@ YNSActivity.define({
         ? "That is under twenty minutes a day. Worth asking whether that is a choice or a consequence."
         : "Small, and it exists, and that counts.") + "</p>" +
       (unaccounted > 12
-        ? "<p>You also left about " + h(unaccounted) + " hours unaccounted for. That happens a lot. It is usually " +
-          "the part of the week that's hard to describe afterwards, and it's often where the answer is.</p>"
+        ? "<p>You also left about " + h(unaccounted) + " hours unaccounted for. That's okay. Those hours can be " +
+          "hard to describe afterwards, and they may be worth a closer look.</p>"
         : "") +
       "</div>" +
 
       '<div class="ya-readout"><h3>What this is for</h3>' +
-      "<p>A job change moves your hours around. Anything you look at from here is a " +
-      "trade against this shape. You now know which parts you'd defend and which you'd hand " +
+      "<p>A job change can move your hours around, so it's worth " +
+      "holding any option up against this shape. You now know which parts you'd defend and which you'd hand " +
       "over without much of a fight.</p></div>";
   },
 
@@ -220,7 +220,7 @@ YNSActivity.define({
     var drain = state.answers.drain || (ctx && ctx.facts.time_drain) || "";
     if (drain === "commute") {
       return [
-        "Work out what your commute costs you in hours a year. The number often surprises people",
+        "Work out what your commute costs you in hours a year",
         "Find one role in your field that's closer, or not on-site, and read what it pays",
         "Try one week of tracking the real door-to-door time"
       ];

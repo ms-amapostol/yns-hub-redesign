@@ -84,15 +84,15 @@ YNSActivity.define({
         {
           mechanic: "learn",
           eyebrow: "Seven minutes",
-          title: "Every problem has a way through it.",
-          lead: "The useful move is swapping \u201cwhy is this happening to me\u201d for \u201chow do I solve this\u201d. Same problem, completely different next ten minutes.",
+          title: "You can look for a way through this.",
+          lead: "One move that can help: swap \u201cwhy is this happening to me\u201d for \u201chow do I solve this\u201d. The problem stays the same, and your next ten minutes can look very different.",
           points: [
             "<b>A</b> \u00b7 Assess. What is actually the problem, said plainly.",
-            "<b>B</b> \u00b7 Brainstorm. More than one way exists. Always.",
+            "<b>B</b> \u00b7 Brainstorm. Look for more than one way.",
             "<b>L</b> \u00b7 List. Put them in order of what you could actually start.",
             "<b>E</b> \u00b7 Execute. Do ten minutes of the top one, then adjust."
           ],
-          note: "Those four letters spell ABLE: Assess, Brainstorm, List, Execute. You'll walk one real problem through it, and it works on anything from a broken car to a stalled application.",
+          note: "Those four letters spell ABLE: Assess, Brainstorm, List, Execute. You'll walk one real problem through it, and you can try it on anything from a broken car to a stalled application.",
           cta: "Let's take one apart"
         }
       ]
@@ -111,7 +111,7 @@ YNSActivity.define({
           eyebrow: "A \u00b7 Assess",
           title: "What\u2019s one problem that\u2019s in your way right now?",
           scene: [
-            "A real one, from this week. Small counts. The method works the same on a small problem, and a small one is a better place to learn it."
+            "A real one, from this week. Small counts. A small problem is a good place to practice the method."
           ],
           prompt: "Say it in one line, plainly.",
           placeholder: "The problem is\u2026",
@@ -155,7 +155,7 @@ YNSActivity.define({
             var pr = (v && v.extra && v.extra.a_text) || (v && v.facts && v.facts.able_problem);
             return [
               pr ? "\u201c" + escHTML(pr) + "\u201d" : "",
-              "\u201cWhy is this happening to me\u201d has no answer you can act on. \u201cHow do I get to work by 6\u201d does. Rewrite yours as a how question."
+              "\u201cWhy is this happening to me\u201d can be hard to act on. \u201cHow do I get to work by 6\u201d does. Rewrite yours as a how question."
             ].filter(Boolean);
           },
           prompt: "Start with \u201cHow do I\u2026\u201d",
@@ -180,7 +180,7 @@ YNSActivity.define({
           eyebrow: "B \u00b7 Brainstorm",
           title: "Three ways it could go. Bad ones welcome.",
           scene: [
-            "The first idea is rarely the best one, and it's never the only one. Write three, even if two are silly. Silly ideas are what shake the good one loose.",
+            "Your first idea might have company. Write three, even if two are silly. A silly idea can help you find a good one.",
             "One is enough to carry on with."
           ],
           prompt: "Add them one at a time.",
@@ -224,12 +224,12 @@ YNSActivity.define({
               ? ["Your list:<br>" + items.map(function (t, n) { return (n + 1) + ". " + escHTML(t); }).join("<br>")]
               : []).concat([
               "Pick the one you could begin without anything else having to happen first.",
-              "That is usually the right one, because a started solution beats a perfect plan."
+              "Starting that one first can help you get moving."
             ]);
           },
           prompt: "The one you could start.",
           options: [
-            { k: "first",  t: "The first one I wrote",  s: "Often the obvious one, and obvious is fine.", echo: "your first idea" },
+            { k: "first",  t: "The first one I wrote",  s: "Maybe the obvious one, and obvious is fine.", echo: "your first idea" },
             { k: "second", t: "The second one",         s: "", echo: "your second idea" },
             { k: "third",  t: "The third one",          s: "The one you nearly didn\u2019t write down.", echo: "your third idea" },
             { k: "help",   t: "None of them on my own",  s: "Then the answer is a person, and that\u2019s a real answer.", echo: "you need someone" }
@@ -281,7 +281,7 @@ YNSActivity.define({
           mechanic: "choice",
           eyebrow: "Last one",
           title: "When?",
-          scene: ["Pick the one you'd actually do. A day you know you'll miss is worse than a later day you'll keep."],
+          scene: ["Pick the one you'd actually do. Choose a day you know you can keep, even if it's later."],
           prompt: "Your best guess.",
           options: DAYS.map(function (d) { return { k: d.toLowerCase().replace(/\s/g, "_"), t: d, echo: d.toLowerCase() }; })
         }
@@ -320,7 +320,7 @@ YNSActivity.define({
         ? '<div class="ya-readout"><h3>E \u00b7 the first ten minutes</h3><p>' + esc(step) + (when ? " \u00b7 <b>" + esc(when) + "</b>" : "") + "</p></div>"
         : "") +
       '<p class="ya-result-lead">That\u2019s the whole method. Assess, brainstorm, list, execute. ' +
-      "It works the same on the next one, and the one after that, which is the point of learning it on a small problem.</p>";
+      "You can use it on the next one, and the one after that. That\u2019s why it helps to learn it on a small problem.</p>";
   },
 
   actions: function (state, ctx) {
@@ -329,7 +329,7 @@ YNSActivity.define({
     return [
       step ? step + " \u00b7 " + when : "Do the first ten minutes " + when.toLowerCase(),
       "Tell one person what you decided to try",
-      "Run the same four steps on a second problem and see how much faster it goes"
+      "Run the same four steps on a second problem and see how it goes"
     ];
   }
 });

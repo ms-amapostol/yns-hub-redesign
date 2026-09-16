@@ -62,7 +62,7 @@
       acts:["abcs_a","abcs_b","abcs_c","conversations"] },
     { key:"mind", n:"Door 4", title:"Mindset and money",
       blurb:"Build the grit and the financial footing to follow through.",
-      why:"Knowing what you want is half of it. This door works on the part nobody teaches: bouncing back when it's hard, and knowing your real numbers.",
+      why:"Knowing what you want is one part. This door works on two more: bouncing back when it's hard, and knowing your real numbers.",
       acts:["grit","able","floor","money101","budget0","compound","taxes","retire","invest","bounce"] },
     { key:"plan", n:"Door 5", title:"Make the plan",
       blurb:"Six months, one SMART goal (specific, measurable, achievable, relevant, time-bound), written down.",
@@ -80,7 +80,7 @@
     cyoa:         { seven:["Look up one role from your top match on CareerOneStop","Tell one person which story you picked, and why","Write down the one thing from your story you\u2019d want most"], name:"The Story",            tag:"Seven chapters of a life eighteen months from now.",min:5, fact:"Work that fits", tile:4, live:"apps/prototype-1-choose-your-own-adventure.html" },
     dayinlife:    { seven:["Find one person who works a day like the one you picked, and ask them one question","Notice one moment this week that felt like the day you\u2019d want","Look up the top role from your match on CareerOneStop"], name:"A Day In The Life",    tag:"Six moments in a day you'd actually want.",         min:5, fact:"A day you'd want", tile:5, live:"apps/prototype-2-day-in-the-life.html" },
     budget:       { seven:["Check one job posting for the thing you\u2019d pay most for","Ask someone in that field whether their job has it","Write down why your biggest spend matters to you"], name:"Spend Your 100",       tag:"What you'd really pay for in a job.",               min:4, fact:"What you value in work", tile:6, live:"apps/prototype-3-budget-allocation.html" },
-    doors:        { name:"Three Doors",          tag:"Every realistic route in, side by side.",           min:7, fact:"Your route in", tile:7, play:true },
+    doors:        { name:"Three Doors",          tag:"Routes in, side by side.",           min:7, fact:"Your route in", tile:7, play:true },
     conversations:{ name:"Two Conversations",    tag:"Who to talk to, and the message already written.",  min:6, fact:"Someone to talk to", tile:8, play:true },
     /* Career ABCs is one app with three stages. The hub opens it at the
        stage she picked (#a/#b/#c) and reads real completion back out of
@@ -90,7 +90,7 @@
     abcs_c:       { seven:["Practice one answer out loud tomorrow","Ask someone to ask you one interview question","Write down the question you\u2019d least like to be asked, and one line of your answer"], name:"C · Say it out loud",  tag:"Interview practice, using the same stories.", min:8, fact:"Interview practice", tile:9, app:"c", after:"abcs_a" },
     able:         { name:"Solve It",           tag:"One real problem, taken apart four ways with ABLE: assess, brainstorm, list, execute.", min:7, fact:"How you solve things", tile:11, play:true },
     budget0:      { name:"Every Dollar a Job", tag:"Build a budget that adds to zero, then take the spreadsheet with you.", min:12, fact:"Your budget", tile:13, play:true },
-    compound:     { name:"What Money Does Over Time", tag:"Watch a small monthly amount turn into a number you didn\u2019t expect.", min:6, fact:"What time does to money", tile:13, play:true },
+    compound:     { name:"What Money Does Over Time", tag:"Watch what a small monthly amount can grow into.", min:6, fact:"What time does to money", tile:13, play:true },
     invest:       { name:"Where Money Can Live", tag:"Five places money can sit, from safest to riskiest, and which end yours goes.", min:5, fact:"Where money lives", tile:13, play:true, wix:true },
     retire:       { name:"The Match",            tag:"401k, 403b, pension, Roth, and the free money you might be leaving.", min:10, fact:"The match", tile:13, play:true, wix:true },
     taxes:        { name:"Where Your Paycheck Goes", tag:"The four lines that take money out, and the one you control.", min:4, fact:"Your paycheck", tile:13, play:true, wix:true },
@@ -246,18 +246,18 @@
     }[stage] || "you're where you are";
     if (reason==="enrolled"){
       return {
-        plan:    "You're already in a program and you know where it's going. This door turns that into six months with dates on it, and it's the one that keeps you moving when the semester gets heavy.",
+        plan:    "You're already in a program and you know where it's going. This door turns that into six months with dates on it, and it can help you keep moving when the semester gets heavy.",
         explore: "You're in a program and you've got a rough idea of where it leads. These help you see the real options inside it, so the choice is yours.",
-        know:    "You're in a program, which is a real step, and you said you're still working out what it's for. Two or three of these and that gets clearer."
+        know:    "You're in a program, which is a real step, and you said you're still working out what it's for. A few of these can help that get clearer."
       }[route(a)];
     }
     var map = {
-      know:    "You said you're still figuring it out, and "+st+". So we start with you, before any of the career stuff. Two or three of these and the picture starts to show.",
+      know:    "You said you're still figuring it out, and "+st+". So we start with you, before any of the career stuff. A few of these can help the picture start to show.",
       explore: "You said you've got a rough idea, and "+st+". These let you try the idea on before you commit to it.",
       get:     reason==="job"
         ? "You said you need a job soon, and "+st+". That's a deadline, so we skip the philosophy and build the thing you'll actually send."
         : "You said you know what you want, and "+st+". So we start with your resume, your cover letter and interview practice for that work.",
-      mind:    "You know the direction. You said the part that isn't ready is your head or your money, and "+st+". A lot of people say this, and it's exactly what this door is for.",
+      mind:    "You know the direction. You said the part that isn't ready is your head or your money, and "+st+". That's exactly what this door is for.",
       plan:    "You know what you want and you're ready to commit. "+st.charAt(0).toUpperCase()+st.slice(1)+", so the plan should fit that. Let's put dates on it."
     };
     return map[route(a)];
@@ -999,7 +999,7 @@
     if (f.interest_top) dir.push({ t:"What you\u2019d enjoy doing", v:f.interest_top, from:"What Kind of Work" });
     if (f.route_preference) dir.push({ t:"How you\u2019d get in", v:(ROUTE_WORD[f.route_preference]||f.route_preference), from:"Three Doors" });
     if (f.training_appetite) dir.push({ t:"Training you\u2019re up for", v:APPETITE_WORD[f.training_appetite]||f.training_appetite, from:"What Kind of Work" });
-    if (dir.length) out.push({ h:"Where you\u2019re pointing", note:"This is the answer to \u201cwhat are you looking for?\u201d in an interview.", rows:dir });
+    if (dir.length) out.push({ h:"Where you\u2019re pointing", note:"This can help you answer \u201cwhat are you looking for?\u201d in an interview.", rows:dir });
 
     /* The practical facts. */
     var prac=[];
@@ -1120,7 +1120,7 @@
     }
 
     var fr=n/total;
-    var cap = n===0 ? "Nothing here yet, and that\u2019s exactly where everyone starts."
+    var cap = n===0 ? "Nothing here yet, and that\u2019s a fine place to start."
             : fr<.35 ? "Look at that, you\u2019re getting going."
             : fr<.7  ? "You\u2019ve told us a lot about yourself."
             : n<total ? "Nearly all of it, and every bit is in your own words."
@@ -1224,7 +1224,7 @@
     var because = picked
       ? "You picked this one, and every door is open to you. "+(answered ? 'Your answers pointed to <button class="lnk" onclick="YNS.goDoor(\''+recommended+'\')">'+byKey(recommended).title+'</button>, if you\u2019d like to start there.' : "")
       : answered ? routeReason(state.a)
-      : "You haven't answered the questions yet, so we've opened the door most people start at. Answer them whenever you like and we'll point you somewhere that fits you better.";
+      : "You haven't answered the questions yet, so we've opened Door 1, a good place to begin. Answer them whenever you like and we'll point you somewhere that fits you better.";
     var offer="";
     if (allDoorsDone()){
       offer=wixCard("You\u2019ve been through all five doors. If you\u2019d like the same journey with videos and more structure, the Your Next Step course has six modules, each with an AI coach. It\u2019s optional and paid, with no obligation to join.", "all_doors");
@@ -1338,7 +1338,7 @@
           + ev.map(function (e) { return names[e.source] || e.source; }).join(", ") + ".</p>");
         if (ev.length > 1) {
           parts.push(state.facts.signals_agree
-            ? '<p class="dir-note">All of them point the same way, which makes this a stronger read than any one on its own.</p>'
+            ? '<p class="dir-note">All of them point the same way, which is worth noticing.</p>'
             : '<p class="dir-note">These point in different directions, which is worth knowing. Each one measures something different, so the answer above is the weight of all of them together.</p>');
         }
         var ns2=nextStepSentence(); if (ns2) parts.push('<p class="dir-next">'+ns2+'</p>');

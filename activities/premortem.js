@@ -61,11 +61,11 @@ YNSActivity.define({
               : "This one asks you to imagine it not working out.";
           },
 
-          lead: "We're not expecting it to go wrong. This is a trick people who plan hard things " +
-                "use all the time, and it works for one simple reason.",
+          lead: "We're not expecting it to go wrong. Some people who plan hard things " +
+                "use this trick. Here's the idea behind it.",
 
           points: [
-            "We're all better at explaining something <b>after</b> it happens than at spotting it coming.",
+            "It can be easier to explain something <b>after</b> it happens than to spot it coming.",
             "So we'll pretend a year has gone by and it didn't work out.",
             "You say what happened. Then we turn that into one small thing you can do now."
           ],
@@ -97,7 +97,7 @@ YNSActivity.define({
               (name ? ", into <b>" + escHTML(name) + "</b>" : "") +
               ", and it hasn't gone the way you hoped. You're roughly back where you started.",
               "Have a look through these and see which one feels most like the way it would " +
-              "really go for you. Many people know right away."
+              "really go for you."
             ];
           },
           prompt: "Choosing one doesn't make it likelier. It just tells us where to aim.",
@@ -108,8 +108,8 @@ YNSActivity.define({
               fact: "money", echo: "the money running out is what worries me",
               a: { order: 3 },
               then: "The money ran out while you were still " +
-                    "learning the work. That is a common way a good decision turns into a bad year, " +
-                    "and one of the easier ones to plan around.",
+                    "learning the work. That can turn a good decision into a hard year, " +
+                    "and it's something you can plan around.",
               cost: "It costs you the change, and some of your belief that you could make one." },
 
             { k: "support", t: "The people around me made it too hard",
@@ -127,7 +127,7 @@ YNSActivity.define({
               a: { order: 2, leading: 1 },
               then: "The plan was fine. What was missing was anything to keep you going through " +
                     "the long flat middle, when nothing visible is happening and nobody's " +
-                    "watching. That stretch is normal, and it can be planned for.",
+                    "watching. That stretch can happen, and it can be planned for.",
               cost: "What stings is the months you did put in before it went quiet." },
 
             { k: "fit", t: "I got there and it wasn't what I thought",
@@ -135,8 +135,8 @@ YNSActivity.define({
               fact: "fit", echo: "the work not being what I pictured worries me",
               a: { analysis: 3 },
               then: "You did everything right and ended up somewhere that didn't suit you. " +
-                    "That one really hurts. It's also the cheapest on this list to avoid, because " +
-                    "fifteen minutes with someone who does the job would have told you.",
+                    "That one really hurts. It may also be one of the easier ones to check early. " +
+                    "Fifteen minutes with someone who does the job could tell you a lot.",
               cost: "A year gone, plus the assumption that wanting something means it suits you." },
 
             { k: "luck", t: "Something happened that was nothing to do with me",
@@ -144,8 +144,8 @@ YNSActivity.define({
               fact: "luck", echo: "something outside my control worries me",
               a: { order: 2, people: 1 },
               then: "Life happened, the way it does, and none of it would have been a reflection " +
-                    "on you. This is the one you can't prevent. It's also the one where a bit of " +
-                    "slack in the plan is the difference between a setback and the end of it.",
+                    "on you. You may not be able to prevent this one. A bit of " +
+                    "slack in the plan can help keep it to a setback.",
               cost: "The plan was sound, and it had no backup." }
           ]
         }
@@ -172,8 +172,8 @@ YNSActivity.define({
             "Some problems have a cause you can go and work on. Others will happen or they " +
             "won't, whatever you do, and the only part you control is what they cost when they " +
             "land.",
-            "Worth separating, because they need different plans and it's easy to put your " +
-            "energy into the wrong one. Either way there's something to do about it."
+            "Worth separating, because they can need different plans. " +
+            "Either way there's something to do about it."
           ],
           prompt: "Whichever feels closest. You can change your mind later.",
           options: [
@@ -184,7 +184,7 @@ YNSActivity.define({
               s: "It happens or it doesn't, and what matters is what it costs when it does.",
               echo: "I'd have to ride it out" },
             { k: "fatal", t: "Neither. It would end it",
-              s: "A common answer, and a useful one, because it means a lot is resting on one thing.",
+              s: "A useful answer, because it means a lot is resting on one thing.",
               echo: "a lot is resting on one thing" }
           ]
         }
@@ -252,21 +252,20 @@ YNSActivity.define({
     };
 
     var KIND = {
-      preventable: "You said you could head it off, which is the best outcome this one has. It " +
+      preventable: "You said you could head it off. It " +
                    "means the thing you're most worried about has a cause. A cause is something " +
                    "you can work on this month.",
       survivable:  "You said you'd have to ride it out. So the job is to make sure it only costs you " +
                    "a setback. Some slack in the plan, a backup, and a " +
-                   "smaller first step all do that. None of them are dramatic.",
-      fatal:       "You said it would end the whole thing. That's a common answer, and it's " +
+                   "smaller first step can all help with that. None of them are dramatic.",
+      fatal:       "You said it would end the whole thing. That's " +
                    "worth saying out loud. It means a lot is resting on one thing going right. " +
                    "Take that as a reason to build a backup route, or to make the first step small " +
                    "enough that this can't reach it."
     };
 
     return "<h1>Now you know what to keep an eye on.</h1>" +
-      '<p class="ya-result-lead">A worry like this often gets carried around without anyone putting ' +
-      "words to it, which is the worst of both worlds: all of the weight and none of the use. " +
+      '<p class="ya-result-lead">A worry with no name can feel heavy. ' +
       "You've just turned yours into something with a name and something to do about it.</p>" +
 
       (CAUSE_WORDS[cause]
@@ -280,15 +279,15 @@ YNSActivity.define({
       (GUARD_WORDS[guard]
         ? '<div class="ya-readout"><h3>The one thing to do first</h3><p>You said the smallest ' +
           "thing that would have helped is <b>" + esc(GUARD_WORDS[guard]) + "</b>. By your own " +
-          "account, that's what separates the version that works from the one that doesn't. So " +
+          "account, that could make a real difference. So " +
           "do that before the big obvious step. There's something at the bottom of this page to " +
           "get you started.</p></div>"
         : "") +
 
       '<div class="ya-readout"><h3>One last thing</h3>' +
       "<p>Picturing it going wrong doesn't make it " +
-      "any more likely. We're all just better at explaining a problem after it happens than at " +
-      "spotting one coming. Pretending it already happened gets you a much more useful list.</p>" +
+      "any more likely. It can be easier to explain a problem after it happens " +
+      "than to spot one coming. Pretending it already happened can help you make a more useful list.</p>" +
       "<p>You've got that list now, and now you know what to plan for.</p></div>";
   },
 

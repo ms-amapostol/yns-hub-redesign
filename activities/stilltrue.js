@@ -137,7 +137,7 @@ YNSActivity.define({
           title: "Here's what we think we know.",
           scene: [
             "This is everything you have told us, in your words, with the date attached. Some of it is months old.",
-            "Go through and say what still holds. Nothing here is precious, and the point of writing things down is being able to find out you were wrong."
+            "Go through and say what still holds. Nothing here is precious. Writing things down lets you see what has changed."
           ],
           prompt: "Still true, or not any more?",
           cta: "That's my update",
@@ -159,15 +159,15 @@ YNSActivity.define({
           eyebrow: "Since last time",
           title: "Did you do anything about it?",
           scene: [
-            "No judgment attached to any of these. \"Nothing\" is a common answer, and it still tells us something, usually about the size of the step."
+            "No judgment attached to any of these. \"Nothing\" is a fine answer, and it can say something about the size of the step."
           ],
           prompt: "Whichever is closest to the truth.",
           options: [
             { k: "researched", t: "I looked into it properly", s: "Reading, research, working out the real numbers.", echo: "I looked into it" },
-            { k: "talked",     t: "I talked to someone",       s: "Often the one that moves things most.",                  echo: "I talked to someone" },
+            { k: "talked",     t: "I talked to someone",       s: "A call, a coffee, a message.",                  echo: "I talked to someone" },
             { k: "applied",    t: "I applied for something",   s: "A job, a course, a place.",                        echo: "I applied for something" },
             { k: "trained",    t: "I started training",        s: "Actually enrolled, and started.",                  echo: "I started training" },
-            { k: "nothing",    t: "Nothing, really",           s: "Which usually means the first step was too big.",  echo: "nothing has happened yet" }
+            { k: "nothing",    t: "Nothing, really",           s: "That's okay. The first step may have been too big.",  echo: "nothing has happened yet" }
           ]
         }
       ]
@@ -195,7 +195,7 @@ YNSActivity.define({
           eyebrow: "The context",
           title: "Has anything changed around you?",
           scene: [
-            "A move, a birth, a diagnosis, a layoff, a relationship, a bill. The things that decide what is possible, and that no quiz ever asks about."
+            "A move, a birth, a diagnosis, a layoff, a relationship, a bill. The things that shape what is possible right now."
           ],
           prompt: "Anything you think is worth us knowing, or skip this one.",
           placeholder: "Since last time…",
@@ -226,8 +226,8 @@ YNSActivity.define({
       : changed.length + (changed.length === 1 ? " thing has moved." : " things have moved.");
 
     var reading = changed.length === 0 && reviewed
-      ? "That's a real result. A direction that survives a few months " +
-        "without you touching it is worth more than one you've only just written down."
+      ? "That's a real result. A direction that still holds after a few months " +
+        "is worth noticing."
       : changed.length
       ? "Good, those are marked out of date now, so nothing here will " +
         "keep steering you with them."
@@ -251,12 +251,12 @@ YNSActivity.define({
 
       '<div class="ya-readout"><h3>What happened since</h3><p>' +
       (action === "nothing"
-        ? "Nothing yet, and that is a common answer here. Usually it means the first step was " +
-          "too big, which is why the thing at " +
-          "the bottom of this page is small on purpose."
+        ? "Nothing yet, and that's okay. Sometimes the first step was " +
+          "too big, so the steps at " +
+          "the bottom of this page are small on purpose."
         : ACTION_WORDS[action]
         ? "You said <b>" + esc(ACTION_WORDS[action]) + "</b>. That's real progress " +
-          "between one check-in and the next, and it's the part that builds on itself."
+          "between one check-in and the next."
         : "You skipped that one, which is fine. The check-in still stands.") + "</p></div>" +
 
       (note ? '<div class="ya-quote">' + esc(note) + "</div>" : "") +

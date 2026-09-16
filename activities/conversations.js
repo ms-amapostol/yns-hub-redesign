@@ -62,7 +62,7 @@ YNSActivity.define({
               "We're looking for the nearest human being to " +
               (n ? "<b>" + escHTML(n) + "</b>" : "the work you're thinking about") +
               ". They don't have to be a contact or a mentor, and you don't have to know them well.",
-              "Many people say \u201cnobody\u201d at first. Widen it by one step and there\u2019s usually someone."
+              "If \u201cnobody\u201d comes to mind, try widening it by one step. You may find someone."
             ];
           },
           prompt: "Which of these exists for you?",
@@ -102,7 +102,7 @@ YNSActivity.define({
               "You're asking someone in " + (n ? "<b>" + escHTML(n) + "</b>" : "that line of work") +
               " for fifteen minutes of their opinion, which many people enjoy giving. " +
               "That's all you're asking for.",
-              "Short is better. The version below is shorter than you think it should be, on purpose."
+              "The version below is kept short on purpose."
             ];
           },
           prompt: "Type into the fields and the message writes itself.",
@@ -135,7 +135,7 @@ YNSActivity.define({
               "You're asking someone in " + (n ? "<b>" + escHTML(n) + "</b>" : "that line of work") +
               " for fifteen minutes of their opinion. That's all you're asking for.",
               "You've already written down why you're doing this. The version below leaves room for " +
-              "one line of it. The real reason lands better than a formal one."
+              "one line of it. Your own words can make the message feel personal."
             ];
           },
           prompt: "Type into the fields and the message writes itself.",
@@ -175,8 +175,7 @@ YNSActivity.define({
           scene: function (v) {
             var n = catName(v);
             return [
-              "A lot of these chats get eaten by small talk and end with \u201cwell, good luck\u201d. " +
-              "One well-chosen question is worth the whole call.",
+              "Small talk can fill a short call fast. One well-chosen question helps you leave with something useful.",
               "Pick the one that would tell you most about " +
               (n ? "<b>" + escHTML(n) + "</b>" : "the work") + "."
             ];
@@ -184,16 +183,16 @@ YNSActivity.define({
           prompt: "Which would tell you the most?",
           options: [
             { k: "badday", t: "\u201cWhat does a bad day look like?\u201d",
-              s: "People often share the good days unprompted. The bad ones are the information.",
+              s: "Hearing about the hard days can tell you a lot.",
               echo: "I'll ask what a bad day looks like" },
             { k: "wish",   t: "\u201cWhat do you wish you'd known before you started?\u201d",
-              s: "It invites the thing they're still slightly annoyed about, which is usually the useful part.",
+              s: "It can bring up lessons they learned the hard way.",
               echo: "I'll ask what they wish they'd known" },
             { k: "who",    t: "\u201cWho else should I be talking to?\u201d",
-              s: "The question that turns one conversation into three.",
+              s: "It can turn one conversation into more.",
               echo: "I'll ask who else to talk to" },
             { k: "again",  t: "\u201cIf you were starting today, would you do it again?\u201d",
-              s: "The bluntest question there is, and people give a real answer more often than you'd expect.",
+              s: "A blunt question, and it can get a very honest answer.",
               echo: "I'll ask whether they'd do it again" }
           ]
         }
@@ -226,15 +225,11 @@ YNSActivity.define({
     var WHO = {
       direct: "You already know someone who does this. That makes this one easier: you can " +
               "go straight to the message.",
-      second: "One person in between is a useful distance. A shared connection means your " +
-              "message gets read, and asking for an introduction is a much smaller favor than " +
-              "the conversation itself.",
-      cold:   "You can find them. A short, specific message with no " +
-              "favor attached gets answered more often than people expect, partly because it " +
-              "stands out.",
+      second: "One person in between is a useful distance. A shared connection can help your message get read, and asking for an introduction is a small, simple request.",
+      cold:   "You can find them. A short, specific message with no favor attached can stand out and get a reply.",
       none:   "Then the first conversation is about finding the second. A trade body, a local " +
               "college's course page, a union hall, a group for people who do this work. Any of " +
-              "them can usually point you to someone."
+              "them may be able to point you to someone."
     };
     var whoNote = WHO[who] || "";
 
@@ -263,9 +258,7 @@ YNSActivity.define({
       : "";
 
     return "<h1>" + esc(lead) + "</h1>" +
-      '<p class="ya-result-lead">Fifteen minutes with someone who does this will tell you more ' +
-      "than any activity here, including this one. They know the work itself, and an activity " +
-      "can only show you a model of it.</p>" +
+      '<p class="ya-result-lead">' + "Fifteen minutes with someone who does this can tell you a lot. They know the work day to day, and they can answer questions an activity can\u2019t.</p>" +
 
       draftBlock +
 
@@ -276,10 +269,8 @@ YNSActivity.define({
         : "") +
 
       '<div class="ya-readout"><h3>Why two conversations</h3>' +
-      "<p>One conversation is a one-off. Two starts to look like a pattern. The second is " +
-      "often easier, because the first person usually tells you who it should be.</p>" +
-      "<p>If the message sits in drafts for a week, send it anyway. The worst realistic outcome " +
-      "is silence, and silence is where you are standing right now.</p></div>";
+      "<p>Two conversations give you more than one view. The first person may be able to suggest who the second should be.</p>" +
+      "<p>If the message sits in drafts for a week, send it anyway. If you don't hear back, you can try the next person on your list.</p></div>";
   },
 
   actions: function (state) {

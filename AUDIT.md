@@ -1,5 +1,38 @@
 # Your Next Step hub — audit
 
+## Update, build v26 (September 16, 2026)
+
+- **Anastasia's claim-review decisions are applied.** She decided all 682 lines.
+  - **639 rewrites applied** as written in the review. Each change to the quiz text is made in both copies of `quiz-shared.js`.
+  - **9 removed lines restored**, because she wanted them back.
+  - **27 removals kept**, including the Three Doors line.
+  - **7 hub speech-bubble sample lines kept as they are.**
+- **Accuracy fixes included:** "year fifteen" becomes "by year twenty" at an assumed 7%. The quiz pay note now says median and explains that each range shown is one slice of the pay spread.
+- **One quoting bug found and fixed:** a rewrite in Two Conversations broke the JavaScript quoting.
+- **Cache version is now v26.**
+- **Tested:**
+  - All 26 activities pass on desktop and on phone, with 0 errors.
+  - The Career ABCs harness passes 11 of 11 bullets, all resumes have the right page count, and there are 0 page errors.
+  - The composer checks pass.
+  - Every inline script in the HTML files parses.
+
+---
+
+## Update, build v25 (September 16, 2026)
+
+- **The Three Doors claim is gone.** "Many people assume the door they know about is the only door. Often it is the slowest and most expensive one." is removed from both versions of the routes screen. The title "There is more than one way in." still makes the point.
+- **Site-wide sweep for opinion stated as fact:** every screen was checked (hub, 20 activities, Career ABCs, the three story apps, the quiz results). 682 lines were found.
+  - **35 were removed.** Each one read fine without its claim, and nothing new was written in.
+  - **The other 647 are rewrites waiting on Anastasia's call.** They are in the Claims Check review page, grouped by type, with before and after for each one.
+- **Found and queued as accuracy fixes:**
+  - "Year fifteen" in What Money Does Over Time is wrong: at 7%, growth passes deposits around year 19.
+  - The quiz pay note says half of people earn less than the range's midpoint. That's wrong, because each range shown is only one slice of the pay spread.
+  - Some hub speech bubbles can show a made-up sample line as if the person said it.
+- **Cache version is now v25**, including the story apps' `quiz-shared.js` link.
+- **Tested:** all 26 activities on desktop and phone, 0 errors.
+
+---
+
 ## Update, build v24 (September 16, 2026)
 
 - **Bug fixed: Start over now clears the quizzes too.** The three quizzes save their answers under their own keys on the device (`yns_quiz_*`, `yns_runid_*`), and Start over left those behind. After a reset, a quiz reopened on the old results. Start over now clears every `yns` key the hub and its apps save. It keeps two: the light/dark setting and the anonymous device id.

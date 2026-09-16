@@ -68,7 +68,7 @@
     },
     health: {
       name: "Health & Care",
-      blurb: "Hands-on work with people at the moments that matter most. Clinical roles, allied health, care settings, public health.",
+      blurb: "Hands-on work with people at important moments. Clinical roles, allied health, care settings, public health.",
       profile: { people: 0.90, order: 0.60, hands: 0.60, analysis: 0.45, leading: 0.30, making: 0.10 }
     },
     gov: {
@@ -93,7 +93,7 @@
     },
     tech: {
       name: "Technology",
-      blurb: "Building and running the things everything else depends on. Software, data, IT, security, support engineering.",
+      blurb: "Building and running software, data and systems. Software, data, IT, security, support engineering.",
       profile: { analysis: 1.00, making: 0.80, order: 0.50, leading: 0.25, hands: 0.20, people: 0.20 }
     },
     finance: {
@@ -119,15 +119,15 @@
   };
 
   var ARCHETYPE_LINE = {
-    social:   "You kept choosing the person over the process. That is the whole job in a set of careers most people never seriously look at.",
-    edu:      "You get something out of watching the moment it clicks for someone else. That instinct is the actual skill, and it is rarer than it sounds.",
+    social:   "You kept choosing the person over the process. That sits at the heart of a set of careers worth a serious look.",
+    edu:      "You get something out of watching the moment it clicks for someone else. That instinct is a real skill in this kind of work.",
     health:   "You went straight toward the difficult thing, and you wanted to be useful in a specific, physical way.",
     gov:      "You kept reaching past the patch, for the rule or the process or the thing that will still be true after you have gone.",
     creative: "You want the day to end with something in front of you that was not there that morning, and you redo it until it is right.",
-    trades:   "You want a clear standard for done, and you want to be the one who reached it. You trust evidence, every time.",
-    biz:      "You kept being the one who calls it when the room has been going in circles for forty minutes. That is a job, and it pays.",
+    trades:   "You want a clear standard for done, and you want to be the one who reached it. You like having evidence.",
+    biz:      "You kept being the one who calls it when the room has been going in circles for forty minutes. Some jobs are built around exactly that.",
     tech:     "You go looking for the root cause, and you want to build the thing that stops the problem coming back.",
-    finance:  "You want the real record. Everything you chose pointed at wanting to know what is actually true before acting."
+    finance:  "You want the real record. Your choices pointed at wanting to know what is actually true before acting."
   };
 
   /* ===================================================================
@@ -485,14 +485,14 @@
     var body;
     if (agrees) {
       body = "You did " + list + " too, and it pointed the same way. Two different sets of questions, " +
-             "the same answer, which is worth more than either result on its own.";
+             "the same answer. That's a useful sign.";
     } else if (alsoRan) {
       body = "You did " + list + " too. " + CATS[topThisTime].name + " showed up there as well, " +
-             "a little lower down. It keeps appearing, which is the signal.";
+             "a little lower down. It keeps appearing, which is worth noticing.";
     } else if (priorTop && CATS[priorTop]) {
       body = "You did " + list + " too, and that one landed on <b>" + CATS[priorTop].name + "</b>. " +
-             "Two different answers usually means the two things you want " +
-             "are both real, and the job you are looking for has to hold both.";
+             "Two different answers might mean you want both things. " +
+             "A job that holds both could be worth looking for.";
     } else {
       body = "You did " + list + " too, and we are reading this alongside it.";
     }
@@ -648,7 +648,7 @@
       'published wage spread for that occupation across ' + where + year +
       ', narrowed to the part that matches your experience. It is not a starting ' +
       'salary and not an offer. Half of people in an occupation earn less than its ' +
-      'midpoint.</p>' +
+      'median wage, and each range here is one slice of the full spread.</p>' +
       '<p class="q-note">' + escapeHTML(liveRoles.citation ||
         "Data from CareerOneStop, sponsored by the U.S. Department of Labor, " +
         "Employment and Training Administration, and the Minnesota Department of " +

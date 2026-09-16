@@ -75,11 +75,11 @@ YNSActivity.define({
           eyebrow: "Ten cards",
           title: "Which of these are true?",
           scene: [
-            "Many people carry a list of reasons a change isn't possible. Some of them are real. They're facts about your life that everything else rests on.",
-            "Some of them are things you were told once, or worked out at twenty-two, and haven't looked at since.",
-            "They sit in the same place in your head, so the whole pile feels stuck. We'll take them one card at a time."
+            "You may carry a list of reasons a change isn't possible. Some of them are real. They're facts about your life that everything else rests on.",
+            "Some of them may be things you were told once, or worked out years ago, and haven't looked at since.",
+            "When they're all mixed together, the whole pile can feel stuck. We'll take them one card at a time."
           ],
-          prompt: "Go with your gut. Nobody else sees this, and a constraint you talk yourself out of is still there next month.",
+          prompt: "Go with your gut. Nobody else sees this, and it helps to count a real constraint as real.",
           pileA: "That's fixed",
           pileB: "Worth questioning",
           pileHint: "\"Worth questioning\" means you haven't checked it yet.",
@@ -159,17 +159,11 @@ YNSActivity.define({
     var reading =
       !open.length
         ? "That might be exactly right. Some lives really are that constrained, and pretending " +
-          "otherwise wouldn't help you. It's also what the list looks like when checking has " +
-          "stopped feeling worth the effort, which happens to a lot of people at some point. " +
+          "otherwise wouldn't help you. It can also happen when checking has stopped feeling worth the effort. " +
           "You only need to take on the one you pick below."
       : !fixed.length
-        ? "That's either real freedom or optimism, and it's worth finding out which. The risk " +
-          "on this side is a plan that quietly ignores something that will still be there in six months. " +
-          "If one of these is holding everything else up, far better to find that out now than " +
-          "by surprise halfway in."
-      : "That second pile is the useful one. Those things might all be true. But a reason you " +
-        "have never checked stops you just as hard as a real one, and it is much easier to move " +
-        "once you look at it.";
+        ? "It's worth checking how much room you really have. A plan can miss something that is still there in six months. If one of these is holding everything else up, finding out now can save you a surprise later."
+      : "That second pile is the useful one. Those things might all be true. An unchecked reason can stop you too, and looking at it closely can show you whether it moves.";
 
     return "<h1>" + esc(lead) + "</h1>" +
       '<p class="ya-result-lead">' + reading + "</p>" +
@@ -177,22 +171,18 @@ YNSActivity.define({
       (fixed.length
         ? '<div class="ya-readout"><h3>What you said is fixed</h3><p>' +
           fixed.map(function (c) { return esc(c.t); }).join(" · ") + "</p>" +
-          "<p>Design around these. A plan that respects them is one " +
-          "you'll still be following in six months.</p></div>"
+          "<p>Design around these. A plan that respects them can be easier to stick with.</p></div>"
         : "") +
 
       (open.length
         ? '<div class="ya-readout"><h3>What you said is worth questioning</h3><p>' +
           open.map(function (c) { return esc(c.t); }).join(" · ") + "</p>" +
-          "<p>Every one of these has an answer you could go and find: a number, a real " +
-          "requirement, one conversation. Each one is something you can go " +
-          "and check.</p></div>"
+          "<p>Many of these can be checked: with a number, a real requirement, or one conversation.</p></div>"
         : "") +
 
       (PICK_WORDS[picked]
         ? '<div class="ya-quote">The one you\u2019d least like to be wrong about is <b>' +
-          esc(PICK_WORDS[picked]) + "</b>. That's the one worth checking, which is a smaller " +
-          "job than deciding anything about it.</div>"
+          esc(PICK_WORDS[picked]) + "</b>. That's a good one to check first, and you don't have to decide anything yet.</div>"
         : "");
   },
 

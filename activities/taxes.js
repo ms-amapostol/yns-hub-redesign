@@ -39,7 +39,7 @@ YNSActivity.define({
         mechanic: "learn",
         eyebrow: "Four minutes",
         title: "Four kinds of line take money out of a paycheck.",
-        lead: "Once you can name them, a pay stub stops being a mystery. That\u2019s the whole lesson.",
+        lead: "Once you can name them, a pay stub can get much easier to read. That\u2019s the whole lesson.",
         points: [
           "<b>Federal income tax.</b> The big one. How much depends on how much you earn and what you told them on the W-4.",
           "<b>State income tax.</b> Most states take some. A few take none.",
@@ -76,11 +76,11 @@ YNSActivity.define({
         mechanic: "learn",
         eyebrow: "The one thing you control",
         title: "The W-4 is the form that decides how much they hold back.",
-        lead: "You fill it in when you start a job. Many people rush it and never look again.",
+        lead: "You fill it in when you start a job. It\u2019s worth filling in slowly, and checking again later.",
         points: [
           "<b>Hold back too little</b> and you owe money in April.",
           "<b>Hold back too much</b> and you get a refund, which is your own money, lent to the government for free all year.",
-          "<b>You can change it any time.</b> HR has the form. Many people update it when life changes: a second job, a kid, a marriage."
+          "<b>You can change it any time.</b> HR has the form. It\u2019s worth a look when life changes: a second job, a kid, a marriage."
         ],
         cta: "Got it"
       }]
@@ -96,8 +96,8 @@ YNSActivity.define({
         prompt: "Your best guess.",
         options: [
           { k: "yes",     t: "Yes, all of them",              s: "Then this was a refresher.", echo: "you can read it" },
-          { k: "most",    t: "Most of them",                  s: "The ones you can\u2019t are usually the FICA pair.", echo: "most of it" },
-          { k: "no",      t: "Not really, I just look at the total", s: "Lots of people do. Your next pay stub is a good one to read line by line.", echo: "just the total" },
+          { k: "most",    t: "Most of them",                  s: "If one is unclear, check the FICA pair.", echo: "most of it" },
+          { k: "no",      t: "Not really, I just look at the total", s: "Your next pay stub is a good one to read line by line.", echo: "just the total" },
           { k: "none",    t: "I haven\u2019t had a pay stub yet",   s: "Then you\u2019ll know what to look for on your very first one.", echo: "no pay stub yet" }
         ]
       }]
@@ -111,8 +111,8 @@ YNSActivity.define({
     var status = r.state.answers.status || r.ctx.facts.taxes_status || "";
     var STATUS = {
       yes:  "You can read the whole thing. Then the only question left is whether the W-4 still fits your life.",
-      most: "Most of it. The FICA pair, Social Security and Medicare, is usually the gap, and now you\u2019ve got it.",
-      no:   "You look at the total. Lots of people do at first. On your next pay stub, the four kinds of line take about a minute to find, and after that you\u2019ll always see them.",
+      most: "Most of it. If the FICA pair, Social Security and Medicare, was the gap, now you\u2019ve got it.",
+      no:   "You look at the total. On your next pay stub, try finding the four kinds of line. The more stubs you read, the quicker it can get.",
       none: "No pay stub yet. Good timing: when the first one arrives you\u2019ll know what the lines are before you\u2019ve had a chance to be confused by them."
     };
     return "<h1>That\u2019s where it goes.</h1>" +
@@ -122,7 +122,7 @@ YNSActivity.define({
         : "") +
       '<div class="ya-readout"><h3>The four lines</h3><p><b>Federal tax</b> \u00b7 <b>State tax</b> \u00b7 <b>FICA</b> (Social Security and Medicare) \u00b7 <b>What you chose</b> (insurance, retirement).</p></div>' +
       (STATUS[status] ? '<div class="ya-readout"><h3>Where you are with it</h3><p>' + esc(STATUS[status]) + "</p></div>" : "") +
-      '<p class="ya-result-lead">This is the high-level version, which is the level that matters for negotiating and budgeting. The optional paid Your Next Step course has the full lesson, with video.</p>';
+      '<p class="ya-result-lead">This is the high-level version, meant for negotiating and budgeting. The optional paid Your Next Step course has the full lesson, with video.</p>';
   },
 
   actions: function () {

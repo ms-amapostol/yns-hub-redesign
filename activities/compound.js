@@ -48,8 +48,8 @@ YNSActivity.define({
           title: "Money left alone earns money. Then that earns money too.",
           lead: "That second part is compounding, and it\u2019s the reason a small amount started early can end up bigger than a larger amount started late.",
           points: [
-            "<b>Year one is boring.</b> Nothing much happens, and this is where many people stop.",
-            "<b>Year fifteen looks different.</b> By then more of the total is growth than is money you put in.",
+            "<b>Year one is boring.</b> Nothing much happens, and it can be tempting to stop.",
+            "<b>Later years look different.</b> At an assumed 7%, by year twenty more of the total can be growth than money you put in.",
             "<b>The thing you can\u2019t buy back is time.</b> Waiting ten years means you\u2019d need much bigger payments to catch up."
           ],
           note: "The next screen is a calculator. Put your own numbers in it.",
@@ -76,7 +76,7 @@ YNSActivity.define({
           prompt: "Change any of these and watch the bottom number move.",
           inputs: [
             { k: "monthly", t: "Every month",        prefix: "$", start: 25, step: 25,  max: 5000, s: "Start small. You can always raise it." },
-            { k: "years",   t: "For how many years", prefix: "",  start: 20, step: 5,   max: 50,   s: "Compounding needs time more than it needs money." },
+            { k: "years",   t: "For how many years", prefix: "",  start: 20, step: 5,   max: 50,   s: "More years give compounding more room to work." },
             { k: "rate",    t: "Assumed yearly return", prefix: "", suffix: "%", start: 7, step: 1, max: 15, s: "7% a year, based on past stock market returns before inflation. That\u2019s an assumption." }
           ],
           cta: "I\u2019ve seen enough"
@@ -99,8 +99,8 @@ YNSActivity.define({
           lead: "A calculator draws a tidy curve. Actual markets go up and down, and some years they go down a lot.",
           points: [
             "<b>The number you just saw is a model.</b> It shows what could happen if the assumptions hold.",
-            "<b>High-interest debt usually costs more than investing earns.</b> A card at 24% costs more each year than a 7% return would earn, which is why many people clear it first.",
-            "<b>A retirement match adds money on top of yours.</b> It\u2019s an immediate return that\u2019s hard for anything else to beat, and many people put in at least enough to get the full match.",
+            "<b>High-interest debt can cost more than investing earns.</b> A card at 24% costs more each year than a 7% return would earn, so clearing it first is worth considering.",
+            "<b>A retirement match adds money on top of yours.</b> It\u2019s extra money added right away. It\u2019s worth checking how much you need to put in to get the full match.",
             "<b>We don\u2019t recommend any provider, fund or account.</b> Your Next Step does offer an optional paid course, with videos and more structure. Joining is always up to you."
           ],
           cta: "Understood"
@@ -131,7 +131,7 @@ YNSActivity.define({
             { k: "start",   t: "I could start something small",
               s: "Even $20 a month, mostly to build the habit.", echo: "you could start small" },
             { k: "debt",    t: "I\u2019ve got debt to clear first",
-              s: "Clearing high-interest debt is a common first step, and the math backs it up.", echo: "debt comes first" },
+              s: "Paying off high-interest debt first can save you more than investing would earn.", echo: "debt comes first" },
             { k: "nothing", t: "There\u2019s nothing spare right now",
               s: "Then this was for later, and later is fine. Knowing it exists is the point.", echo: "nothing spare yet" }
           ]
@@ -149,10 +149,10 @@ YNSActivity.define({
     var intent = r.state.answers.intent || "";
 
     var INTENT = {
-      match:   "You said there\u2019s a match at work you\u2019re not using. A match adds your employer\u2019s money on top of yours, and signing up is often a form and ten minutes. Many people put in at least enough to get the full match. HR or the benefits page can tell you the percentage.",
-      start:   "You said you could start something small. The amount matters far less than starting, because the thing you can never buy back is the years.",
-      debt:    "You said debt comes first. Clearing high-interest debt is a common first step. A card at 20-something percent usually costs more each year than investing is likely to earn.",
-      nothing: "You said there\u2019s nothing spare, and that\u2019s an honest answer that plenty of people are giving. The Floor and Every Dollar a Job are the two that change it, and this one will still be here."
+      match:   "You said there\u2019s a match at work you\u2019re not using. A match adds your employer\u2019s money on top of yours, and signing up may be as simple as a form. It\u2019s worth checking how much you need to put in to get the full match. HR or the benefits page can tell you the percentage.",
+      start:   "You said you could start something small. Starting now gives your money more years to grow, and you can raise the amount later.",
+      debt:    "You said debt comes first. Paying off high-interest debt first is worth considering. A card at 20-something percent can cost more each year than investing would earn at 7%.",
+      nothing: "You said there\u2019s nothing spare, and that\u2019s an honest answer. The Floor and Every Dollar a Job can help you find room, and this one will still be here."
     };
 
     return "<h1>That\u2019s what time does.</h1>" +
