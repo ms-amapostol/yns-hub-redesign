@@ -58,7 +58,7 @@
   var CATS = {
     social: {
       name: "Social & Community Work",
-      blurb: "Work where a specific person is measurably better off because you were there. Case work, support, advocacy, community programmes.",
+      blurb: "Work where a specific person is measurably better off because you were there. Case work, support, advocacy, community programs.",
       profile: { people: 1.00, order: 0.40, leading: 0.40, analysis: 0.20, making: 0.10, hands: 0.10 }
     },
     edu: {
@@ -73,7 +73,7 @@
     },
     gov: {
       name: "Government & Public Service",
-      blurb: "Making the system work for the people inside it. Policy, administration, regulation, public programmes.",
+      blurb: "Making the system work for the people inside it. Policy, administration, regulation, public programs.",
       profile: { order: 1.00, analysis: 0.55, people: 0.50, leading: 0.50, hands: 0.20, making: 0.15 }
     },
     creative: {
@@ -121,13 +121,13 @@
   var ARCHETYPE_LINE = {
     social:   "You kept choosing the person over the process. That is the whole job in a set of careers most people never seriously look at.",
     edu:      "You get something out of watching the moment it clicks for someone else. That instinct is the actual skill, and it is rarer than it sounds.",
-    health:   "You went towards the difficult thing rather than around it, and you wanted to be useful in a specific, physical way.",
+    health:   "You went straight toward the difficult thing, and you wanted to be useful in a specific, physical way.",
     gov:      "You kept reaching past the patch, for the rule or the process or the thing that will still be true after you have gone.",
-    creative: "You want the day to end with something in front of you that was not there that morning, and you would rather redo it than ship it nearly right.",
-    trades:   "You want a clear standard for done, and you want to be the one who reached it. Evidence over opinion, every time.",
+    creative: "You want the day to end with something in front of you that was not there that morning, and you redo it until it is right.",
+    trades:   "You want a clear standard for done, and you want to be the one who reached it. You trust evidence, every time.",
     biz:      "You kept being the one who calls it when the room has been going in circles for forty minutes. That is a job, and it pays.",
-    tech:     "You go to the root cause while everyone else is still treating the symptom, and you would rather build the thing that stops it recurring.",
-    finance:  "You want the record, not the impression. Everything you chose pointed at wanting to know what is actually true before acting."
+    tech:     "You go looking for the root cause, and you want to build the thing that stops the problem coming back.",
+    finance:  "You want the real record. Everything you chose pointed at wanting to know what is actually true before acting."
   };
 
   /* ===================================================================
@@ -142,7 +142,7 @@
       s: "First job, or first job in anything like this. No relevant experience yet, and that is fine." },
     { k: "some",        t: "A couple of years in",
       s: "You have worked, you have picked things up, but nobody would call you senior yet." },
-    { k: "experienced", t: "Genuinely experienced",
+    { k: "experienced", t: "Experienced",
       s: "Five years or more. You are good at what you do, you are just not sure it is the right thing." },
     { k: "leader",      t: "Running things already",
       s: "You manage people, a budget, or both. A move sideways has to be worth it." }
@@ -165,9 +165,9 @@
   var ROLES = {
     social: {
       early:       [["Case Aide", "$34k–42k"], ["Community Outreach Worker", "$36k–45k"], ["Residential Support Worker", "$33k–41k"]],
-      some:        [["Case Manager", "$44k–56k"], ["Housing Specialist", "$45k–58k"], ["Youth Programme Coordinator", "$42k–54k"]],
-      experienced: [["Licensed Social Worker", "$55k–72k"], ["Programme Manager", "$60k–78k"], ["Clinical Case Supervisor", "$62k–80k"]],
-      leader:      [["Director of Programmes", "$78k–105k"], ["Executive Director, Nonprofit", "$85k–130k"], ["Head of Community Services", "$80k–110k"]]
+      some:        [["Case Manager", "$44k–56k"], ["Housing Specialist", "$45k–58k"], ["Youth Program Coordinator", "$42k–54k"]],
+      experienced: [["Licensed Social Worker", "$55k–72k"], ["Program Manager", "$60k–78k"], ["Clinical Case Supervisor", "$62k–80k"]],
+      leader:      [["Director of Programs", "$78k–105k"], ["Executive Director, Nonprofit", "$85k–130k"], ["Head of Community Services", "$80k–110k"]]
     },
     edu: {
       early:       [["Teaching Assistant", "$30k–38k"], ["Tutor / Learning Coach", "$34k–44k"], ["Training Coordinator", "$40k–50k"]],
@@ -183,8 +183,8 @@
     },
     gov: {
       early:       [["Administrative Assistant, Public Sector", "$36k–46k"], ["Permit Technician", "$40k–50k"], ["Eligibility Specialist", "$40k–51k"]],
-      some:        [["Programme Analyst", "$55k–70k"], ["Compliance Officer", "$58k–75k"], ["Planner", "$58k–76k"]],
-      experienced: [["Senior Policy Analyst", "$80k–105k"], ["Programme Manager, Public Sector", "$85k–110k"], ["Regulatory Affairs Specialist", "$88k–115k"]],
+      some:        [["Program Analyst", "$55k–70k"], ["Compliance Officer", "$58k–75k"], ["Planner", "$58k–76k"]],
+      experienced: [["Senior Policy Analyst", "$80k–105k"], ["Program Manager, Public Sector", "$85k–110k"], ["Regulatory Affairs Specialist", "$88k–115k"]],
       leader:      [["Division Director", "$110k–150k"], ["City Manager", "$120k–180k"], ["Head of Policy", "$115k–160k"]]
     },
     creative: {
@@ -202,7 +202,7 @@
     biz: {
       early:       [["Operations Assistant", "$38k–48k"], ["Sales Development Rep", "$45k–60k"], ["Project Coordinator", "$45k–58k"]],
       some:        [["Operations Analyst", "$60k–78k"], ["Account Executive", "$70k–110k"], ["Project Manager", "$70k–92k"]],
-      experienced: [["Senior Programme Manager", "$105k–140k"], ["Operations Manager", "$90k–125k"], ["Strategy Manager", "$110k–150k"]],
+      experienced: [["Senior Program Manager", "$105k–140k"], ["Operations Manager", "$90k–125k"], ["Strategy Manager", "$110k–150k"]],
       leader:      [["Director of Operations", "$130k–180k"], ["VP, Business Operations", "$160k–230k"], ["General Manager", "$140k–200k"]]
     },
     tech: {
@@ -488,10 +488,10 @@
              "the same answer, which is worth more than either result on its own.";
     } else if (alsoRan) {
       body = "You did " + list + " too. " + CATS[topThisTime].name + " showed up there as well, " +
-             "just not in first place. It keeps appearing, which is the signal.";
+             "a little lower down. It keeps appearing, which is the signal.";
     } else if (priorTop && CATS[priorTop]) {
       body = "You did " + list + " too, and that one landed on <b>" + CATS[priorTop].name + "</b>. " +
-             "Two different answers is not a contradiction. Usually it means the two things you want " +
+             "Two different answers usually means the two things you want " +
              "are both real, and the job you are looking for has to hold both.";
     } else {
       body = "You did " + list + " too, and we are reading this alongside it.";
@@ -581,7 +581,7 @@
     box.className = "q-offer";
     box.innerHTML =
       "<p>Want this saved? We can email you a link that signs you in. Your result gets kept, " +
-      "and the next activity will build on it instead of starting from nothing.</p>" +
+      "and the next activity will build on it.</p>" +
       '<button type="button" class="btn" data-q="mklink">Save my results</button>' +
       '<span class="q-offermsg" data-q="offermsg"></span>';
     host.parentNode.insertBefore(box, host.nextSibling);
@@ -713,14 +713,19 @@
      how you end up with two sign-in buttons that disagree. Everything
      else init() does (the activity slug, wage data, prior signals, the
      start event) is still wanted, which is why this is a flag rather
-     than a separate function. */
+     than a separate function.
+
+     opts.track === false skips the start event. The hub calls init()
+     only to load the wage data, and it is not an activity. */
   function init(slug, opts) {
     activity = slug || "unknown";
     injectCSS();
     opts = opts || {};
 
+    var logStart = opts.track !== false;
+
     if (opts.chrome === false) {
-      track("start", {});
+      if (logStart) track("start", {});
       var rolesOnly = loadRoles();
       if (!DB) {
         signalsLoaded = true;
@@ -763,7 +768,7 @@
       });
     }
 
-    track("start", {});
+    if (logStart) track("start", {});
 
     // Wage data and prior signals load in parallel — neither blocks the
     // other, and the first screen waits for both so it never has to

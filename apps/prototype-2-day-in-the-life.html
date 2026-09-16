@@ -150,8 +150,8 @@
 <script src="yns-config.js?v=3ceff94a"></script>
 <script src="yns-supabase.js?v=d872a971"></script>
 <script src="yns-taxonomy.js?v=4bb570b3"></script>
-<script src="yns-profile.js?v=a23328d5"></script>
-<script src="quiz-shared.js?v=ee3e8651"></script>
+<script src="yns-profile.js?v=17ae72a5"></script>
+<script src="quiz-shared.js?v=77c966fb"></script>
 <script>
 if(!window.Quiz){
   document.getElementById('app').innerHTML =
@@ -214,7 +214,7 @@ const MOMENTS = [
          "There's one thing that would put the charge back."],
   prompt:"What actually restores you?",
   options:[
-   {t:"Eating with someone and properly talking", s:"Not networking. Talking.",
+   {t:"Eating with someone and properly talking", s:"A real conversation over food.",
     echo:"people recharge you", a:{people:3}},
    {t:"Being completely alone with your own head", s:"A walk. No podcast. Nothing needing you.",
     echo:"solitude recharges you", a:{analysis:2, making:1, order:1}},
@@ -229,7 +229,7 @@ const MOMENTS = [
 {
   time:"2:15 pm", pip:"2:15",
   title:"The hardest part of the day.",
-  scene:["Every job has one stretch that's genuinely difficult. Not annoying. <em>Difficult</em>.",
+  scene:["Every job has one stretch that's <em>really hard</em>.",
          "This is the one you'd want, if you had to have one."],
   prompt:"Which hard thing would you pick?",
   options:[
@@ -249,7 +249,7 @@ const MOMENTS = [
   time:"3:50 pm", pip:"3:50",
   title:"Then it goes wrong.",
   scene:["Something breaks. A person, a plan, a number that doesn't add up.",
-         "Everyone looks around. You realise, with mild surprise, that it's yours."],
+         "Everyone looks around. You realize, with mild surprise, that it's yours."],
   prompt:"First move?",
   options:[
    {t:"Find whoever's most affected and talk to them", s:"The technical fix can wait ten minutes.",
@@ -261,7 +261,7 @@ const MOMENTS = [
    {t:"Take charge of the room and assign the work", s:"Five people doing nothing is the actual problem.",
     echo:"you take the room", a:{leading:3}},
    {t:"Work out how to stop it happening a third time", s:"It's happened before. That's the real issue.",
-    echo:"you fix the cause, not the incident", a:{order:3, analysis:2}}
+    echo:"you fix the root cause", a:{order:3, analysis:2}}
   ]
 },
 {
@@ -511,6 +511,33 @@ READY.then(function(){
   offerResume();
   render();
 });
+</script>
+<script>/* N9: key events don't cross the hub's iframe, so Escape here asks the
+   hub to close this activity, the same message the "Back to your hub"
+   buttons send. Skipped while this page's own dialog is open: that
+   dialog's Escape closes only the dialog. */
+(function(){try{
+  if (window.parent === window) return;
+  var SEL = '[role="dialog"],[aria-modal="true"],dialog[open],.modal,.modal-scrim,.yns-scrim,.front';
+  var dialogWasOpen = false;
+  function dialogOpen(){
+    var list = document.querySelectorAll(SEL);
+    for (var i = 0; i < list.length; i++) {
+      var n = list[i];
+      if (n.hidden || (n.tagName === "DIALOG" && !n.open)) continue;
+      if (n.getClientRects().length) return true;
+    }
+    return false;
+  }
+  function isEsc(e){ return (e.key === "Escape" || e.key === "Esc") && !e.isComposing; }
+  /* Window capture runs before any handler on the page, so this sees the
+     dialog before its own Escape handler removes it. */
+  window.addEventListener("keydown", function(e){ if (isEsc(e)) { try { dialogWasOpen = dialogOpen(); } catch (_) { dialogWasOpen = true; } } }, true);
+  window.addEventListener("keydown", function(e){
+    if (!isEsc(e) || dialogWasOpen || e.defaultPrevented) return;
+    try { window.parent.postMessage({ yns: "close" }, "*"); } catch (_) {}
+  });
+}catch(e){}})();
 </script>
 <script>/* review-build bridge: tell the hub when a run is saved */(function(){try{var o=localStorage.setItem.bind(localStorage);localStorage.setItem=function(k,v){o(k,v);if(k==="yns_pending_runs"&&window.parent!==window)window.parent.postMessage({yns:"run",key:k},"*");};}catch(e){}})();</script>
 </body>

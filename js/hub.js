@@ -65,7 +65,7 @@
       why:"Knowing what you want is half of it. This door works on the part nobody teaches: bouncing back when it's hard, and knowing your real numbers.",
       acts:["grit","able","floor","money101","budget0","compound","taxes","retire","invest","bounce"] },
     { key:"plan", n:"Door 5", title:"Make the plan",
-      blurb:"Six months, one SMART goal, written down.",
+      blurb:"Six months, one SMART goal (specific, measurable, achievable, relevant, time-bound), written down.",
       why:"You're ready to commit. This door turns a direction into a plan with dates on it, and helps you spot what might knock it off course before it does.",
       acts:["smart6","premortem","stilltrue"] }
   ];
@@ -88,17 +88,17 @@
     abcs_a:       { seven:["Add one more story from something that happened this week","Tell a friend one of your stories out loud","Put a number on one story: how many, how fast, or how often"], name:"A · What you\u2019ve already done", tag:"Turn things you\u2019ve actually done into short stories you can use.", min:8, fact:"Your stories", tile:9, app:"a" },
     abcs_b:       { seven:["Send your resume to one place","Ask one person you trust to read your resume","Save your resume as a PDF with your name in the file name"], name:"B · Put it on paper",  tag:"A resume and a cover letter, built from those stories.", min:10, fact:"Resume and cover letter", tile:9, app:"b", after:"abcs_a" },
     abcs_c:       { seven:["Practice one answer out loud tomorrow","Ask someone to ask you one interview question","Write down the question you\u2019d least like to be asked, and one line of your answer"], name:"C · Say it out loud",  tag:"Interview practice, using the same stories.", min:8, fact:"Interview practice", tile:9, app:"c", after:"abcs_a" },
-    able:         { name:"Solve It",           tag:"One real problem, taken apart four ways. The ABLE method.", min:7, fact:"How you solve things", tile:11, play:true },
+    able:         { name:"Solve It",           tag:"One real problem, taken apart four ways with ABLE: assess, brainstorm, list, execute.", min:7, fact:"How you solve things", tile:11, play:true },
     budget0:      { name:"Every Dollar a Job", tag:"Build a budget that adds to zero, then take the spreadsheet with you.", min:12, fact:"Your budget", tile:13, play:true },
     compound:     { name:"What Money Does Over Time", tag:"Watch a small monthly amount turn into a number you didn\u2019t expect.", min:6, fact:"What time does to money", tile:13, play:true },
     invest:       { name:"Where Money Can Live", tag:"Five places money can sit, from safest to riskiest, and which end yours goes.", min:5, fact:"Where money lives", tile:13, play:true, wix:true },
     retire:       { name:"The Match",            tag:"401k, 403b, pension, Roth, and the free money you might be leaving.", min:10, fact:"The match", tile:13, play:true, wix:true },
     taxes:        { name:"Where Your Paycheck Goes", tag:"The four lines that take money out, and the one you control.", min:4, fact:"Your paycheck", tile:13, play:true, wix:true },
-    floor:        { name:"The Floor",            tag:"The number you need, not the number you want.",     min:6, fact:"Your number", tile:10, play:true },
+    floor:        { name:"The Floor",            tag:"What your month costs to run.",     min:6, fact:"Your number", tile:10, play:true },
     grit:         { name:"Bounce Back",          tag:"The last time it went wrong, and what you did next.", min:6, fact:"How you recover", tile:11, play:true },
     bounce:       { name:"The Week It's Hard",   tag:"A plan for the week you want to quit.",             min:8, fact:"Your hard-week plan", tile:12, play:true },
     money101:     { name:"Money, Plainly",       tag:"Paycheck, rent, the gap. No jargon.",               min:8, fact:"Money basics", tile:13, play:true },
-    smart6:       { name:"Your Six Months",      tag:"One SMART goal, with dates on it.",                 min:15, fact:"Your six-month goal", tile:14, play:true, big:true },
+    smart6:       { name:"Your Six Months",      tag:"One SMART goal (specific, measurable, achievable, relevant, time-bound), with dates on it.",                 min:15, fact:"Your six-month goal", tile:14, play:true, big:true },
     premortem:    { name:"What Might Trip You Up", tag:"Find the thing most likely to knock this off course.", min:7, fact:"What could trip you", tile:15, play:true },
     stilltrue:    { name:"Still True?",          tag:"What's changed since last time, and whether it still holds.", min:4, fact:"A check-in", tile:16, play:true }
   };
@@ -172,7 +172,7 @@
     conversations:{ lead:"Someone I'm going to talk to:",      say:"My cousin's friend who does medical assisting. Message is written.", key:"contact_named" },
     abcs_a:       { lead:"Something I\u2019ve actually done:",  say:"Covered a double shift when we were two people down, and the night still ran.", key:"" },
     abcs_b:       { lead:"Ready to send:",                     say:"A resume and a cover letter, built from my own stories.", key:"" },
-    abcs_c:       { lead:"I\u2019ve practised out loud:",       say:"Three answers, in my own words, with the clock running.", key:"" },
+    abcs_c:       { lead:"I\u2019ve practiced out loud:",       say:"Three answers, in my own words, with the clock running.", key:"" },
     floor:        { lead:"My number:",                         say:"$2,900 a month keeps the lights on. Everything above that is choice.", key:"floor_monthly" },
     grit:         { lead:"The last time it went wrong:",       say:"I got passed over for shift lead. I asked why, and I'm still here.", key:"setback_response" },
     bounce:       { lead:"My plan for the hard week:",         say:"Text Jordan, do the smallest step, no big decisions before Friday.", key:"hard_week_plan" },
@@ -190,6 +190,37 @@
   var state = { a:[null,null,null], q:0, done:{}, door:null, skipped:false, body:"n", tone:"3", facts: window.YNSMock.facts, opened:{}, aside:{}, asideAct:{}, offerAnswered:false, evidence:[] };
   var $ = function(id){ return document.getElementById(id); };
   window.YNS = window.YNS || {};
+
+  /* ---------- funnel events -----------------------------------------
+
+     An opt-in hook, and nothing more. Each event goes three places, all
+     inside this page: the window.ynsEvents list (the last 200), a
+     "yns:track" event on window, and window.YNS_TRACK(event, props) if
+     the live site defines one. Nothing is sent anywhere until it does.
+     Props never carry names or anything typed. See
+     docs/analytics-events.md. */
+  var EVENT_CAP = 200;
+  YNS.track = function(event, props){
+    try {
+      var clean = {};
+      if (props && typeof props === "object"){
+        Object.keys(props).forEach(function(k){
+          var v = props[k];
+          if (v == null || typeof v === "number" || typeof v === "boolean") clean[k] = v;
+          else clean[k] = String(v).slice(0, 80);
+        });
+      }
+      var detail = { event: String(event), props: clean, at: new Date().toISOString() };
+      if (!Array.isArray(window.ynsEvents)) window.ynsEvents = [];
+      window.ynsEvents.push(detail);
+      if (window.ynsEvents.length > EVENT_CAP) window.ynsEvents.splice(0, window.ynsEvents.length - EVENT_CAP);
+      if (typeof window.YNS_TRACK === "function"){
+        try { window.YNS_TRACK(detail.event, Object.assign({}, clean)); } catch(e){}
+      }
+      try { window.dispatchEvent(new CustomEvent("yns:track", { detail: detail })); } catch(e){}
+    } catch(e){}
+  };
+  var track = YNS.track;
 
   /* ---------- routing ----------------------------------------------
      Ordered rules. First match wins. This is the whole "starting door"
@@ -216,7 +247,7 @@
     if (reason==="enrolled"){
       return {
         plan:    "You're already in a program and you know where it's going. This door turns that into six months with dates on it, and it's the one that keeps you moving when the semester gets heavy.",
-        explore: "You're in a program and you've got a rough idea of where it leads. These help you see the real options inside it, so the choice is yours rather than the default.",
+        explore: "You're in a program and you've got a rough idea of where it leads. These help you see the real options inside it, so the choice is yours.",
         know:    "You're in a program, which is a real step, and you said you're still working out what it's for. Two or three of these and that gets clearer."
       }[route(a)];
     }
@@ -382,6 +413,24 @@
 
   /* ---------- the standalone apps, in an iframe --------------------- */
   var appOpen=null, uploadWatch=null, appRunBaseline=0, appFinishedNow=null, sevenOffered={};
+  /* When each activity in progress was started, for activity_done. */
+  var startedAt={};
+  function trackStart(slug){
+    var a=ACTS[slug]; if (!a) return;
+    startedAt[slug]=Date.now();
+    track("activity_start", { slug: slug, door: doorOf(slug), kind: a.play ? "hub" : "app" });
+  }
+  function trackDone(slug){
+    if (!startedAt[slug]) return;
+    var mins=Math.round((Date.now()-startedAt[slug])/6000)/10;
+    delete startedAt[slug];
+    track("activity_done", { slug: slug, minutes_on_card: mins });
+  }
+  function trackClosedEarly(slug){
+    if (!startedAt[slug]) return;
+    delete startedAt[slug];
+    track("activity_closed_early", { slug: slug });
+  }
   /* Asked once, in the intake, in the vocabulary the activities score
      against. Nothing derives it and nothing re-asks it. If someone skips
      the intake entirely, the first activity that needs it asks, and the
@@ -393,6 +442,14 @@
     appOpen=slug; appRunBaseline=runsFor(slug).length;
     var m=$("actModal"); m.style.display="block"; document.body.classList.add("modal-open");
     m.innerHTML='<div class="am-card am-frame"><div class="am-top"><span class="am-eyebrow">'+name+'</span><span class="small muted">Close when you\u2019re done. Everything saves as you go.</span><button class="am-x" onclick="YNS.closeApp()" aria-label="Back to your hub">\u00d7 Back to your hub</button></div><iframe src="'+url+'" title="'+name+'"></iframe></div>';
+    /* Once the app has loaded, hand it keyboard focus (unless the person
+       has already moved to the close button), so its keys reach it. */
+    var fr=m.querySelector("iframe");
+    if (fr) fr.addEventListener("load", function(){
+      if (appOpen!==slug) return;
+      var ae=document.activeElement;
+      if (ae===fr || ae===document.body || !m.contains(ae)){ try { fr.focus(); if (fr.contentWindow) fr.contentWindow.focus(); } catch(e){} }
+    });
     if (opts.upload){
       /* The app already has a proper document importer: PDF, DOC, DOCX,
          TXT, 8MB cap, and it pulls the jobs and bullets out into stories.
@@ -429,7 +486,11 @@
   }
   window.addEventListener("message", function(ev){
     if (!ev.data || !appOpen) return;
-    if (ev.data.yns==="run"){ if (absorbRun(appOpen) && !state.done[appOpen]) { state.done[appOpen]=true; lastAdded=appOpen; appFinishedNow=appOpen; render(); } }
+    if (ev.data.yns==="run"){
+      var got=absorbRun(appOpen);
+      if (got) trackDone(appOpen);
+      if (got && !state.done[appOpen]) { state.done[appOpen]=true; lastAdded=appOpen; appFinishedNow=appOpen; render(); }
+    }
     /* The activity finished and asked to come back. One set of
        navigation rather than two. */
     if (ev.data.yns==="close") YNS.closeApp();
@@ -443,12 +504,13 @@
       syncAbcs();
       var fresh=["abcs_a","abcs_b","abcs_c"].filter(function(k){ return state.done[k] && !was[k]; });
       render();
-      if (fresh.length){ toast("Nice work. That\u2019s saved."); sevenDays(fresh[fresh.length-1]); }
-      else toast("Nothing lost. Pick it up whenever you like.");
+      if (fresh.length){ trackDone(slug); fresh.forEach(function(k){ if (k!==slug && startedAt[k]) trackDone(k); }); toast("Nice work. That\u2019s saved."); sevenDays(fresh[fresh.length-1]); }
+      else { trackClosedEarly(slug); toast("Nothing lost. Pick it up whenever you like."); }
       return;
     }
     var had=absorbRun(slug), isNew=(had && !state.done[slug]) || appFinishedNow===slug;
     appFinishedNow=null;
+    if (had || isNew) trackDone(slug); else trackClosedEarly(slug);
     if (isNew) { state.done[slug]=true; lastAdded=slug; toast("Nice work. That\u2019s "+ACTS[slug].name+" done."); }
     else if (!had && !state.done[slug]) toast("No problem, nothing lost. "+ACTS[slug].name+" is there whenever you want it.");
     render();
@@ -459,6 +521,7 @@
      other activities' results (YNS.open). */
   function openActivity(slug){
     var a=ACTS[slug]; if (!a || a.soon) return;
+    trackStart(slug);
     if (a.app) openApp(slug, withLevel(ABCS_URL)+"#"+a.app, a.name);
     else if (a.play) window.YNSMock.play(slug);
     else if (a.live) openApp(slug, withLevel(a.live), a.name);
@@ -471,7 +534,7 @@
     $("actModal").style.display="none"; $("actModal").innerHTML=""; document.body.classList.remove("modal-open");
     var door=DOORS.filter(function(d){ return d.acts.indexOf(slug)>=0; })[0];
     var here=byKey(state.door);
-    if (door && !(here && here.acts.indexOf(slug)>=0)) { state.door=door.key; state.opened[door.key]=true; render(); }
+    if (door && !(here && here.acts.indexOf(slug)>=0)) { setDoor(door.key); render(); }
     setTimeout(function(){ if (state.done[slug]) reopen(slug, false); else openActivity(slug); }, 60);
   };
 
@@ -489,8 +552,9 @@
   YNS.pickSeven=function(slug, i){
     if (slug && ACTS[slug] && ACTS[slug].seven){
       var text=ACTS[slug].seven[i];
-      state.facts.steps_open=steps().filter(function(x){ return x.text!==text; });
+      state.facts.steps_open=steps().filter(function(x){ return !(x.text===text && x.slug===slug); });
       state.facts.steps_open.push({ id:slug+"-"+Date.now(), slug:slug, text:text, from:ACTS[slug].name, at:now(), done:false });
+      track("seven_days_pick", { slug: slug });
       toast("On your Planner.");
     }
     YNS.closeList(); render(); afterFinish();
@@ -502,6 +566,7 @@
      lands where the person left off; only "do it again" clears it. */
   function reopen(slug, atResults){
     var a=ACTS[slug];
+    if (!atResults) trackStart(slug);
     if (a.play){
       if (atResults && window.YNSMock.hasResults(slug)) window.YNSMock.play(slug, {results:true});
       else window.YNSMock.play(slug);
@@ -518,7 +583,8 @@
      Supabase. Nothing in this panel submits anywhere. The perks are the
      real ones, the consent box starts unticked, and the same sentence
      belongs in the privacy policy. */
-  YNS.signup=function(){
+  YNS.signup=function(from){
+    track("signup_open", { from: typeof from==="string" ? from : "other" });
     var m=$("actModal"); m.style.display="block"; document.body.classList.add("modal-open");
     var ns=nextStepSentence();
     m.innerHTML='<div class="am-card"><div class="am-top"><span class="am-eyebrow">Keep your next step</span><button class="am-x" onclick="YNS.closeList()" aria-label="Close">\u00d7</button></div>'
@@ -527,15 +593,15 @@
       +'<p class="am-scene">Every activity here is free, with or without an account. A free account adds four things:</p>'
       +'<ul class="am-points">'
       +'<li><b>It saves.</b> Your plan, your portfolio, your places, on any device, and it survives a cleared browser.</li>'
-      +'<li><b>The coach.</b> The AI coach inside Career ABCs helps with your stories, your resume and your interview answers.</li>'
+      +'<li><b>The coach.</b> The AI coach in Career ABCs, with a free account: help with your stories, your resume and your interview answers.</li>'
       +'<li><b>Check-ins that follow you.</b> Check-ins pop up on this page when a step is due. With an account, they follow you to any device. Email reminders are planned for later.</li>'
-      +'<li><b>First to hear.</b> When we start working with schools, programs and employers, you\u2019ll be first to hear about ones that match what you\u2019ve told us. You choose whether to be introduced, every time, and you can turn it off any time.</li>'
+      +'<li><b>First to hear.</b> When we start working with schools, programs and employers, you can choose to hear about ones that match what you\u2019ve told us. We ask you first, every time, and you can turn it off any time.</li>'
       +'</ul>'
       +'<div class="signup-form">'
       +'<label>Email<input type="email" placeholder="you@email.com" autocomplete="email"></label>'
       +'<label>Password<input type="password" placeholder="At least 8 characters" autocomplete="new-password"></label>'
       +'<label class="signup-consent"><input type="checkbox"> Yes, tell me when there\u2019s an opportunity that fits. I can turn this off any time.</label>'
-      +'<p class="am-note">By making an account you agree to the <a href="https://www.yournextstepai.com/terms" target="_blank" rel="noopener">terms</a> and the privacy policy. We don\u2019t sell your data, and nobody is introduced to you without your say-so.</p>'
+      +'<p class="am-note">By making an account you agree to the <a href="https://www.yournextstepai.com/terms" target="_blank" rel="noopener">terms</a> and the privacy policy. We use your email to sign you in and save your work. If we ever work with schools, programs or employers, we\u2019ll ask you first, every time.</p>'
       +'</div>'
       +'<div class="am-foot"><button class="btn-quiet" onclick="YNS.closeList()">Not now</button><button class="btn btn-primary" disabled title="Wired by Matt to Supabase in the live build">Make my free account</button></div>'
       +'<p class="am-note" style="margin-top:8px">Review build: this screen shows the words and the order. The button is connected in the live build.</p>'
@@ -550,8 +616,8 @@
      doors are finished. Never on arrival, never on every door. */
   var WIX_URL = "https://www.yournextstepai.com/curriculum";
   var WIX_LINE = "Want to go deeper, with videos and more structure? Module 5 of the Your Next Step course covers this end to end. It\u2019s an optional paid course, and there\u2019s no obligation to join.";
-  function wixCard(text){
-    return '<div class="wix-card"><p>'+text+'</p><a class="btn btn-ghost" href="'+WIX_URL+'" target="_blank" rel="noopener">Take a look at the course \u2197</a></div>';
+  function wixCard(text, from){
+    return '<div class="wix-card"><p>'+text+'</p><a class="btn btn-ghost" href="'+WIX_URL+'" target="_blank" rel="noopener" onclick="YNS.track(\'course_click\',{from:\''+String(from||"other").replace(/[^a-z0-9_]/gi,"")+'\'})">Take a look at the course \u2197</a></div>';
   }
   function allDoorsDone(){
     return DOORS.every(function(d){ var l=live(d); return l.length && l.every(function(sl){ return state.done[sl]; }); });
@@ -725,11 +791,12 @@
         + "</section>");
     }
 
-    out.push('<footer class="pp-foot"><p>Made with Your Next Step. Pay ranges are national bands from the US Bureau of Labor Statistics via CareerOneStop, narrowed to the experience level stated above. They are not starting salaries or offers.</p></footer>');
+    out.push('<footer class="pp-foot"><p>Made with Your Next Step. Pay ranges are national bands from the US Bureau of Labor Statistics via CareerOneStop, narrowed to the experience level stated above. They show the usual range, and a starting salary or an offer may be different.</p></footer>');
     return out.join("");
   }
 
   YNS.portfolio=function(){
+    track("portfolio_pdf", {});
     var root=$("printRoot");
     root.innerHTML=portfolioHTML();
     /* Give the browser a tick to lay it out before the dialog opens. */
@@ -754,7 +821,9 @@
   function steps(){ return (state.facts.steps_open||[]); }
   function openSteps(){ return steps().filter(function(s){ return !s.done; }); }
 
+  function panelShowing(name){ var m=$("actModal"); return !!(m && m.style.display==="block" && m.querySelector('[data-panel="'+name+'"]')); }
   YNS.planner=function(){
+    if (!panelShowing("planner")) track("planner_open", {});
     var all=steps(), open=all.filter(function(s){return !s.done;}), done=all.filter(function(s){return s.done;});
     var f=state.facts;
     /* The dated things. Each one belongs to an activity, so each one can
@@ -781,7 +850,7 @@
         + done.map(function(s){ return '<div class="pl-row pl-off"><span class="pl-t">'+s.text+'</span><span class="pl-from">'+s.from+'</span></div>'; }).join("")
         + "</details>"
       : "";
-    m.innerHTML='<div class="am-card am-results"><div class="am-top"><span class="am-eyebrow">Your planner</span><button class="am-x" onclick="YNS.closeList()" aria-label="Close">\u00d7</button></div>'
+    m.innerHTML='<div class="am-card am-results" data-panel="planner"><div class="am-top"><span class="am-eyebrow">Your planner</span><button class="am-x" onclick="YNS.closeList()" aria-label="Close">\u00d7</button></div>'
       +'<h1>What you said you\u2019d do</h1>'
       +'<p class="am-scene">One line for every thing you picked at the end of an activity. Tick them off as they happen, change the wording, or clear one and plan it again.</p>'
       +'<section class="pf-sec"><h3>This week</h3>'+list+doneList+"</section>"
@@ -833,7 +902,7 @@
      which one, by name, before doing it. */
   function confirmPanel(title, body, onYes, yesLabel){
     var m=$("actModal");
-    m.innerHTML='<div class="am-card"><div class="am-top"><span class="am-eyebrow">Just checking</span><button class="am-x" onclick="YNS.planner()" aria-label="Back">\u00d7</button></div>'
+    m.innerHTML='<div class="am-card" data-panel="planner"><div class="am-top"><span class="am-eyebrow">Just checking</span><button class="am-x" onclick="YNS.planner()" aria-label="Back">\u00d7</button></div>'
       +"<h2>"+title+"</h2>"
       +'<p class="am-scene">'+body+"</p>"
       +'<div class="am-foot" data-back="planner"><button class="btn-quiet" onclick="YNS.planner()">Keep it</button>'
@@ -859,7 +928,7 @@
       return;
     }
     confirmPanel("Delete this, and start " + name + " again?",
-      "This came out of <b>"+name+"</b>. Clearing it also clears what you told that activity, so it asks you properly next time rather than skipping the questions it already has answers for. Everything else stays exactly as it is.",
+      "This came out of <b>"+name+"</b>. Clearing it also clears what you told that activity, so next time it asks you every question again. Everything else stays exactly as it is.",
       function(){
         state.facts.steps_open = steps().filter(function(x){ return x.id!==id; });
         resetActivity(s.slug);
@@ -870,7 +939,7 @@
   YNS.askDeleteFact=function(k, slug){
     var name = (window.YNSMock.title && window.YNSMock.title(slug)) || slug;
     confirmPanel("Delete this, and start " + name + " again?",
-      "This came out of <b>"+name+"</b>. Clearing it also clears what you told that activity, so you can plan it from scratch rather than editing around an old answer.",
+      "This came out of <b>"+name+"</b>. Clearing it also clears what you told that activity, so you can plan it from scratch.",
       function(){
         delete state.facts[k];
         state.facts.steps_open = steps().filter(function(x){ return x.slug!==slug; });
@@ -882,7 +951,7 @@
 
   YNS.tickStep=function(id){
     steps().forEach(function(s){ if (s.id===id) s.done=true; });
-    render(); YNS.planner();
+    render(); if (panelShowing("planner")) YNS.planner();
     toast("Ticked off. That\u2019s the whole point of the list.");
   };
 
@@ -946,6 +1015,7 @@
   }
 
   YNS.profile=function(){
+    if (!panelShowing("portfolio")) track("portfolio_open", {});
     var sec=profileSections();
     var m=$("actModal"); m.style.display="block"; document.body.classList.add("modal-open");
     var ns=nextStepSentence(), links=searchLinks();
@@ -976,7 +1046,7 @@
             + "</section>";
         }).join("")
       : '<p class="am-scene">Nothing here yet. Finish any activity and this page starts filling in: your own words, the work they point at, and the numbers worth having to hand. It is also the thing you can save as a PDF and take to an interview.</p>';
-    m.innerHTML='<div class="am-card am-results"><div class="am-top"><span class="am-eyebrow">Everything you\u2019ve told us</span><button class="am-x" onclick="YNS.closeList()" aria-label="Close">\u00d7</button></div>'
+    m.innerHTML='<div class="am-card am-results" data-panel="portfolio"><div class="am-top"><span class="am-eyebrow">Everything you\u2019ve told us</span><button class="am-x" onclick="YNS.closeList()" aria-label="Close">\u00d7</button></div>'
       +'<h1>What we know about you</h1>'
       +'<p class="am-scene">Your own words, the direction they add up to, and the facts worth having to hand. Take any of it straight into an application or a message.</p>'
       +nextStep
@@ -1017,6 +1087,22 @@
     return out.filter(function(k){ var d=byKey(k); return doorState(d)==="untouched"; });
   }
   function byKey(k){ return DOORS.filter(function(d){return d.key===k;})[0]; }
+  /* The door the answers point to, or Door 1 when there are no answers. */
+  function recommendedDoor(){ return (state.a[0] && state.a[1]) ? route(state.a) : "know"; }
+  /* Every change of door goes through here, so door_open fires once per
+     change and never on a repaint. */
+  function setDoor(k){
+    var changed = state.door !== k;
+    state.door = k; state.opened[k] = true;
+    if (changed) track("door_open", { door: k, recommended: k === recommendedDoor() });
+  }
+  function doorOf(slug){
+    var here = byKey(state.door);
+    if (here && here.acts.indexOf(slug) >= 0) return here.key;
+    var d = DOORS.filter(function(x){ return x.acts.indexOf(slug) >= 0; })[0];
+    return d ? d.key : null;
+  }
+
   function offerDue(){ return !state.offerAnswered && doneCount()>=1 && notNeeded().length>0; }
   function doorProgress(d){ var n=0; d.acts.forEach(function(s){ if(state.done[s]) n++; }); return {n:n,of:d.acts.length}; }
 
@@ -1114,7 +1200,7 @@
     if (slug==="abcs_a" && !aside){
       var up=document.createElement("button"); up.type="button"; up.className="bringin";
       up.textContent="Already have a resume or cover letter? Bring it in";
-      up.onclick=function(ev){ ev.stopPropagation(); openApp(slug, withLevel(ABCS_URL)+"#home", ACTS[slug].name, {upload:true}); };
+      up.onclick=function(ev){ ev.stopPropagation(); trackStart(slug); openApp(slug, withLevel(ABCS_URL)+"#home", ACTS[slug].name, {upload:true}); };
       el.appendChild(up);
     }
     if (!a.soon && !aside && !done){
@@ -1136,18 +1222,18 @@
     var picked = state.door!==recommended;
     var eyebrow = picked ? "The door you picked" : answered ? "Your starting door" : "A good place to start";
     var because = picked
-      ? "You picked this one, and every door is open to you. "+(answered ? 'Your answers pointed to <button class="lnk" onclick="YNS.goDoor(\''+recommended+'\')">'+byKey(recommended).title+'</button>, if you\u2019d like to start there instead.' : "")
+      ? "You picked this one, and every door is open to you. "+(answered ? 'Your answers pointed to <button class="lnk" onclick="YNS.goDoor(\''+recommended+'\')">'+byKey(recommended).title+'</button>, if you\u2019d like to start there.' : "")
       : answered ? routeReason(state.a)
       : "You haven't answered the questions yet, so we've opened the door most people start at. Answer them whenever you like and we'll point you somewhere that fits you better.";
     var offer="";
     if (allDoorsDone()){
-      offer=wixCard("You\u2019ve been through all five doors. If you\u2019d like the same journey with videos and more structure, the Your Next Step course has six modules, each with an AI coach. It\u2019s optional and paid, with no obligation to join.");
+      offer=wixCard("You\u2019ve been through all five doors. If you\u2019d like the same journey with videos and more structure, the Your Next Step course has six modules, each with an AI coach. It\u2019s optional and paid, with no obligation to join.", "all_doors");
     }
     if (offerDue()){
       var names=notNeeded().map(function(k){ return byKey(k).title; });
       offer='<div class="offer"><svg viewBox="0 0 20 20" fill="none" stroke="#6B5F00" stroke-width="1.6"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.5v.5"/></svg><div>'
         +'<p><b>You already know what you want, so let\u2019s not waste your time.</b> '+(names.length>1?names.join(" and ")+" are":names[0]+" is")+' built for people still working that out. Shall we set '+(names.length>1?"them":"it")+' aside for now? '+(names.length>1?"They\u2019ll be":"It\u2019ll be")+' right here if you ever want '+(names.length>1?"them":"it")+'.</p>'
-        +'<div class="offer-acts"><button class="btn btn-ghost" onclick="YNS.acceptOffer()">Yes, set '+(names.length>1?"them":"it")+' aside</button><button class="btn-quiet" onclick="YNS.declineOffer()">I\u2019d rather keep '+(names.length>1?"them":"it")+'</button></div></div></div>';
+        +'<div class="offer-acts"><button class="btn btn-ghost" onclick="YNS.acceptOffer()">Yes, set '+(names.length>1?"them":"it")+' aside</button><button class="btn-quiet" onclick="YNS.declineOffer()">Keep '+(names.length>1?"them":"it")+' here</button></div></div></div>';
     }
     var nd=doorDone(d), nl=live(d).length;
     /* Door 3 has a "ready" state: when the direction, a resume and one
@@ -1185,7 +1271,7 @@
                : st==="open" ? '<div class="prog"><i style="width:'+(nl?nd/nl*100:0)+'%"></i></div><span class="small muted">'+nd+' of '+nl+'</span>'
                : '<span class="small muted">Not opened yet</span>';
       el.innerHTML='<span class="num">'+d.n+'</span><h3>'+d.title+'</h3><p>'+d.blurb+'</p>'+foot;
-      el.onclick=function(){ state.door=d.key; state.opened[d.key]=true; render(); $("doorPanel").scrollIntoView({behavior:"smooth",block:"start"}); };
+      el.onclick=function(){ setDoor(d.key); render(); $("doorPanel").scrollIntoView({behavior:"smooth",block:"start"}); };
       g.appendChild(el);
     });
   }
@@ -1253,7 +1339,7 @@
         if (ev.length > 1) {
           parts.push(state.facts.signals_agree
             ? '<p class="dir-note">All of them point the same way, which makes this a stronger read than any one on its own.</p>'
-            : '<p class="dir-note">These do not all point the same way, and that is worth knowing rather than hiding. Each one measures something different, so the answer above is the weight of all of them together.</p>');
+            : '<p class="dir-note">These point in different directions, which is worth knowing. Each one measures something different, so the answer above is the weight of all of them together.</p>');
         }
         var ns2=nextStepSentence(); if (ns2) parts.push('<p class="dir-next">'+ns2+'</p>');
         parts.push('<button class="btn btn-ghost dir-more" onclick="YNS.profile()">See everything we know</button>');
@@ -1308,9 +1394,11 @@
   Object.assign(window.YNS, {
     next: function(){ if (state.q<3) showQ(state.q+1); else {
       if (state.a[2]) state.facts.level=state.a[2];
-      state.facts.enrolled = state.a[1]==="enrolled"; state.door=route(state.a); state.skipped=false; render(); show("hub"); } },
+      state.facts.enrolled = state.a[1]==="enrolled"; state.skipped=false;
+      track("intake_done", { clarity: state.a[0], reason: state.a[1], level: state.a[2], door: route(state.a) });
+      state.door=null; setDoor(route(state.a)); render(); show("hub"); } },
     back: function(){ showQ(state.q-1); },
-    skip: function(){ state.skipped=true; state.door="know"; render(); show("hub"); },
+    skip: function(){ state.skipped=true; track("intake_skipped", {}); state.door=null; setDoor("know"); render(); show("hub"); },
     retake: function(){ state.a=[null,null,null]; renderPicker(); renderQ(1);renderQ(2);renderQ(3); showQ(1); show("intake"); },
     pickAvatar: function(){ renderPicker(); showQ(0); show("intake"); },
     /* Review build only: mark activities done without playing them, so
@@ -1324,10 +1412,11 @@
   });
 
   YNS.activityClosed=function(slug, finished){
+    if (!finished) trackClosedEarly(slug);
     if (!finished && ACTS[slug]) toast("No problem, nothing lost. "+ACTS[slug].name+" is there whenever you want it.");
     if (finished) setTimeout(afterFinish, 400);
   };
-  YNS.goDoor=function(k){ if (!byKey(k)) return; state.door=k; state.opened[k]=true; render(); $("doorPanel").scrollIntoView({behavior:"smooth",block:"start"}); };
+  YNS.goDoor=function(k){ if (!byKey(k)) return; setDoor(k); render(); $("doorPanel").scrollIntoView({behavior:"smooth",block:"start"}); };
 
   /* ---------- check-ins, on the screen ------------------------------
 
@@ -1348,7 +1437,8 @@
       return { kind:"month" };
     return null;
   }
-  function popup(html){
+  function popup(html, kind){
+    track("checkin_shown", { kind: kind });
     var p=$("checkin");
     if (!p){ p=document.createElement("div"); p.id="checkin"; p.className="checkin"; p.setAttribute("role","region"); p.setAttribute("aria-label","Check-in"); document.body.appendChild(p); }
     p.innerHTML='<button class="checkin-x" onclick="YNS.closePopup()" aria-label="Close">\u00d7</button>'+html;
@@ -1363,6 +1453,7 @@
     if ((e.key==="Escape"||e.key==="Esc") && p && p.classList.contains("show") && !document.body.classList.contains("modal-open")) YNS.closePopup();
   });
   YNS.closePopup=function(){
+    if (popupKind && $("checkin") && $("checkin").classList.contains("show")) track("checkin_action", { kind: popupKind, action: "dismiss" });
     if (popupKind==="week" && popupStep) steps().forEach(function(s){ if (s.id===popupStep) s.nudgedAt=now(); });
     if (popupKind==="month") state.facts.month_nudged=now();
     YNS.dismissPopup();
@@ -1375,26 +1466,30 @@
       popup('<p class="checkin-eyebrow">Check-in</p><p><b>A week ago you picked:</b> '+c.step.text+'</p><p class="small muted">From '+c.step.from+'. How did it go?</p>'
         +'<div class="checkin-acts"><button class="btn btn-primary" onclick="YNS.checkinDone(\''+c.step.id+'\')">I did it</button>'
         +'<button class="btn btn-ghost" onclick="YNS.checkinLater(\''+c.step.id+'\')">Still on it</button>'
-        +'<button class="lnk" onclick="YNS.dismissPopup();YNS.planner()">Change it</button></div>');
+        +'<button class="lnk" onclick="YNS.checkinChange()">Change it</button></div>', "week");
       return;
     }
     if (c && c.kind==="month"){
       popup('<p class="checkin-eyebrow">Check-in</p><p><b>It\u2019s been a month since you set your six-month goal.</b></p><p class="small muted">Still True? takes about four minutes and shows what has changed.</p>'
-        +'<div class="checkin-acts"><button class="btn btn-primary" onclick="YNS.dismissPopup();YNS.open(\'stilltrue\')">Check in now</button>'
-        +'<button class="btn btn-ghost" onclick="YNS.monthLater()">Later</button></div>');
+        +'<div class="checkin-acts"><button class="btn btn-primary" onclick="YNS.monthNow()">Check in now</button>'
+        +'<button class="btn btn-ghost" onclick="YNS.monthLater()">Later</button></div>', "month");
       return;
     }
     /* Once per visit, after the first thing is finished: the free account. */
     if (!nudgedSave && Object.keys(state.done).length){
       nudgedSave=true;
       popup('<p class="checkin-eyebrow">Keep what you made</p><p><b>Save your progress, free.</b></p><p class="small muted">A free account keeps your answers, your Planner and your Portfolio, on any device.</p>'
-        +'<div class="checkin-acts"><button class="btn btn-primary" onclick="YNS.dismissPopup();YNS.signup()">Save it, free</button>'
-        +'<button class="btn btn-ghost" onclick="YNS.dismissPopup()">Not now</button></div>');
+        +'<div class="checkin-acts"><button class="btn btn-primary" onclick="YNS.saveNow()">Save it, free</button>'
+        +'<button class="btn btn-ghost" onclick="YNS.saveLater()">Not now</button></div>', "save");
     }
   }
-  YNS.checkinDone=function(id){ YNS.dismissPopup(); YNS.tickStep(id); YNS.closeList(); };
-  YNS.checkinLater=function(id){ steps().forEach(function(s){ if (s.id===id) s.nudgedAt=now(); }); YNS.dismissPopup(); toast("Good. We\u2019ll ask again next week."); };
-  YNS.monthLater=function(){ state.facts.month_nudged=now(); YNS.dismissPopup(); };
+  YNS.checkinDone=function(id){ track("checkin_action", { kind:"week", action:"did_it" }); YNS.dismissPopup(); YNS.tickStep(id); };
+  YNS.checkinLater=function(id){ track("checkin_action", { kind:"week", action:"still_on_it" }); steps().forEach(function(s){ if (s.id===id) s.nudgedAt=now(); }); YNS.dismissPopup(); toast("Good. We\u2019ll ask again next week."); };
+  YNS.checkinChange=function(){ track("checkin_action", { kind:"week", action:"change_it" }); YNS.dismissPopup(); YNS.planner(); };
+  YNS.monthNow=function(){ track("checkin_action", { kind:"month", action:"check_in_now" }); YNS.dismissPopup(); YNS.open("stilltrue"); };
+  YNS.monthLater=function(){ track("checkin_action", { kind:"month", action:"later" }); state.facts.month_nudged=now(); YNS.dismissPopup(); };
+  YNS.saveNow=function(){ track("checkin_action", { kind:"save", action:"save_it" }); YNS.dismissPopup(); YNS.signup("save_popup"); };
+  YNS.saveLater=function(){ track("checkin_action", { kind:"save", action:"not_now" }); YNS.dismissPopup(); };
   /* Review build only: move the clock so the check-ins can be seen. */
   YNS.now=now;
   YNS.skipAhead=function(days){ clockShift+=days*86400000; toast("Moved the clock ahead "+days+" days."); afterFinish(); };
@@ -1402,13 +1497,13 @@
   window.YNSHub = { addEvidence: addEvidence };
   window.YNSMock.mount($("actModal"),
     function(slug){
-      state.done[slug]=true; lastAdded=slug;
+      state.done[slug]=true; lastAdded=slug; trackDone(slug);
       if (slug==="smart6") state.facts.smart_set_at=now();
       if (slug==="stilltrue") state.facts.stilltrue_at=now();
       bubbleIdx=Math.max(0,bubbleLines().length-1); render();
       toast(allDoorsDone() ? "That\u2019s all five doors. Really well done." : "Nice work. That\u2019s "+ACTS[slug].name+" done.");
     },
     /* The course card, on the results of the money activities only. */
-    function(slug){ return (ACTS[slug] && ACTS[slug].wix) ? wixCard(WIX_LINE) : ""; });
+    function(slug){ return (ACTS[slug] && ACTS[slug].wix) ? wixCard(WIX_LINE, slug) : ""; });
   renderPicker(); renderQ(1); renderQ(2); renderQ(3); showQ(0);
 })();

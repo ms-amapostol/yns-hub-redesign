@@ -17,7 +17,7 @@
 (function () {
 "use strict";
 
-/* Which rows are daily and which are weekly is a content judgement, not
+/* Which rows are daily and which are weekly is a content judgment, not
    a technical one, and it is the whole point of the two units.
 
    Daily: things with a rhythm you could describe per night or per day.
@@ -29,12 +29,12 @@
    hours a week" is not.
 
    `daily.days` is the default day count. `adjustable` adds a stepper for
-   the rows where it genuinely varies — a hybrid commute is the obvious
+   the rows where it really varies — a hybrid commute is the obvious
    one, and paid work is the other, since a four-on-four-off shift and a
    Monday-to-Friday desk job are the same weekly total by very different
    routes. */
 var ROWS = [
-  { k: "sleep",    t: "Sleeping",              s: "Whatever you really average, not what you'd like to.",
+  { k: "sleep",    t: "Sleeping",              s: "Whatever you really average.",
     daily: { days: 7 }, max: 12, step: 0.5, a: {} },
 
   { k: "work",     t: "Working",               s: "Including the parts you do at home.",
@@ -46,7 +46,7 @@ var ROWS = [
   { k: "care",     t: "Looking after people",  s: "Children, parents, anyone who needs you.",
     daily: { days: 7 }, max: 14, step: 0.5, a: { people: 3 } },
 
-  { k: "chores",   t: "Keeping life running",  s: "Cooking, cleaning, paperwork, the shop.",
+  { k: "chores",   t: "Keeping life running",  s: "Cooking, cleaning, paperwork, the grocery run.",
     daily: { days: 7 }, max: 8, step: 0.25, a: { order: 2, hands: 1 } },
 
   { k: "making",   t: "Making or fixing something", s: "A project, a repair, a craft, a build.",
@@ -55,7 +55,7 @@ var ROWS = [
   { k: "learning", t: "Learning something",    s: "A course, a book, a tutorial, practice.",
     max: 40, a: { analysis: 3 } },
 
-  { k: "people",   t: "Being with people you like", s: "Time you chose, rather than time you owed.",
+  { k: "people",   t: "Being with people you like", s: "Time you chose to spend.",
     max: 50, a: { people: 3 } },
 
   { k: "rest",     t: "Actually resting",      s: "The kind that actually restores you, rather than scrolling and feeling guilty.",
@@ -73,7 +73,7 @@ YNSActivity.define({
 
     /* ---------------------------------------------------------------
        1. The week. Scored, because how someone spends unclaimed time is
-       genuinely diagnostic — but scored proportionally, so a person with
+       diagnostic — but scored proportionally, so a person with
        a 60-hour job is not read as more "order"-driven than a person
        with a 30-hour one.
        --------------------------------------------------------------- */
@@ -115,9 +115,9 @@ YNSActivity.define({
           prompt: "Pick the one you resent most.",
           options: [
             { k: "commute", t: "The commute",          fact: "commute", s: "Time that's neither work nor life.",        echo: "the commute takes the most" },
-            { k: "work",    t: "The job itself",        fact: "work",    s: "The hours inside the job, rather than the ones around it.",  echo: "the job itself takes the most" },
+            { k: "work",    t: "The job itself",        fact: "work",    s: "The hours inside the job itself.",  echo: "the job itself takes the most" },
             { k: "chores",  t: "Keeping life running",  fact: "chores",  s: "The admin that never finishes.",             echo: "keeping life running takes the most" },
-            { k: "none",    t: "Nothing. The problem is what's missing", fact: "none", s: "The week isn't so much too full as the wrong shape.", echo: "my week is the wrong shape" }
+            { k: "none",    t: "Nothing. The problem is what's missing", fact: "none", s: "The week has the wrong shape.", echo: "my week is the wrong shape" }
           ]
         }
       ]
@@ -145,7 +145,7 @@ YNSActivity.define({
             { k: "weekends", t: "Weekends, both of the days",           fact: "weekends", echo: "I won't give up my weekends" },
             { k: "sleep",    t: "Sleep. I've tried the other way",      fact: "sleep",    echo: "I won't give up sleep" },
             { k: "own_time", t: "The one thing I do that's mine",       fact: "own_time", echo: "I won't give up my own time" },
-            { k: "flexible", t: "Honestly, most of it's negotiable for the right thing", fact: "flexible", echo: "most of it is up for grabs for the right job" }
+            { k: "flexible", t: "Most of it's negotiable for the right thing", fact: "flexible", echo: "most of it is up for grabs for the right job" }
           ]
         }
       ]
@@ -203,15 +203,15 @@ YNSActivity.define({
       "</b>, at " + h(alloc[smallest] || 0) + " hours. " +
       ((alloc[smallest] || 0) <= 2
         ? "That is under twenty minutes a day. Worth asking whether that is a choice or a consequence."
-        : "Small, but it exists, which is more than most people manage.") + "</p>" +
+        : "Small, and it exists, and that counts.") + "</p>" +
       (unaccounted > 12
-        ? "<p>You also left about " + h(unaccounted) + " hours unaccounted for. That happens to everyone. It is usually " +
-          "the part of the week nobody can quite describe afterwards, and it's often where the answer is.</p>"
+        ? "<p>You also left about " + h(unaccounted) + " hours unaccounted for. That happens a lot. It is usually " +
+          "the part of the week that's hard to describe afterwards, and it's often where the answer is.</p>"
         : "") +
       "</div>" +
 
       '<div class="ya-readout"><h3>What this is for</h3>' +
-      "<p>A job change doesn't add hours, it moves them. Anything you look at from here is a " +
+      "<p>A job change moves your hours around. Anything you look at from here is a " +
       "trade against this shape. You now know which parts you'd defend and which you'd hand " +
       "over without much of a fight.</p></div>";
   },
@@ -220,9 +220,9 @@ YNSActivity.define({
     var drain = state.answers.drain || (ctx && ctx.facts.time_drain) || "";
     if (drain === "commute") {
       return [
-        "Work out what your commute costs you in hours a year. The number is usually shocking",
+        "Work out what your commute costs you in hours a year. The number often surprises people",
         "Find one role in your field that's closer, or not on-site, and read what it pays",
-        "Try one week of tracking the real door-to-door time rather than the estimate"
+        "Try one week of tracking the real door-to-door time"
       ];
     }
     return [

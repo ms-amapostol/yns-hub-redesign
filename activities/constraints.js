@@ -32,7 +32,7 @@ var CARDS = [
     s: "School pickup, a second job, someone who needs you at a fixed time.",
     aA: { order: 2 }, aB: { leading: 1, people: 1 } },
   { k: "money_now",  t: "I can't take a pay cut, even for a bit",
-    s: "The number has to hold from day one, not just eventually.",
+    s: "The number has to hold from day one.",
     aA: { order: 2 }, aB: { analysis: 2 } },
   { k: "quals",      t: "I don't have the qualifications",
     s: "The postings all ask for something you haven't got.",
@@ -47,7 +47,7 @@ var CARDS = [
     s: "No car, bad transit, a commute that doesn't work.",
     aA: { hands: 1, order: 1 }, aB: { analysis: 2 } },
   { k: "confidence", t: "I'm not the kind of person who does that",
-    s: "This one is about how you see yourself rather than about the work.",
+    s: "This one is about how you see yourself.",
     aA: { order: 2 }, aB: { people: 1, leading: 1 } },
   { k: "time",       t: "I haven't got time to retrain",
     s: "Between work and everyone else, there's nothing left.",
@@ -75,14 +75,14 @@ YNSActivity.define({
           eyebrow: "Ten cards",
           title: "Which of these are true?",
           scene: [
-            "Everyone carries a list of reasons a change isn't possible. Some of them are real. They're facts about your life that everything else rests on.",
+            "Many people carry a list of reasons a change isn't possible. Some of them are real. They're facts about your life that everything else rests on.",
             "Some of them are things you were told once, or worked out at twenty-two, and haven't looked at since.",
             "They sit in the same place in your head, so the whole pile feels stuck. We'll take them one card at a time."
           ],
           prompt: "Go with your gut. Nobody else sees this, and a constraint you talk yourself out of is still there next month.",
           pileA: "That's fixed",
           pileB: "Worth questioning",
-          pileHint: "\"Worth questioning\" doesn't mean it's false. It means you haven't checked.",
+          pileHint: "\"Worth questioning\" means you haven't checked it yet.",
           cards: CARDS,
           /* The two constraint facts are registered in fact_keys and were
              going unwritten — so Three Doors' deeper rung, which is keyed
@@ -111,7 +111,7 @@ YNSActivity.define({
           eyebrow: "One of them",
           title: "Pick the one you'd least like to be wrong about.",
           scene: [
-            "Go for the one where finding out you were wrong would change the most, rather than the one that's easiest to check."
+            "Go for the one where finding out you were wrong would change the most."
           ],
           prompt: "Which is it?",
           options: [
@@ -160,8 +160,8 @@ YNSActivity.define({
       !open.length
         ? "That might be exactly right. Some lives really are that constrained, and pretending " +
           "otherwise wouldn't help you. It's also what the list looks like when checking has " +
-          "stopped feeling worth the effort, which happens to most people at some point. You " +
-          "don't have to take on all ten, only the one you pick below."
+          "stopped feeling worth the effort, which happens to a lot of people at some point. " +
+          "You only need to take on the one you pick below."
       : !fixed.length
         ? "That's either real freedom or optimism, and it's worth finding out which. The risk " +
           "on this side is a plan that quietly ignores something that will still be there in six months. " +
@@ -177,7 +177,7 @@ YNSActivity.define({
       (fixed.length
         ? '<div class="ya-readout"><h3>What you said is fixed</h3><p>' +
           fixed.map(function (c) { return esc(c.t); }).join(" · ") + "</p>" +
-          "<p>Design around these rather than arguing with them. A plan that respects them is one " +
+          "<p>Design around these. A plan that respects them is one " +
           "you'll still be following in six months.</p></div>"
         : "") +
 
@@ -185,8 +185,8 @@ YNSActivity.define({
         ? '<div class="ya-readout"><h3>What you said is worth questioning</h3><p>' +
           open.map(function (c) { return esc(c.t); }).join(" · ") + "</p>" +
           "<p>Every one of these has an answer you could go and find: a number, a real " +
-          "requirement, one conversation. They're things to check rather than things to " +
-          "weigh up in your head.</p></div>"
+          "requirement, one conversation. Each one is something you can go " +
+          "and check.</p></div>"
         : "") +
 
       (PICK_WORDS[picked]
@@ -221,7 +221,7 @@ YNSActivity.define({
     }
     return [
       "Spend twenty minutes finding the actual answer to the one you picked",
-      "Ask one person who would know, rather than deciding on your own",
+      "Ask one person who would know",
       "Write down what would have to change for it to move"
     ];
   }

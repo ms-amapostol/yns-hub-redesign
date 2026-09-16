@@ -11,7 +11,7 @@
    click it is the wrong title.
 
    The rest of the rewrite is tone. The first version was accurate and
-   cold: it opened by telling somebody their change had failed, labelled
+   cold: it opened by telling somebody their change had failed, labeled
    their answer a "cost", and demanded honesty in three separate places
    ("Be honest rather than brave", "the honest one, not the respectable
    one", "Which is it, honestly?").
@@ -25,10 +25,10 @@
      answer does not make it likelier, and that nobody else sees it.
    * Every hard screen is followed straight away by something to do. The
      activity never ends on the wound.
-   * Difficulty is normalised rather than judged. "Most people know
+   * Difficulty is normalized rather than judged. "Most people know
      straight away" does more work than "be honest".
 
-   All the candour is still here. It is earned now instead of demanded.
+   All the candor is still here. It is earned now instead of demanded.
    ===================================================================== */
 (function () {
 "use strict";
@@ -97,7 +97,7 @@ YNSActivity.define({
               (name ? ", into <b>" + escHTML(name) + "</b>" : "") +
               ", and it hasn't gone the way you hoped. You're roughly back where you started.",
               "Have a look through these and see which one feels most like the way it would " +
-              "really go for you. Most people know straight away."
+              "really go for you. Many people know right away."
             ];
           },
           prompt: "Choosing one doesn't make it likelier. It just tells us where to aim.",
@@ -107,18 +107,18 @@ YNSActivity.define({
               s: "The gap between leaving and earning was longer than you'd planned for.",
               fact: "money", echo: "the money running out is what worries me",
               a: { order: 3 },
-              then: "You didn't fail at the work. The money ran out while you were still " +
-                    "learning it. That is a common way a good decision turns into a bad year, " +
+              then: "The money ran out while you were still " +
+                    "learning the work. That is a common way a good decision turns into a bad year, " +
                     "and one of the easier ones to plan around.",
               cost: "It costs you the change, and some of your belief that you could make one." },
 
             { k: "support", t: "The people around me made it too hard",
-              s: "A steady, tiring lack of support rather than anything dramatic.",
+              s: "A steady, tiring lack of support.",
               fact: "support", echo: "not enough support at home worries me",
               a: { people: 3 },
               then: "Nobody stopped you. It was just heavier every week than it needed to be, and " +
-                    "in the end the easiest thing was to stop. Almost everyone who has made a big " +
-                    "change has felt some version of this.",
+                    "in the end the easiest thing was to stop. Many people who have made a big " +
+                    "change have felt some version of this.",
               cost: "You lose the change, and it can cost you something at home too." },
 
             { k: "stamina", t: "I ran out of steam",
@@ -146,7 +146,7 @@ YNSActivity.define({
               then: "Life happened, the way it does, and none of it would have been a reflection " +
                     "on you. This is the one you can't prevent. It's also the one where a bit of " +
                     "slack in the plan is the difference between a setback and the end of it.",
-              cost: "Nothing was wrong with the plan. There just wasn't a spare one." }
+              cost: "The plan was sound, and it had no backup." }
           ]
         }
       ]
@@ -157,7 +157,7 @@ YNSActivity.define({
 
        The screen the feedback was about. It used to open by telling
        people they routinely get this wrong and then demand honesty. Both
-       are gone. The distinction is genuinely useful, so it gets explained
+       are gone. The distinction is useful, so it gets explained
        plainly and left as a question rather than set as a test.
        --------------------------------------------------------------- */
     {
@@ -183,7 +183,7 @@ YNSActivity.define({
             { k: "survivable", t: "I couldn't stop it, but I could soften the landing",
               s: "It happens or it doesn't, and what matters is what it costs when it does.",
               echo: "I'd have to ride it out" },
-            { k: "fatal", t: "Honestly, neither. It would end it",
+            { k: "fatal", t: "Neither. It would end it",
               s: "A common answer, and a useful one, because it means a lot is resting on one thing.",
               echo: "a lot is resting on one thing" }
           ]
@@ -203,7 +203,7 @@ YNSActivity.define({
           eyebrow: "The useful bit",
           title: "What's the smallest thing that would have helped?",
           scene: [
-            "One small thing rather than the whole plan. Something that, looking back from that " +
+            "One small thing. Something that, looking back from that " +
             "year, you'd be glad you'd done."
           ],
           prompt: "Whichever would have mattered most.",
@@ -212,16 +212,16 @@ YNSActivity.define({
               s: "What it costs, what it pays, how long the gap is.",
               echo: "knowing the numbers would have helped" },
             { k: "person", t: "One person in my corner who understood it",
-              s: "Somebody who understood why you were doing it, which isn't the same as approval.",
+              s: "Somebody who understood why you were doing it.",
               echo: "one person in my corner would have helped" },
             { k: "talk", t: "Talking to someone who'd already done it",
-              s: "Fifteen minutes, before rather than after.",
+              s: "Fifteen minutes, before you start.",
               echo: "one honest conversation would have helped" },
             { k: "smaller", t: "A smaller first step, so less was riding on it",
-              s: "Part-time, evenings or a trial, rather than a leap.",
+              s: "Part-time, evenings or a trial first.",
               echo: "a smaller first step would have helped" },
             { k: "deadline", t: "A date to check in and be straight with myself",
-              s: "A time to look at it properly instead of drifting.",
+              s: "A time to look at it properly, so it doesn't drift.",
               echo: "a check-in date would have helped" }
           ]
         }
@@ -254,9 +254,9 @@ YNSActivity.define({
     var KIND = {
       preventable: "You said you could head it off, which is the best outcome this one has. It " +
                    "means the thing you're most worried about has a cause. A cause is something " +
-                   "you can work on this month instead of carrying it around all year.",
-      survivable:  "You said you'd have to ride it out. So the job is to make sure it costs you " +
-                   "a setback instead of the whole thing. Some slack in the plan, a backup, and a " +
+                   "you can work on this month.",
+      survivable:  "You said you'd have to ride it out. So the job is to make sure it only costs you " +
+                   "a setback. Some slack in the plan, a backup, and a " +
                    "smaller first step all do that. None of them are dramatic.",
       fatal:       "You said it would end the whole thing. That's a common answer, and it's " +
                    "worth saying out loud. It means a lot is resting on one thing going right. " +
@@ -265,7 +265,7 @@ YNSActivity.define({
     };
 
     return "<h1>Now you know what to keep an eye on.</h1>" +
-      '<p class="ya-result-lead">Most people carry a worry like this around without ever putting ' +
+      '<p class="ya-result-lead">A worry like this often gets carried around without anyone putting ' +
       "words to it, which is the worst of both worlds: all of the weight and none of the use. " +
       "You've just turned yours into something with a name and something to do about it.</p>" +
 
@@ -286,10 +286,10 @@ YNSActivity.define({
         : "") +
 
       '<div class="ya-readout"><h3>One last thing</h3>' +
-      "<p>Picturing it going wrong is not the same as expecting it to, and it doesn't make it " +
+      "<p>Picturing it going wrong doesn't make it " +
       "any more likely. We're all just better at explaining a problem after it happens than at " +
       "spotting one coming. Pretending it already happened gets you a much more useful list.</p>" +
-      "<p>You've got that list now, and nothing on it is a reason not to go.</p></div>";
+      "<p>You've got that list now, and now you know what to plan for.</p></div>";
   },
 
   actions: function (state) {
@@ -297,13 +297,13 @@ YNSActivity.define({
     if (g === "numbers") {
       return [
         "Work out your monthly floor, so the money question has a number in it",
-        "Find out what the training costs from the provider, not from a search result",
+        "Find out what the training costs from the provider itself",
         "Check what the work pays at the level you'd really start at"
       ];
     }
     if (g === "person") {
       return [
-        "Tell one person what you're thinking about, properly rather than in passing",
+        "Tell one person what you're thinking about, properly",
         "Ask them straight out to be the person you check in with",
         "Write down who'd be hardest to tell, and why"
       ];

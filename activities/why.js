@@ -109,7 +109,7 @@ YNSActivity.define({
           lead: "The first answer is usually a job or a complaint. The fifth is usually the real reason. That's the whole trick.",
           body: [
             "Each screen asks why about the thing you just wrote. It gets uncomfortable around the third one, which is a sign it's working. You can stop early if you hit the real one sooner.",
-            "It doesn't have to be noble or tidy. It just has to be true. Nothing here is shared."
+            "Any reason counts, as long as it's true. Nothing here is shared."
           ],
           cta: "Start"
         },
@@ -119,7 +119,7 @@ YNSActivity.define({
           eyebrow: "Already done",
           title: "You've already found your why.",
           lead: function (v) { return "\u201c" + ((v && v.facts && v.facts.why_statement) || "") + "\u201d"; },
-          body: ["No need to dig again. This run asks the question underneath it instead."],
+          body: ["No need to dig again. This run asks the question underneath it."],
           provenance: "You've told us your why already, so the five whys are skipped.",
           cta: "Okay"
         }
@@ -138,10 +138,10 @@ YNSActivity.define({
       "Because\u2026", false,
       ["Because I hate my job.", "Because I need more money.", "Because I'm 24 and still working the same register."]),
     WHY(2, "And why does that matter to you?",
-      function (v) { return ["You said: \u201c" + last(v) + "\u201d", "Why does that matter? Not to anyone else. To you."]; },
+      function (v) { return ["You said: \u201c" + last(v) + "\u201d", "Think only about you here."]; },
       "Because\u2026", false, null),
     WHY(3, "Why?",
-      function (v) { return ["\u201c" + last(v) + "\u201d", "One more layer. This is the one where most people find the real thing."]; },
+      function (v) { return ["\u201c" + last(v) + "\u201d", "One more layer. This is often where the real thing shows up."]; },
       "Because\u2026", true, null),
     WHY(4, "And underneath that?",
       function (v) { return ["\u201c" + last(v) + "\u201d", "If that came true, what would it give you?"]; },
@@ -199,11 +199,11 @@ YNSActivity.define({
           title: "How will you know it worked?",
           scene: [
             "You've already written down why you're doing this. Here's the harder question underneath it. A year from now, what would have to be true for you to say it worked?",
-            "Be specific enough you could check. \"Happier\" isn't checkable. \"I don't think about work on Sunday\" is."
+            "Pick something you could check, like \"I don't think about work on Sunday.\""
           ],
           prompt: "One year from now, I will know this worked because\u2026",
           placeholder: "Because by then\u2026",
-          provenance: "You've already told us your why, so this asks the next question instead of repeating it.",
+          provenance: "You've already told us your why, so this asks the next question.",
           rows: 4,
           maxLength: 600,
           cta: "That's my test",
@@ -217,8 +217,8 @@ YNSActivity.define({
         title: "You have already done the hard part",
         stat: "Written down",
         body: [
-          "You've got both a reason and a test for it, saved. Most people never write either " +
-          "one down. So most career changes get judged against a standard that moves every " +
+          "You've got both a reason and a test for it, saved. Many people never write either " +
+          "one down, so their career changes get judged against a standard that moves every " +
           "time the mood does.",
           "Keep it where you'll see it. It sits at the top of your Portfolio, and a free account keeps it there on any device. It's there for the week you can't remember why you started."
         ],
@@ -239,7 +239,7 @@ YNSActivity.define({
           eyebrow: "Last one",
           title: "And how long has this been true?",
           scene: [
-            "This isn't a test. It just helps to know. Something you've sat with for three years needs a different next step than something that started last month."
+            "This just helps us know where you are. Something you've sat with for three years needs a different next step than something that started last month."
           ],
           prompt: "Roughly.",
           options: [
@@ -247,7 +247,7 @@ YNSActivity.define({
               s: "Something changed recently and this is new.",
               echo: "this started recently" },
             { k: "year",   t: "About a year",
-              s: "Long enough to know it isn't just a bad week.",
+              s: "Long enough to know it's more than a bad week.",
               echo: "this has been building for about a year" },
             { k: "years",  t: "A few years",
               s: "You've thought about this more than once and haven't moved yet.",
@@ -287,11 +287,11 @@ YNSActivity.define({
       "new": "It's new. That's the easiest time to move and the hardest time to trust yourself. " +
              "Give it one honest test before you decide it was a mood.",
       year:  "A year is long enough to know this is more than a bad week. It deserves a real " +
-             "next step, not another year of noticing it.",
+             "next step.",
       years: "A few years, and you haven't moved yet. For most people that's not about wanting " +
              "it enough. Usually nobody has ever handed them a first step small enough to take, " +
              "which is what the bottom of this page is for.",
-      always: "If it predates the job you're in, then this was never really about the job. So the " +
+      always: "If it predates the job you're in, then this goes deeper than the job. So the " +
               "thing that needs to change may be bigger than you've been assuming, or much smaller."
     };
     var longNote = LONG[howLong] || "";
@@ -322,8 +322,7 @@ YNSActivity.define({
       (tag && WHO[tag]
         ? '<div class="ya-readout"><h3>Who it\u2019s for</h3><p>You said this is mostly for <b>' +
           esc(WHO[tag]) + "</b>. Keep that in mind when an option looks like a compromise, " +
-          "because the question to ask is whether it serves that, rather than whether it is the " +
-          "best job available.</p></div>"
+          "because the question to ask is whether it serves that.</p></div>"
         : "") +
 
       (longNote

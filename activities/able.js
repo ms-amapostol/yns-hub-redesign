@@ -15,7 +15,7 @@
 
    Design notes:
 
-   * The method is the class's: Assess, Brainstorm, List, Execute. The
+   * The method is the course's: Assess, Brainstorm, List, Execute. The
      screens are named with the letters so the framework is learnable,
      not just usable once.
 
@@ -92,7 +92,7 @@ YNSActivity.define({
             "<b>L</b> \u00b7 List. Put them in order of what you could actually start.",
             "<b>E</b> \u00b7 Execute. Do ten minutes of the top one, then adjust."
           ],
-          note: "This is the ABLE framework from Module 4. You'll walk one real problem through it, and it works on anything from a broken car to a stalled application.",
+          note: "Those four letters spell ABLE: Assess, Brainstorm, List, Execute. You'll walk one real problem through it, and it works on anything from a broken car to a stalled application.",
           cta: "Let's take one apart"
         }
       ]
@@ -180,7 +180,7 @@ YNSActivity.define({
           eyebrow: "B \u00b7 Brainstorm",
           title: "Three ways it could go. Bad ones welcome.",
           scene: [
-            "The first idea is rarely the best one, and it's never the only one. Write three, even if two are daft. Daft ideas are what shake the good one loose.",
+            "The first idea is rarely the best one, and it's never the only one. Write three, even if two are silly. Silly ideas are what shake the good one loose.",
             "One is enough to carry on with."
           ],
           prompt: "Add them one at a time.",
@@ -223,7 +223,7 @@ YNSActivity.define({
             return (items.length
               ? ["Your list:<br>" + items.map(function (t, n) { return (n + 1) + ". " + escHTML(t); }).join("<br>")]
               : []).concat([
-              "Not the best one. Not the cleverest one. The one you could begin without anything else having to happen first.",
+              "Pick the one you could begin without anything else having to happen first.",
               "That is usually the right one, because a started solution beats a perfect plan."
             ]);
           },
@@ -252,7 +252,7 @@ YNSActivity.define({
           eyebrow: "E \u00b7 Execute",
           title: "What are the first ten minutes?",
           scene: [
-            "Not the whole solution. The first ten minutes of it. One phone call, one search, one message, one form."
+            "Just the first ten minutes. One phone call, one search, one message, one form."
           ],
           prompt: "Ten minutes, and nothing bigger.",
           placeholder: "I\u2019ll\u2026",
@@ -282,7 +282,7 @@ YNSActivity.define({
           eyebrow: "Last one",
           title: "When?",
           scene: ["Pick the one you'd actually do. A day you know you'll miss is worse than a later day you'll keep."],
-          prompt: "Honestly.",
+          prompt: "Your best guess.",
           options: DAYS.map(function (d) { return { k: d.toLowerCase().replace(/\s/g, "_"), t: d, echo: d.toLowerCase() }; })
         }
       ]

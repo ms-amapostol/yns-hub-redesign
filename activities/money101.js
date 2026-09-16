@@ -3,9 +3,9 @@
 
    Door 4 · Mindset and money. Module 5 (Money Mindset), app-ised.
    Source scripts: Budgeting 101 (zero-based budget), Gross vs. Net
-   Income. The $40,000 example and the 25–31% deduction range are the
-   class's own figures and are attributed to it on screen. Credit and
-   retirement are covered by the class and are out of scope here; they
+   Income. The $40,000 example uses a common rule of thumb (often 15–30%
+   comes out, 20% used here), labeled on screen. Credit and
+   retirement are covered by the course and are out of scope here; they
    are a second activity.
 
    Outcome: "I know what's actually mine to decide on each month."
@@ -51,10 +51,10 @@ YNSActivity.define({
           mechanic: "learn",
           eyebrow: "Eight minutes",
           title: "Three numbers, and you already know all of them.",
-          lead: "What comes in. What has to go out. What's left. Most budgeting advice skips to step nine. This is steps one to three.",
+          lead: "What comes in. What has to go out. What's left. A lot of budgeting advice skips to step nine. This is steps one to three.",
           body: [
             "Rough figures are fine. You can fix them later. Nothing here is shared, and nothing gets judged.",
-            "If you did The Floor, we'll use that number instead of asking again."
+            "If you did The Floor, we'll use that number and skip the question."
           ],
           cta: "Okay"
         }
@@ -63,7 +63,7 @@ YNSActivity.define({
 
     /* ---------------------------------------------------------------
        2. Gross vs net, before asking for income, so "after tax" means
-       something. The class's example, attributed.
+       something. A worked example, labeled.
        --------------------------------------------------------------- */
     {
       id: "grossnet",
@@ -75,14 +75,14 @@ YNSActivity.define({
           title: "The number you were quoted and the number that lands are different.",
           lead: "Gross is what a job says it pays. Net is what actually reaches your account after taxes, insurance and any retirement money come out. You live on net.",
           example: {
-            label: "The class's example",
+            label: "An example",
             fromLabel: "Gross", from: "$40,000 a year, about $3,333 a month",
-            toLabel: "Net", to: "about $2,500 a month",
-            note: "That's with roughly 25% taken out. The class says deductions usually run 25\u201331%."
+            toLabel: "Net", to: "about $2,670 a month",
+            note: "That's with about 20% taken out. Often 15\u201330% comes out, depending on your state and the benefits you pick."
           },
           points: [
-            "<b>Hourly?</b> Multiply your rate by your usual hours in a month, then take off about a quarter. That's your rough net.",
-            "<b>The next screen asks for net.</b> If you only know gross, use the quarter-off rule."
+            "<b>Hourly?</b> Multiply your rate by your usual hours in a month, then take off about a fifth. That's your rough net.",
+            "<b>The next screen asks for net.</b> If you only know gross, take off about a fifth."
           ],
           cta: "Got it"
         }
@@ -194,14 +194,14 @@ YNSActivity.define({
             return "So where does that leave you most months?";
           },
           scene: [
-            "This is the number that matters, and it's the one nobody talks about. It stays private. Pick what most months feel like."
+            "This is the number that matters, and people rarely talk about it. It stays private. Pick what most months feel like."
           ],
           prompt: "Most months.",
           options: [
             { k: "room",  t: "There's room",            s: "Something is left, and I mostly decide where it goes.", echo: "there's some room" },
             { k: "tight", t: "It's tight but it works", s: "It clears, barely. One surprise and it doesn't.",       echo: "it's tight" },
             { k: "short", t: "It doesn't cover it",     s: "Most months I'm borrowing from next month.",            echo: "it's short" },
-            { k: "unsure",t: "I honestly don't know",   s: "A very common answer. Now you have the numbers to find out.", echo: "you're not sure yet" }
+            { k: "unsure",t: "I don't know",   s: "A very common answer. Now you have the numbers to find out.", echo: "you're not sure yet" }
           ]
         }
       ]
@@ -218,10 +218,10 @@ YNSActivity.define({
           mechanic: "learn",
           eyebrow: "Worth knowing",
           title: "Give every dollar a job. That's the whole budget.",
-          lead: "The class teaches a zero-based budget: what comes in, minus everything you've assigned a purpose, equals zero. The money that's left after fixed costs is the part you're actually deciding about.",
+          lead: "A zero-based budget works like this: what comes in, minus everything you've assigned a purpose, equals zero. The money that's left after fixed costs is the part you're actually deciding about.",
           points: [
             "<b>Name it before the month starts.</b> Fun money, a buffer, a payment. Money with no job gets spent on whatever is loudest.",
-            "<b>Pay yourself something first, even $20.</b> The amount matters less than the habit of it existing.",
+            "<b>Many budgets pay you first, even $20.</b> The habit matters more than the amount.",
             "<b>One surprise a month is normal.</b> A plan with no room for one is a plan that breaks in week two."
           ],
           note: "Managing money is mostly managing your habits around it, which is why a budget works best as a weekly habit. If your number is negative, the first job is getting it to zero. The Floor and Every Dollar a Job help you see which line can move.",
@@ -243,8 +243,8 @@ YNSActivity.define({
 
     var READ = {
       room:  "Some of it is yours to decide. That's the number to give a job before next month starts.",
-      tight: "It works until something breaks. The move is a small buffer, built slowly, so one surprise stops being a crisis.",
-      short: "It doesn't cover it, and you were able to say so. Most people never get that far. The first plan is getting to zero, one bill at a time, and it's usually smaller than it looks.",
+      tight: "It works until something breaks. Many people start a small buffer, built slowly, so one surprise stops being a crisis.",
+      short: "It doesn't cover it, and you were able to say so. The first plan is getting to zero, one bill at a time, and it's usually smaller than it looks.",
       unsure:"You didn't know, and now you have three numbers. Watch one normal month against them and you'll know."
     };
 

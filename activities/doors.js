@@ -4,7 +4,7 @@
    Outcome: "I know the three realistic routes into this field, and which
    one fits my life."
 
-   Gated on top_category, and genuinely so: a comparison of routes into
+   Gated on top_category, and for good reason: a comparison of routes into
    nothing is a table of abstractions. The gate reason is printed on the
    card, because the reason is also the pitch.
 
@@ -30,7 +30,7 @@ var ROUTES = {
     { k: "certificate", t: "Trade school certificate", s: "A community college or a private provider",
       time: "6–18 months", cost: "$3k–15k", entry: "Mostly open to anyone", risk: "Medium" },
     { k: "lateral", t: "Start as a helper and work up", s: "Start on the tools, learn on the job",
-      time: "1–3 years", cost: "None", entry: "Turn up and be reliable", risk: "Low" }
+      time: "1–3 years", cost: "None", entry: "Show up and be reliable", risk: "Low" }
   ],
   health: [
     { k: "certificate", t: "Certificate program", s: "Nursing assistant, taking blood, medical assistant",
@@ -68,7 +68,7 @@ var ROUTES = {
     { k: "certificate", t: "Community health worker training", s: "Short and practical, often run by a hospital or a charity",
       time: "3–9 months", cost: "$0–3k", entry: "A high school diploma, and some are free", risk: "Low" },
     { k: "lateral", t: "Support role first", s: "Case aide, outreach or residential support, then train with their help",
-      time: "6 months–2 years", cost: "None", entry: "They hire entry level all year round", risk: "Low" },
+      time: "6 months–2 years", cost: "None", entry: "They hire entry level all year", risk: "Low" },
     { k: "degree", t: "Social work degree", s: "A social work degree, plus a license if you want to do clinical work",
       time: "2–6 years", cost: "$15k–70k", entry: "Normal admissions, though the master's needs a bachelor's first", risk: "Medium" }
   ],
@@ -93,7 +93,7 @@ var ROUTES = {
       time: "3–12 months", cost: "$500–5k", entry: "Usually open to anyone", risk: "Low" },
     { k: "lateral", t: "Operations, then finance", s: "Invoices, billing or payroll, inside a company that has a finance team",
       time: "6–24 months", cost: "None", entry: "They hire at entry level", risk: "Low" },
-    { k: "degree", t: "Accounting or finance degree", s: "What you need to become a licensed accountant, and for most analyst jobs",
+    { k: "degree", t: "Accounting or finance degree", s: "What you need to become a licensed accountant, and for many analyst jobs",
       time: "2–4 years", cost: "$15k–70k", entry: "Normal admissions", risk: "Medium" }
   ]
 };
@@ -111,11 +111,11 @@ var BLOCKERS = [
   { k: "time",       t: "The time",              fact: "time",
     s: "There's nowhere in the week to put it.",            echo: "time is what's stopping me" },
   { k: "unclear",    t: "I don't know what the first step is", fact: "unclear",
-    s: "You're willing enough, but nobody has ever laid out the order it goes in.", echo: "I don't know the first step" },
+    s: "You're willing. The order it goes in just hasn't been laid out for you yet.", echo: "I don't know the first step" },
   { k: "entry",      t: "Getting accepted",      fact: "entry",
     s: "You're not sure you'd get in.",                     echo: "getting accepted is what's stopping me" },
   { k: "confidence", t: "Whether I could do it", fact: "confidence",
-    s: "The worry is finishing it, rather than getting in.",                        echo: "whether I could do it is what's stopping me" },
+    s: "The worry is about finishing it.",                        echo: "whether I could do it is what's stopping me" },
   { k: "none",       t: "Nothing really. I just haven't started", fact: "none",
     s: "Which is its own kind of answer.",                  echo: "nothing is stopping me except starting" }
 ];
@@ -205,8 +205,8 @@ YNSActivity.define({
           eyebrow: "The routes",
           title: "There is more than one way in.",
           scene: [
-            "Almost everyone assumes the door they know about is the only door. Usually it is the slowest and most expensive one.",
-            "Here are the realistic routes into the work you keep pointing at. Mark the ones you could see yourself doing, rather than the ones you think you should want."
+            "Many people assume the door they know about is the only door. Often it is the slowest and most expensive one.",
+            "Here are the realistic routes into the work you keep pointing at. Mark the ones you could see yourself doing."
           ],
           prompt: "Yes means \"I could start this within a year.\" No means \"not with my life as it stands.\"",
           rowHeader: "Route",
@@ -226,8 +226,8 @@ YNSActivity.define({
           eyebrow: "The routes",
           title: "There is more than one way in.",
           scene: [
-            "Almost everyone assumes the door they know about is the only door. Usually it is the slowest and most expensive one.",
-            "These are the realistic routes into the field your answers keep pointing at. Mark the ones you could see yourself doing, rather than the ones you think you should want."
+            "Many people assume the door they know about is the only door. Often it is the slowest and most expensive one.",
+            "These are the realistic routes into the field your answers keep pointing at. Mark the ones you could see yourself doing."
           ],
           prompt: "Yes means \"I could start this within a year.\" No means \"not with my life as it stands.\"",
           provenance: "These are the routes into the field your other answers keep pointing at.",
@@ -281,7 +281,7 @@ YNSActivity.define({
 
             if (picked) {
               out.push("You just marked <b>" + escHTML(picked.t) + "</b> as something you could " +
-                "start inside a year. So the question is no longer which route to take. It's what has " +
+                "start inside a year. So the next question is what has " +
                 "been keeping you from that one.");
             } else {
               out.push("None of those routes looked like something you could start inside a " +
@@ -366,13 +366,13 @@ YNSActivity.define({
         ? "You ruled one out."
         : "You ruled " + no.length + " out.";
       reading = "You left " + (unmarked === 1 ? "the other one" : "the other " + unmarked) +
-        " unmarked, so take this as one route ruled out rather than a verdict on the whole " +
-        "field. Ruling one out on purpose still helps, because it stops being a nagging maybe. " +
+        " unmarked, so this rules out one route and leaves the rest of the " +
+        "field open. Ruling one out on purpose still helps, because it stops being a nagging maybe. " +
         "Come back and mark the rest whenever you want.";
     } else {
       lead = "You closed all of them.";
       reading = "Sit with that for a minute. It means one of two things. Either the field is " +
-        "out of reach right now, and the honest next step is a different field. Or the routes " +
+        "out of reach right now, and one option is to look at a different field. Or the routes " +
         "as written don't match what you'd be willing to do. The second one is much easier to " +
         "fix.";
     }
@@ -408,7 +408,7 @@ YNSActivity.define({
           "</b>. Everything below is aimed at that and nothing else.</div>"
         : "") +
 
-      '<p class="ya-note"><b>Read the numbers as orientation, not as quotes.</b> These are typical ' +
+      '<p class="ya-note"><b>Use these numbers as a rough guide.</b> These are typical ' +
       "ranges for " + esc(catName(cat)) + ", and we wrote them. The pay figures elsewhere in " +
       "this product come from published government data. These don't. Cost and length vary a " +
       "lot by state and by provider. Funding you qualify for can bring the cost down to " +
@@ -421,7 +421,7 @@ YNSActivity.define({
     if (b === "money") {
       return [
         "Find out whether the route you'd pick has funding, a grant, or an employer who pays for it",
-        "Price the cheapest legitimate version of it, not the first one you found",
+        "Price the cheapest legitimate version of it, and compare a few",
         "Work out your monthly floor so the pay-cut question has a real number in it"
       ];
     }
@@ -441,13 +441,13 @@ YNSActivity.define({
     }
     if (b === "none") {
       return [
-        "Do the first ten minutes of it today. The form, the email, the enquiry",
-        "Put a date in the calendar for the application, not for thinking about it",
+        "Do the first ten minutes of it today. The form, the email, the inquiry",
+        "Put a date in the calendar for sending the application",
         "Tell one person you're doing it, out loud"
       ];
     }
     return [
-      "Spend twenty minutes on the provider's own website rather than on opinions about it",
+      "Spend twenty minutes on the provider's own website",
       "Find one person who took the route you'd pick and ask how it really went",
       "Write down what would have to change for the blocker to move"
     ];

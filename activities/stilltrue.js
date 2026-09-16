@@ -159,12 +159,12 @@ YNSActivity.define({
           eyebrow: "Since last time",
           title: "Did you do anything about it?",
           scene: [
-            "No judgment attached to any of these. \"Nothing\" is a common answer, and it still tells us something. Usually about the size of the step rather than about you."
+            "No judgment attached to any of these. \"Nothing\" is a common answer, and it still tells us something, usually about the size of the step."
           ],
           prompt: "Whichever is closest to the truth.",
           options: [
             { k: "researched", t: "I looked into it properly", s: "Reading, research, working out the real numbers.", echo: "I looked into it" },
-            { k: "talked",     t: "I talked to someone",       s: "The one that moves things most.",                  echo: "I talked to someone" },
+            { k: "talked",     t: "I talked to someone",       s: "Often the one that moves things most.",                  echo: "I talked to someone" },
             { k: "applied",    t: "I applied for something",   s: "A job, a course, a place.",                        echo: "I applied for something" },
             { k: "trained",    t: "I started training",        s: "Actually enrolled, and started.",                  echo: "I started training" },
             { k: "nothing",    t: "Nothing, really",           s: "Which usually means the first step was too big.",  echo: "nothing has happened yet" }
@@ -226,10 +226,10 @@ YNSActivity.define({
       : changed.length + (changed.length === 1 ? " thing has moved." : " things have moved.");
 
     var reading = changed.length === 0 && reviewed
-      ? "That's a real result rather than an empty one. A direction that survives a few months " +
+      ? "That's a real result. A direction that survives a few months " +
         "without you touching it is worth more than one you've only just written down."
       : changed.length
-      ? "Good, those are marked out of date now rather than quietly wrong, so nothing here will " +
+      ? "Good, those are marked out of date now, so nothing here will " +
         "keep steering you with them."
       : "Nothing marked either way, so nothing on your profile has changed. Come back when " +
         "something has shifted.";
@@ -252,10 +252,10 @@ YNSActivity.define({
       '<div class="ya-readout"><h3>What happened since</h3><p>' +
       (action === "nothing"
         ? "Nothing yet, and that is a common answer here. Usually it means the first step was " +
-          "too big rather than anything about how serious you were, which is why the thing at " +
+          "too big, which is why the thing at " +
           "the bottom of this page is small on purpose."
         : ACTION_WORDS[action]
-        ? "You said <b>" + esc(ACTION_WORDS[action]) + "</b>. That's more than most people manage " +
+        ? "You said <b>" + esc(ACTION_WORDS[action]) + "</b>. That's real progress " +
           "between one check-in and the next, and it's the part that builds on itself."
         : "You skipped that one, which is fine. The check-in still stands.") + "</p></div>" +
 
@@ -266,7 +266,7 @@ YNSActivity.define({
           "<p>Your profile confidence sits at <b>" + conf + "%</b>. It can go down, and this " +
           "activity is one of the things that can push it down. If an update contradicts what " +
           "came before, it means we know you less well than we thought. The number should say so " +
-          "instead of flattering us.</p></div>"
+          "even when that means going down.</p></div>"
         : "");
   },
 

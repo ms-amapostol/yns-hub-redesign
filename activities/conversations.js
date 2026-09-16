@@ -62,7 +62,7 @@ YNSActivity.define({
               "We're looking for the nearest human being to " +
               (n ? "<b>" + escHTML(n) + "</b>" : "the work you're thinking about") +
               ". They don't have to be a contact or a mentor, and you don't have to know them well.",
-              "Almost everyone says \u201cnobody\u201d at first. Almost everyone is wrong, once you widen it by one step."
+              "Many people say \u201cnobody\u201d at first. Widen it by one step and there\u2019s usually someone."
             ];
           },
           prompt: "Which of these exists for you?",
@@ -71,12 +71,12 @@ YNSActivity.define({
               s: "A friend, a relative, someone you used to work with.",
               echo: "I know someone who does it" },
             { k: "second", t: "Someone I know who knows someone",
-              s: "You'd be asking for an introduction, not for the conversation itself.",
+              s: "You'd be asking for an introduction first.",
               echo: "I know someone who knows them" },
             { k: "cold",   t: "Someone I've never met but could find",
               s: "A name on a company page, a person in a group, someone local.",
               echo: "I can find someone even if I don't know them" },
-            { k: "none",   t: "Genuinely nobody, and I don't know where to look",
+            { k: "none",   t: "Nobody yet, and I don't know where to look",
               s: "Then the first job is finding one name. There's a way to do that below.",
               echo: "I don't know where to look yet" }
           ]
@@ -100,8 +100,8 @@ YNSActivity.define({
             var n = catName(v);
             return [
               "You're asking someone in " + (n ? "<b>" + escHTML(n) + "</b>" : "that line of work") +
-              " for fifteen minutes of their opinion, which most people enjoy giving. You're not " +
-              "asking for a job, a favour, or half an hour of mentoring.",
+              " for fifteen minutes of their opinion, which many people enjoy giving. " +
+              "That's all you're asking for.",
               "Short is better. The version below is shorter than you think it should be, on purpose."
             ];
           },
@@ -133,7 +133,7 @@ YNSActivity.define({
             var n = catName(v);
             return [
               "You're asking someone in " + (n ? "<b>" + escHTML(n) + "</b>" : "that line of work") +
-              " for fifteen minutes of their opinion. You're not asking for a job or for mentoring.",
+              " for fifteen minutes of their opinion. That's all you're asking for.",
               "You've already written down why you're doing this. The version below leaves room for " +
               "one line of it. The real reason lands better than a formal one."
             ];
@@ -175,7 +175,7 @@ YNSActivity.define({
           scene: function (v) {
             var n = catName(v);
             return [
-              "Most of these chats get eaten by small talk and end with \u201cwell, good luck\u201d. " +
+              "A lot of these chats get eaten by small talk and end with \u201cwell, good luck\u201d. " +
               "One well-chosen question is worth the whole call.",
               "Pick the one that would tell you most about " +
               (n ? "<b>" + escHTML(n) + "</b>" : "the work") + "."
@@ -184,7 +184,7 @@ YNSActivity.define({
           prompt: "Which would tell you the most?",
           options: [
             { k: "badday", t: "\u201cWhat does a bad day look like?\u201d",
-              s: "Everyone tells you about the good ones unprompted. The bad ones are the information.",
+              s: "People often share the good days unprompted. The bad ones are the information.",
               echo: "I'll ask what a bad day looks like" },
             { k: "wish",   t: "\u201cWhat do you wish you'd known before you started?\u201d",
               s: "It invites the thing they're still slightly annoyed about, which is usually the useful part.",
@@ -193,7 +193,7 @@ YNSActivity.define({
               s: "The question that turns one conversation into three.",
               echo: "I'll ask who else to talk to" },
             { k: "again",  t: "\u201cIf you were starting today, would you do it again?\u201d",
-              s: "The bluntest question there is, and people answer it honestly more often than you'd expect.",
+              s: "The bluntest question there is, and people give a real answer more often than you'd expect.",
               echo: "I'll ask whether they'd do it again" }
           ]
         }
@@ -224,17 +224,17 @@ YNSActivity.define({
       : "You've got the message. The name is the missing piece.";
 
     var WHO = {
-      direct: "You already know someone who does this. The hard version of this activity is for " +
-              "people who don't, and you are not doing the hard version.",
+      direct: "You already know someone who does this. That makes this one easier: you can " +
+              "go straight to the message.",
       second: "One person in between is a useful distance. A shared connection means your " +
-              "message gets read, and asking for an introduction is a much smaller favour than " +
+              "message gets read, and asking for an introduction is a much smaller favor than " +
               "the conversation itself.",
-      cold:   "You don't know them yet, but you can find them. A short, specific message with no " +
-              "favour attached gets answered more often than people expect, mostly because almost " +
-              "nobody sends one.",
+      cold:   "You can find them. A short, specific message with no " +
+              "favor attached gets answered more often than people expect, partly because it " +
+              "stands out.",
       none:   "Then the first conversation is about finding the second. A trade body, a local " +
               "college's course page, a union hall, a group for people who do this work. Any of " +
-              "them will hand you a name inside an hour."
+              "them can usually point you to someone."
     };
     var whoNote = WHO[who] || "";
 
@@ -264,8 +264,8 @@ YNSActivity.define({
 
     return "<h1>" + esc(lead) + "</h1>" +
       '<p class="ya-result-lead">Fifteen minutes with someone who does this will tell you more ' +
-      "than any activity here, including this one. We don't say that to be modest. It's the " +
-      "difference between a model of the work and the work.</p>" +
+      "than any activity here, including this one. They know the work itself, and an activity " +
+      "can only show you a model of it.</p>" +
 
       draftBlock +
 
@@ -275,9 +275,9 @@ YNSActivity.define({
         ? '<div class="ya-quote">Your one question: <b>' + esc(ASK_WORDS[ask]) + "</b></div>"
         : "") +
 
-      '<div class="ya-readout"><h3>Two, not one</h3>' +
+      '<div class="ya-readout"><h3>Why two conversations</h3>' +
       "<p>One conversation is a one-off. Two starts to look like a pattern. The second is " +
-      "always easier, because the first person usually tells you who it should be.</p>" +
+      "often easier, because the first person usually tells you who it should be.</p>" +
       "<p>If the message sits in drafts for a week, send it anyway. The worst realistic outcome " +
       "is silence, and silence is where you are standing right now.</p></div>";
   },
@@ -291,7 +291,7 @@ YNSActivity.define({
       ];
     }
     return [
-      "Send the message today rather than tomorrow.",
+      "Send the message today.",
       "Write down the one question so you don't lose it in the small talk",
       "Ask whoever replies who else you should be speaking to"
     ];

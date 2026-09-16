@@ -4,14 +4,14 @@
    Door 5 · Make the plan. Module 6 (Building Your Legacy), app-ised.
    Source scripts: Module 4 #8 The Power of SMART Goals, #9 Applying
    SMART Goals; Module 6 Strategic Planning: Begin with the End in Mind.
-   The shape is the class's: pick one thing from the five-year vision,
+   The shape is the course's: pick one thing from the five-year vision,
    ask what has to be true in six months, then break the six months
    into months.
 
-   SMART is asked as five plain questions, each screen labelled with its
-   letter so the framework is learnable rather than invisible. The result
+   SMART is asked as five plain questions, each screen labeled with its
+   letter so the framework is learnable. The result
    screen shows the five parts back as a checked goal, and says which
-   part is thin when one is. The class's own instruction to work
+   part is thin when one is. The course's own instruction to work
    backwards from the finish line is what the month-by-month screen does.
 
    Outcome: "I have one goal for six months, and I know the first step
@@ -19,10 +19,9 @@
 
    Design notes:
 
-   * SMART is never named on screen. Each letter is a question a person
-     would ask anyway: what, how you'll know, whether it's doable, why it
-     matters, when. The acronym is jargon and the spec says no jargon in
-     a title.
+   * SMART is named and spelled out on the first screen, so people learn
+     it. Each letter is also a question a person would ask anyway: what,
+     how you'll know, whether it's doable, why it matters, when.
 
    * The goal is prefilled from what the profile already knows: the top
      category, the route from Three Doors, the why. Someone who has done
@@ -58,7 +57,7 @@ function monthCheck(months) {
   var ready = rows.filter(function (r) { return /ready/.test(r); }).length;
   return '<div class="ya-readout"><h3>The other months, checked</h3>' + rows.join("") +
     "<p>" + (ready === rows.length
-      ? "Every line has a number and a when. That is six SMART goals, not one."
+      ? "Every line has a number and a when. That makes six SMART goals."
       : ready + " of " + rows.length + " are ready. The rest will still work, they just cannot be judged at the end of the month, which is the part that keeps a plan honest.") +
     "</p></div>";
 }
@@ -90,7 +89,7 @@ YNSActivity.define({
           lead: function () { return "Today plus six months is " + inSixMonths() + ". This activity decides what will be different by then."; },
           body: [
             "One goal. Small enough that you can picture the day it's done. Big enough to matter.",
-            "Five questions, then the first step. The first step is the part that makes the rest true."
+            "Five questions, one for each letter of SMART: Specific, Measurable, Achievable, Relevant, Time-bound. Then the first step, which is the part that makes the rest true."
           ],
           cta: "Let's plan it"
         }
@@ -99,7 +98,7 @@ YNSActivity.define({
 
     /* ---------------------------------------------------------------
        2. The end in mind. One line of the five-year picture, so the
-       six-month goal has something to point at. The class's Module 1
+       six-month goal has something to point at. The course's
        vision board is the source if they did it; otherwise one sentence.
        --------------------------------------------------------------- */
     {
@@ -112,7 +111,7 @@ YNSActivity.define({
           eyebrow: "Begin with the end in mind",
           title: "Five years from now, what's one thing that's true about your life?",
           scene: [
-            "The class starts every plan here: picture the end, then work backward. One line is enough. If you made a vision board, pick one thing off it."
+            "Many plans start here: picture the end, then work backward. One line is enough. If you made a vision board, pick one thing off it."
           ],
           prompt: "Five years from now\u2026",
           placeholder: "Five years from now, I\u2026",
@@ -143,9 +142,9 @@ YNSActivity.define({
             var cat = v && v.derived && v.derived.top_category_label;
             return [
               (vis ? "\u201c" + vis + "\u201d That's the five-year picture. " : "") +
-              "The class's question is: what needs to happen in the next six months to move closer? " +
+              "The question is: what needs to happen in the next six months to move closer? " +
               (cat ? "You've been circling " + cat + ", if that helps. " : "") +
-              "Say it as something that will have happened. \u201cI've enrolled,\u201d rather than \u201cI'll look into enrolling.\u201d"
+              "Say it as something that will have happened, like \u201cI've enrolled.\u201d"
             ];
           },
           prompt: "One sentence. Past tense.",
@@ -206,14 +205,14 @@ YNSActivity.define({
           eyebrow: "A \u00b7 Achievable",
           title: "With the life you actually have, how likely is this in six months?",
           scene: [
-            "Your hours, your money, your people. The class's example: if you've got a C, aiming for a B+ first beats aiming for an A. Shrinking a goal is a good move."
+            "Your hours, your money, your people. A common example: if you've got a C, aiming for a B+ first beats aiming for an A. Shrinking a goal is a good move."
           ],
           prompt: "Your gut.",
           options: [
             { k: "likely",  t: "Likely, if I actually start",   s: "The size is right. The risk is the first week.", echo: "the size is right" },
             { k: "stretch", t: "A stretch, but possible",       s: "It'll take most of what I've got.", echo: "it's a stretch" },
-            { k: "big",     t: "Honestly, too big",             s: "Say so now and cut it in half. That's the whole point of asking.", echo: "it's too big" },
-            { k: "small",   t: "Too small. I could do more",    s: "Rare answer. Make it slightly bigger, not twice as big.", echo: "it's too small" }
+            { k: "big",     t: "Too big",             s: "Say so now and cut it in half. That's the whole point of asking.", echo: "it's too big" },
+            { k: "small",   t: "Too small. I could do more",    s: "Then make it a little bigger. One step up is plenty.", echo: "it's too small" }
           ]
         }
       ]
@@ -245,7 +244,7 @@ YNSActivity.define({
           title: "You've already written this part.",
           lead: function (v) { return "\u201c" + ((v && v.facts && v.facts.why_statement) || "") + "\u201d"; },
           body: ["That's your why, from Your Why. Hold this goal up against it. If they don't match, one of them needs changing, and it's usually the goal."],
-          provenance: "You've told us your why already, so this shows it instead of asking again.",
+          provenance: "You've told us your why already, so this shows it and skips the question.",
           cta: "They match"
         }
       ]
@@ -253,7 +252,7 @@ YNSActivity.define({
 
     /* ---------------------------------------------------------------
        6. Month one, written as a SMART goal rather than described as
-       one. The class teaches the framework; this is where someone
+       one. The course teaches the framework; this is where someone
        actually produces one. Assembled from four blanks so nobody has to
        hold five criteria in their head while writing a sentence.
        --------------------------------------------------------------- */
@@ -289,7 +288,7 @@ YNSActivity.define({
 
     /* ---------------------------------------------------------------
        7. The rest of the months, each to the same shape as month one.
-       The class works backwards from the finish line; the scaffold does
+       The course works backwards from the finish line; the scaffold does
        that for them, and the results screen checks each line for a
        number and a when rather than accepting a wish.
        --------------------------------------------------------------- */
@@ -303,7 +302,7 @@ YNSActivity.define({
           eyebrow: "The other five",
           title: "Now work backwards from month six.",
           scene: [
-            "The class does this with a home library: month six is three more books, month five is three before that. Yours can be exactly that plain.",
+            "Here's a simple example with a home library: month six is three more books, month five is three before that. Yours can be exactly that plain.",
             "Write each month the way you wrote month one. The five letters are what turn a line into something you can actually finish."
           ],
           prompt: "One line per month. Leave any of them blank for now.",
@@ -343,9 +342,9 @@ YNSActivity.define({
           optional: true,
           skipLabel: "I\u2019ll do the rest later",
           examples: [
-            "Month 2: sit the entrance test, book it by the 10th",
+            "Month 2: take the entrance test, book it by the 10th",
             "Month 3: save $300 toward the fee, $75 a week",
-            "Month 4: enrol, deposit paid by the 15th"
+            "Month 4: enroll, deposit paid by the 15th"
           ]
         }
       ]
@@ -371,17 +370,17 @@ YNSActivity.define({
       likely:  "You said the size is right. Then the only thing between you and it is the first week, and you've already written what that week holds.",
       stretch: "You said it's a stretch. Stretches are fine as long as the first step is small. Keep the goal, and keep the step tiny.",
       big:     "You said it's too big, which is the most useful thing anyone says on this screen. Come back in and cut it to the first half. A finished half beats an abandoned whole.",
-      small:   "You said you could do more. Add one thing to it, not three."
+      small:   "You said you could do more. Add one thing to it. One is plenty."
     };
 
     /* The five parts, back as a check. Naming a thin one is more use
        than a tick for every box. */
     var parts = [
-      { L:"S", t:"Specific",    v:goal,    hint:"Say the thing itself, not the area it's in." },
+      { L:"S", t:"Specific",    v:goal,    hint:"Say the exact thing you'll do." },
       { L:"M", t:"Measurable",  v:measure, hint:"Something a person could check on the last day." },
       { L:"A", t:"Achievable",  v:conf,    hint:"Right size for the life you actually have." },
       { L:"R", t:"Relevant",    v:why,     hint:"Tied to why you're doing any of this." },
-      { L:"T", t:"Time-bound",  v:first,   hint:"Month one needs a by-when, not just a direction." }
+      { L:"T", t:"Time-bound",  v:first,   hint:"Month one needs a by-when." }
     ];
     var thin = parts.filter(function(p){ return !p.v; });
     var check = '<div class="ya-readout"><h3>Your goal, checked</h3>' +
@@ -390,7 +389,7 @@ YNSActivity.define({
       }).join("") +
       (thin.length
         ? "<p>" + (thin.length === 1 ? "One part" : thin.length + " parts") + " could be sharper. A goal missing its M is the one that quietly never gets judged, and a goal missing its T is the one that never starts.</p>"
-        : "<p>All five parts are there. That is a SMART goal, and most people never write one down.</p>") +
+        : "<p>All five parts are there. That is a SMART goal, written down.</p>") +
       "</div>";
 
     return "<h1>Your six months, written down.</h1>" +
@@ -405,7 +404,7 @@ YNSActivity.define({
       monthCheck(months) +
       check +
       (CONF[conf] ? '<p class="ya-result-lead">' + esc(CONF[conf]) + "</p>" : "") +
-      '<p class="ya-result-lead">When the six months are up, the class says to rinse and repeat: pick the next six-month piece of the same five-year picture. In a month, you\u2019ll see a reminder here to check in with Still True? Say what changed. Plans that get checked are the ones that happen.</p>';
+      '<p class="ya-result-lead">When the six months are up, a common next step is to rinse and repeat: pick the next six-month piece of the same five-year picture. In a month, you\u2019ll see a reminder here to check in with Still True? Say what changed. Plans that get checked are the ones that happen.</p>';
   },
 
   /* Each month line gets the same two questions asked of it: is there a

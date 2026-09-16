@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Questrial&display=swap">
-<link rel="stylesheet" href="css/hub.css?v=21">
+<link rel="stylesheet" href="css/hub.css?v=22">
 </head>
 <body>
 <div class="wrap">
@@ -16,7 +16,7 @@
     <a class="brand" href="#" aria-label="Your Next Step">
       <img src="assets/yns-lockup.svg" alt="Your Next Step" class="brand-lockup">
     </a>
-    <div class="acct"><button class="planner-btn" id="portfolioBtn" onclick="YNS.profile()">Portfolio</button><button class="planner-btn" id="plannerBtn" onclick="YNS.planner()">Planner</button><span class="chip" id="youChip">Not signed in</span><a href="#" onclick="YNS.signup();return false">Sign in or join free</a></div>
+    <div class="acct"><button class="planner-btn" id="portfolioBtn" onclick="YNS.profile()">Portfolio</button><button class="planner-btn" id="plannerBtn" onclick="YNS.planner()">Planner</button><span class="chip" id="youChip">Not signed in</span><a href="#" onclick="YNS.signup('top_bar');return false">Sign in or join free</a></div>
   </div>
 
   <div class="demo" id="demoStrip">
@@ -27,7 +27,7 @@
     <button class="lnk" onclick="YNS.skipAhead(7)">Skip ahead a week</button>
     <button class="lnk" onclick="YNS.skipAhead(28)">Skip ahead a month</button>
     <button class="lnk" onclick="document.getElementById('demoStrip').remove()">Hide this bar</button>
-    <span class="small" style="margin-left:auto">build v21</span>
+    <span class="small" style="margin-left:auto">build v22</span>
   </div>
 
   <!-- ============================================================
@@ -149,31 +149,31 @@
 <div class="toast" id="toast"></div>
 <div id="srStatus" role="status" class="sr-only"></div>
 
-<script src="vendor/yns-taxonomy.js?v=21"></script>
+<script src="vendor/yns-taxonomy.js?v=22"></script>
 <script>/* real wage bands, used by the interest profiler results */fetch("data/roles.json").then(function(r){return r.json();}).then(function(d){window.YNS_ROLES=d;}).catch(function(){});</script>
-<script src="vendor/quiz-shared.js?v=21"></script>
-<script>/* load the real wage bands into Quiz, so rolesFor() uses them */if (window.Quiz && Quiz.init) { try { Quiz.init("hub", { chrome: false }); } catch (e) {} }</script>
-<script src="js/mock-runtime.js?v=21"></script>
-<script src="activities/interests.js?v=21"></script>
-<script src="activities/able.js?v=21"></script>
-<script src="activities/budget0.js?v=21"></script>
-<script src="activities/compound.js?v=21"></script>
-<script src="activities/invest.js?v=21"></script>
-<script src="activities/retire.js?v=21"></script>
-<script src="activities/taxes.js?v=21"></script>
-<script src="activities/why.js?v=21"></script>
-<script src="activities/proof.js?v=21"></script>
-<script src="activities/hours168.js?v=21"></script>
-<script src="activities/constraints.js?v=21"></script>
-<script src="activities/floor.js?v=21"></script>
-<script src="activities/doors.js?v=21"></script>
-<script src="activities/conversations.js?v=21"></script>
-<script src="activities/premortem.js?v=21"></script>
-<script src="activities/stilltrue.js?v=21"></script>
-<script src="activities/grit.js?v=21"></script>
-<script src="activities/bounce.js?v=21"></script>
-<script src="activities/money101.js?v=21"></script>
-<script src="activities/smart6.js?v=21"></script>
-<script src="js/hub.js?v=21"></script>
+<script src="vendor/quiz-shared.js?v=22"></script>
+<script>/* load the real wage bands into Quiz, so rolesFor() uses them. The hub is not an activity, so no start event. */if (window.Quiz && Quiz.init) { try { Quiz.init("hub", { chrome: false, track: false }); } catch (e) {} }</script>
+<script src="js/mock-runtime.js?v=22"></script>
+<script src="activities/interests.js?v=22"></script>
+<script src="activities/able.js?v=22"></script>
+<script src="activities/budget0.js?v=22"></script>
+<script src="activities/compound.js?v=22"></script>
+<script src="activities/invest.js?v=22"></script>
+<script src="activities/retire.js?v=22"></script>
+<script src="activities/taxes.js?v=22"></script>
+<script src="activities/why.js?v=22"></script>
+<script src="activities/proof.js?v=22"></script>
+<script src="activities/hours168.js?v=22"></script>
+<script src="activities/constraints.js?v=22"></script>
+<script src="activities/floor.js?v=22"></script>
+<script src="activities/doors.js?v=22"></script>
+<script src="activities/conversations.js?v=22"></script>
+<script src="activities/premortem.js?v=22"></script>
+<script src="activities/stilltrue.js?v=22"></script>
+<script src="activities/grit.js?v=22"></script>
+<script src="activities/bounce.js?v=22"></script>
+<script src="activities/money101.js?v=22"></script>
+<script src="activities/smart6.js?v=22"></script>
+<script src="js/hub.js?v=22"></script>
 </body>
 </html>

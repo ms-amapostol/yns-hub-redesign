@@ -4,7 +4,7 @@
    Door 4 · Mindset and money. Module 4 (Mighty Mindset), app-ised.
    Source scripts: #12 Developing a Solutions-First Mindset (ABLE), and
    "Using the ABLE Framework in Everyday Challenges". The middle of this
-   activity is the class's ABLE framework, walked once on a real problem
+   activity is the course's ABLE framework, walked once on a real problem
    so that the note to future you has a method inside it.
 
    Outcome: "I have a written plan for the bad week, made on a good one."
@@ -78,10 +78,10 @@ YNSActivity.define({
           mechanic: "learn",
           eyebrow: "Eight minutes",
           title: "There will be a week you want to quit.",
-          lead: "Everyone who changes something has one. The people who get through it usually decided what to do before it arrived.",
+          lead: "Many people who change something have one. The people who get through it usually decided what to do before it arrived.",
           body: [
             "Right now you can think clearly. On the hard week you won't be able to. So this activity writes the plan now and hands it to future you.",
-            "You'll name your warning sign, pick one person, walk one real problem through the class's ABLE method, and write a short note to future you."
+            "You'll name your warning sign, pick one person, walk one real problem through four steps called ABLE (Assess, Brainstorm, List, Execute), and write a short note to future you."
           ],
           cta: "Let's write it"
         }
@@ -101,12 +101,12 @@ YNSActivity.define({
           eyebrow: "The warning sign",
           title: "How do you usually know a hard week has started?",
           scene: [
-            "Most people have a tell. Naming it means you'll notice it a day or two earlier next time."
+            "Many people have a tell. Naming it means you'll notice it a day or two earlier next time."
           ],
           prompt: "The most familiar one.",
           options: [
             { k: "avoid",  t: "I stop opening the thing",           s: "The app, the email, the book. It sits unopened.", echo: "you stop opening it" },
-            { k: "tired",  t: "I'm tired in a way sleep doesn't fix", s: "Flat, not just sleepy.", echo: "you go flat" },
+            { k: "tired",  t: "I'm tired in a way sleep doesn't fix", s: "Flat, and more than sleepy.", echo: "you go flat" },
             { k: "doubt",  t: "I start rewriting the whole plan",     s: "Suddenly the entire direction feels wrong.", echo: "you start doubting the plan" },
             { k: "snap",   t: "I get short with people",             s: "Small things land harder than they should.", echo: "you get short with people" },
             { k: "hide",   t: "I go quiet",                          s: "Fewer replies, fewer plans, fewer people.", echo: "you go quiet" }
@@ -156,7 +156,7 @@ YNSActivity.define({
           eyebrow: "A · Assess",
           title: "What's one problem that's in your way right now?",
           scene: [
-            "The class calls this a solutions-first mindset. It starts with one belief: every problem has a solution, so the question changes from \u201cwhy me\u201d to \u201chow do I solve this.\u201d",
+            "This is called a solutions-first mindset. It starts with one belief: every problem has a solution, so the question changes from \u201cwhy me\u201d to \u201chow do I solve this.\u201d",
             "Pick a real one. Small is fine."
           ],
           prompt: "The problem, in one line.",
@@ -223,7 +223,7 @@ YNSActivity.define({
             var items = optionList((v && v.extra && v.extra.able_b_text) || (v && v.facts && v.facts.able_options));
             return (items.length
               ? ["Your list:<br>" + items.map(function (t, n) { return (n + 1) + ". " + escHTML(t); }).join("<br>")]
-              : []).concat(["The class says list them from most to least realistic and start at the top. You only need the top one."]);
+              : []).concat(["A common rule of thumb: list them from most to least realistic and start at the top. You only need the top one."]);
           },
           prompt: "Your top one.",
           options: [
@@ -244,7 +244,7 @@ YNSActivity.define({
           mechanic: "text",
           eyebrow: "E · Execute",
           title: "What's the first ten minutes of that?",
-          scene: ["Execute, learn, adjust. You don't need the whole solution. You need the first ten minutes, and a day this week to do them."],
+          scene: ["Execute, learn, adjust. All you need is the first ten minutes, and a day this week to do them."],
           prompt: "This week I'll\u2026",
           placeholder: "On [day] I'll\u2026",
           rows: 3, maxLength: 200, cta: "That's the first step", optional: true

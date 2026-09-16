@@ -522,7 +522,7 @@ M.calc = function(r){
   var h = prompt(r)+'<div class="am-build">'+r.inputs.map(function(i){
     return '<div class="am-row"><div><strong>'+esc(i.t)+'</strong>'+(i.s?'<span>'+esc(i.s)+'</span>':'')+'</div>'
       +'<div class="am-step"><button type="button" onclick="YNSMock.calcBump(\''+i.k+'\',-'+i.step+')" aria-label="Less for '+esc(i.t)+'">\u2212</button>'
-      +'<span class="am-money">'+(i.prefix?'<i>'+i.prefix+'</i>':'')+'<input type="text" inputmode="numeric" value="'+v[i.k]+'" data-c="'+i.k+'" aria-label="'+esc(i.t)+'" aria-describedby="cap-c-'+i.k+'" oninput="YNSMock.calcType(this)" onblur="YNSMock.capBlur(this)">'+(i.suffix?'<i>'+i.suffix+'</i>':'')+'</span>'
+      +'<span class="am-money">'+(i.prefix?'<i>'+i.prefix+'</i>':'')+'<input type="text" inputmode="'+(i.suffix==="%"?"decimal":"numeric")+'" value="'+v[i.k]+'" data-c="'+i.k+'" aria-label="'+esc(i.t)+'" aria-describedby="cap-c-'+i.k+'" oninput="YNSMock.calcType(this)" onblur="YNSMock.capBlur(this)">'+(i.suffix?'<i>'+i.suffix+'</i>':'')+'</span>'
       +'<button type="button" onclick="YNSMock.calcBump(\''+i.k+'\','+i.step+')" aria-label="More for '+esc(i.t)+'">+</button></div>'
       +'<p class="am-cap" id="cap-c-'+i.k+'" hidden></p></div>';
   }).join("")+'</div>'
@@ -561,14 +561,14 @@ function calcHTML(res,v,mode){
   if (mode==="net"){
     return '<div class="calc-big">$'+Math.round(res.netMonth).toLocaleString("en-US")+' a month</div>'
       +'<p class="calc-sub">lands in your account, from $'+Math.round(v.salary||0).toLocaleString("en-US")+' a year on the offer</p>'
-      +'<p class="calc-late">About $'+Math.round(res.outYear).toLocaleString("en-US")+' a year comes out across tax, FICA and anything you chose. Rule of thumb, not your actual withholding.</p>';
+      +'<p class="calc-late">About $'+Math.round(res.outYear).toLocaleString("en-US")+' a year comes out across tax, FICA and anything you chose. This is a rule of thumb. Your own withholding may be different.</p>';
   }
   var pct = res.end ? Math.min(100, Math.round(res.paid/res.end*100)) : 0;
   return '<div class="calc-big">$'+Math.round(res.end).toLocaleString("en-US")+'</div>'
     +'<p class="calc-sub">after '+(v.years||0)+' years, from $'+(v.monthly||0)+' a month</p>'
     +'<div class="calc-bar"><i style="width:'+pct+'%"></i></div>'
     +'<p class="calc-key"><span class="k1"></span>$'+Math.round(res.paid).toLocaleString("en-US")+' you put in &nbsp; <span class="k2"></span>$'+Math.round(res.growth).toLocaleString("en-US")+' growth</p>'
-    +'<p class="calc-late">Start ten years later instead and the same amount reaches $'+Math.round(res.late).toLocaleString("en-US")+'.</p>';
+    +'<p class="calc-late">Start ten years later and the same amount reaches $'+Math.round(res.late).toLocaleString("en-US")+'.</p>';
 }
 function refreshCalc(){
   var r=cur().rung, v=run.ui.calc, out=host.querySelector("#calcOut");
@@ -585,7 +585,7 @@ function calcType(input){
 }
 function calcBump(k,d){
   var i=cur().rung.inputs.filter(function(x){return x.k===k;})[0];
-  var n=(run.ui.calc[k]||0)+d; if(n<0)n=0; if(i&&i.max&&n>i.max)n=i.max;
+  var n=Math.round(((run.ui.calc[k]||0)+d)*100)/100; if(n<0)n=0; if(i&&i.max&&n>i.max)n=i.max;
   run.ui.calc[k]=n; showCap("cap-c-"+k, null);
   var input=host.querySelector('input[data-c="'+k+'"]'); if (input) input.value=n;
   refreshCalc();
@@ -645,12 +645,14 @@ function finish(el){
      date, so it exists somewhere other than that one screen. */
   if (el){
     var text=el.textContent.trim();
-    facts.steps_open = (facts.steps_open||[]).filter(function(x){ return x.text!==text; });
+    facts.steps_open = (facts.steps_open||[]).filter(function(x){ return !(x.text===text && x.slug===slug); });
     var at=(global.YNS && global.YNS.now) ? global.YNS.now() : Date.now();
     facts.steps_open.push({ id: slug+"-"+Date.now(), slug: slug, text: text, from: (DEFS[slug]||{}).title || slug, at: at, done: false });
   } if (el) facts.next_action=el.textContent.trim(); facts.activities_completed=(facts.activities_completed||[]).concat([slug]);
   delete unfinished[slug];
-  var info=closeRun(true); hooks.onDone(slug); tellHub(info); }
+  var info=closeRun(true); hooks.onDone(slug);
+  if (el){ try { if (global.YNS && global.YNS.track) global.YNS.track("seven_days_pick", { slug: slug }); } catch(e){} }
+  tellHub(info); }
 
 /* ---------- the shared panel: focus, name, Escape -------------------
    #actModal is used by these activities and by the hub's own panels
@@ -671,7 +673,21 @@ function watchModal(){
   function page(){ return document.querySelector(".wrap"); }
   function shown(){ return !!m.style.display && m.style.display!=="none"; }
   function visible(el){ return !!(el && el.isConnected && (el.offsetWidth || el.offsetHeight || el.getClientRects().length)); }
-  function focusables(){ return Array.prototype.filter.call(m.querySelectorAll(FOCUSABLE), function(el){ return visible(el) && !el.closest("[hidden]"); }); }
+  function focusables(){ return Array.prototype.filter.call(m.querySelectorAll(FOCUSABLE), function(el){ return visible(el) && !el.closest("[hidden]") && !el.hasAttribute("data-trap"); }); }
+  /* A last stop at the end of the panel. Tabbing out of the end of a
+     framed app happens inside the frame, where this page can't see the
+     key, and would otherwise drop focus on <body>. It lands here instead
+     and goes back to the top of the panel. */
+  function ensureTrap(){
+    var t=m.querySelector("[data-trap]");
+    if (t && t===m.lastElementChild) return;
+    if (t) t.remove();
+    t=document.createElement("span");
+    t.setAttribute("data-trap","end"); t.setAttribute("tabindex","0"); t.setAttribute("aria-hidden","true");
+    t.style.cssText="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap";
+    t.addEventListener("focus", function(){ focusEdge(false); });
+    m.appendChild(t);
+  }
   function name(){
     var h=m.querySelector("h1,h2"), t=h || m.querySelector(".am-eyebrow");
     if (!t){ m.removeAttribute("aria-labelledby"); return null; }
@@ -680,10 +696,17 @@ function watchModal(){
     if (h && !h.hasAttribute("tabindex")) h.setAttribute("tabindex","-1");
     return h;
   }
+  /* A framed app gets focus itself, so its own keys (Escape included)
+     reach it. Everything else starts at its heading. */
   function focusIn(){
-    var h=name();
-    var target = h || m.querySelector("iframe") || focusables()[0];
+    var h=name(), frame=m.querySelector("iframe");
+    var target = frame || h || focusables()[0];
     if (target){ try { target.focus({ preventScroll:true }); } catch(e){ target.focus(); } }
+  }
+  function focusEdge(back){
+    var f=focusables(); if (!f.length){ focusIn(); return; }
+    var el=back ? f[f.length-1] : f[0];
+    try { el.focus({ preventScroll:true }); } catch(e){ el.focus(); }
   }
   function signature(el){ return { tag:el.tagName, id:el.id, cls:el.className, text:(el.textContent||"").trim().slice(0,120), oc:el.getAttribute("onclick") }; }
   function findLike(s){
@@ -704,6 +727,7 @@ function watchModal(){
   }
   function sync(){
     var open=shown(), active=document.activeElement;
+    if (open && m.firstElementChild && !m.firstElementChild.hasAttribute("data-trap")) ensureTrap();
     if (open && !isOpen){
       isOpen=true;
       opener = (active && active!==document.body && !m.contains(active)) ? active : null;
@@ -725,6 +749,17 @@ function watchModal(){
     }
   }
   new MutationObserver(sync).observe(m, { attributes:true, attributeFilter:["style"], childList:true });
+  /* Focus that escapes the panel while it is open (for example by
+     tabbing out of the end of a framed app) comes back to it. The
+     check-in pop-up sits outside the panel and is allowed. */
+  document.addEventListener("focusin", function(e){
+    if (!isOpen || !shown()) return;
+    var t=e.target;
+    if (!t || m.contains(t)) return;
+    var ci=document.getElementById("checkin");
+    if (ci && ci.contains(t)) return;
+    focusEdge(false);
+  });
   document.addEventListener("keydown", function(e){
     if (!isOpen || !shown()) return;
     if (e.defaultPrevented) return;
@@ -741,7 +776,16 @@ function watchModal(){
     if (e.key==="Tab"){
       var f=focusables(); if (!f.length){ e.preventDefault(); return; }
       var first=f[0], last=f[f.length-1], a=document.activeElement;
-      if (!m.contains(a)){ e.preventDefault(); (e.shiftKey?last:first).focus(); }
+      /* Focus on <body> (after a repaint, or after tabbing out of a
+         framed app) or anywhere outside the panel: start from the edge. */
+      var outside = !a || a===document.body || a===document.documentElement || !m.contains(a);
+      if (outside){ e.preventDefault(); focusEdge(e.shiftKey); }
+      else if (f.indexOf(a)<0){
+        /* On the heading or another non-tabbable spot: if nothing
+           tabbable lies ahead in that direction, wrap. */
+        var ahead=f.filter(function(x){ var pos=a.compareDocumentPosition(x); return e.shiftKey ? (pos & Node.DOCUMENT_POSITION_PRECEDING) : (pos & Node.DOCUMENT_POSITION_FOLLOWING); });
+        if (!ahead.length){ e.preventDefault(); focusEdge(e.shiftKey); }
+      }
       else if (e.shiftKey && a===first){ e.preventDefault(); last.focus(); }
       else if (!e.shiftKey && a===last){ e.preventDefault(); first.focus(); }
     }

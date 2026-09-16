@@ -136,8 +136,8 @@
 <script src="yns-config.js?v=3ceff94a"></script>
 <script src="yns-supabase.js?v=d872a971"></script>
 <script src="yns-taxonomy.js?v=4bb570b3"></script>
-<script src="yns-profile.js?v=a23328d5"></script>
-<script src="quiz-shared.js?v=ee3e8651"></script>
+<script src="yns-profile.js?v=17ae72a5"></script>
+<script src="quiz-shared.js?v=77c966fb"></script>
 <script>
 if(!window.Quiz){
   document.getElementById('app').innerHTML =
@@ -171,7 +171,7 @@ const BEATS = [
 {
   id:"wake", eyebrow:"Chapter One", title:"Eighteen months from now.",
   scene:[
-    "You wake up before your alarm, and not because you're anxious. Because you're <em>ready</em>.",
+    "You wake up before your alarm, and you feel <em>ready</em>.",
     "Something changed this year. You can't quite point to the day it happened, but the version of you lying here is not the version who took a career quiz on " + whenPhrase() + ".",
     "You open your eyes. Where are you?"
   ],
@@ -234,15 +234,15 @@ const BEATS = [
      s:"Analysis later. Something needs to work again in the next twenty minutes.",
      echo:"you move first and think while moving", a:{hands:3, making:1}},
     {t:"Rethink the whole approach, because this was going to break eventually",
-     s:"You're not interested in patching it. You want to redesign it.",
-     echo:"you'd rather redesign than patch", a:{making:2, analysis:2, order:1}}
+     s:"You want to redesign it from the ground up.",
+     echo:"you go for the redesign", a:{making:2, analysis:2, order:1}}
   ]
 },
 {
   id:"offers", eyebrow:"Chapter Four", title:"Two envelopes.",
   scene:[
     "That afternoon, two offers land. Same start date. You have to pick one and you can't negotiate.",
-    "Read them fast and go with your stomach, not your spreadsheet."
+    "Read them fast and go with your gut."
   ],
   prompt:"", type:"offers",
   options:[
@@ -532,6 +532,33 @@ READY.then(function(){
   offerResume();
   render();
 });
+</script>
+<script>/* N9: key events don't cross the hub's iframe, so Escape here asks the
+   hub to close this activity, the same message the "Back to your hub"
+   buttons send. Skipped while this page's own dialog is open: that
+   dialog's Escape closes only the dialog. */
+(function(){try{
+  if (window.parent === window) return;
+  var SEL = '[role="dialog"],[aria-modal="true"],dialog[open],.modal,.modal-scrim,.yns-scrim,.front';
+  var dialogWasOpen = false;
+  function dialogOpen(){
+    var list = document.querySelectorAll(SEL);
+    for (var i = 0; i < list.length; i++) {
+      var n = list[i];
+      if (n.hidden || (n.tagName === "DIALOG" && !n.open)) continue;
+      if (n.getClientRects().length) return true;
+    }
+    return false;
+  }
+  function isEsc(e){ return (e.key === "Escape" || e.key === "Esc") && !e.isComposing; }
+  /* Window capture runs before any handler on the page, so this sees the
+     dialog before its own Escape handler removes it. */
+  window.addEventListener("keydown", function(e){ if (isEsc(e)) { try { dialogWasOpen = dialogOpen(); } catch (_) { dialogWasOpen = true; } } }, true);
+  window.addEventListener("keydown", function(e){
+    if (!isEsc(e) || dialogWasOpen || e.defaultPrevented) return;
+    try { window.parent.postMessage({ yns: "close" }, "*"); } catch (_) {}
+  });
+}catch(e){}})();
 </script>
 <script>/* review-build bridge: tell the hub when a run is saved */(function(){try{var o=localStorage.setItem.bind(localStorage);localStorage.setItem=function(k,v){o(k,v);if(k==="yns_pending_runs"&&window.parent!==window)window.parent.postMessage({yns:"run",key:k},"*");};}catch(e){}})();</script>
 </body>

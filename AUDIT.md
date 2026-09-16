@@ -1,5 +1,31 @@
 # Your Next Step hub — audit
 
+## Update, build v22 (September 16, 2026)
+
+**Verdict: Anastasia's approved copy and product calls are built, and the full suite passes.** All 26 activities were played on desktop and on phone with no errors, and the Career ABCs resume test passes 11 of 11 bullets.
+
+**What changed:**
+- **Money screens only describe the options.** 7% is the one long-run return everywhere, labeled as an assumption. Match math notes the dollar-for-dollar assumption. Paycheck withholding is "often 15–30%", with a 20% default. Savings examples use September 2026 rates: FDIC national average 0.38%, 12-month CD 1.71%, top high-yield accounts about 3.4–4.2%.
+- **Voice:** "genuinely" and "honestly" are removed, spelling is US, and the remaining contrast lines are rewritten. "The class" and "Module N, videos…" are gone.
+- **SMART and ABLE stay visible,** and each is spelled out where it first appears.
+- **The privacy sentence is now the same in both places:** "We use your email to sign you in and save your work. If we ever work with schools, programs or employers, we'll ask you first, every time." The same sentence needs to go into the privacy policy on Wix.
+- **The AI coach is a free-account perk.** The Career ABCs lines that said it needs no account are reworded.
+- **The Career ABCs model answers have named speakers.**
+- **Funnel tracking is built in as a hook.** `YNS.track` records 14 events. Nothing is sent anywhere until Delante defines `window.YNS_TRACK` (see `docs/analytics-events.md`).
+- **Bugs fixed:**
+  - Escape now closes the embedded apps.
+  - Career ABCs asks once to confirm when the hub's experience answer changes.
+  - Two activities offering the same weekly step now keep both.
+  - Percentage fields show a decimal keypad on phones.
+
+**Still open:**
+- **Tone lines:** Anastasia is reviewing them in `tone-review.md`, which isn't in the repo.
+- **Small tap targets:** the Planner tick box, the money steppers, and "Not for me right now".
+- **Two missing files:** `yns-ga.js` and `/api/coach-status`.
+- **Two moderate axe notes:** region and heading-order.
+
+---
+
 ## Update, build v21 (September 16, 2026)
 
 **Verdict: every mechanical problem from the v20 audit is fixed and re-tested, and the app is ready for real people.** All 26 activities play to a result with no errors: 104 of 104 runs, covering two intake variants, each on desktop and on a 390px phone. No High issues remain in function, consistency or accessibility. What's left is copy. It's listed at the end of this update for Anastasia to decide on.

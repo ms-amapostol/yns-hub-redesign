@@ -8,7 +8,7 @@
 
    Design notes:
 
-   * Zero-based is the class's method and it is the right one to teach,
+   * Zero-based is the course's method and it is the right one to teach,
      because it answers the question people actually have, which is not
      "where did it go" but "what am I allowed to spend".
 
@@ -32,7 +32,7 @@ var ROWS = [
   { k: "rent",     t: "Rent or mortgage",        s: "Your share of it", group: "Have to" },
   { k: "utility",  t: "Utilities",               s: "Power, water, internet", group: "Have to" },
   { k: "phone",    t: "Phone",                   s: "", group: "Have to" },
-  { k: "food",     t: "Groceries",               s: "The shop, not eating out", group: "Have to" },
+  { k: "food",     t: "Groceries",               s: "The grocery run. Eating out goes under Fun", group: "Have to" },
   { k: "transit",  t: "Getting around",          s: "Car payment, gas, insurance, fares", group: "Have to" },
   { k: "debt",     t: "Debt payments",           s: "The minimums", group: "Have to" },
   { k: "care",     t: "People who depend on you", s: "Childcare, money you send home", group: "Have to" },
@@ -56,9 +56,9 @@ function savingsRead(savings, income, alloc) {
 
   if (!savings) {
     return '<div class="ya-readout"><h3>The line worth adding</h3>' +
-      "<p>Savings came out at zero this month. That is where a lot of budgets start and it is not a failure, though it is the one line worth fighting for. " +
-      "Twenty dollars a month is $240 a year, and more importantly it is the month you stop being one flat tyre away from a crisis.</p>" +
-      "<p>Try moving $20 out of the fun line and see whether the month still works. It usually does.</p></div>";
+      "<p>Savings came out at zero this month. That is where a lot of budgets start, and it\u2019s a line worth fighting for. " +
+      "Twenty dollars a month is $240 a year, and more importantly it is the month you stop being one flat tire away from a crisis.</p>" +
+      "<p>Some people move $20 out of the fun line to see whether the month still works.</p></div>";
   }
 
   /* Twenty years at 7% a year, compounded monthly. Same assumption, and
@@ -67,13 +67,13 @@ function savingsRead(savings, income, alloc) {
   for (var i = 0; i < 240; i++) bal = (bal + savings) * (1 + r);
 
   return '<div class="ya-readout"><h3>What you\u2019re keeping</h3>' +
-    "<p>" + money(savings) + " a month is going to you rather than to someone else" +
+    "<p>" + money(savings) + " a month is going to you" +
     (rate ? ", which is about " + rate + "% of what comes in" : "") + ". " +
-    "Kept up for twenty years at a 7% average return, that is roughly <b>" + money(bal) + "</b>. " +
-    "That rate is an assumption rather than a promise, and What Money Does Over Time lets you change it.</p>" +
+    "If this were invested and averaged 7% a year (an assumption; a savings account usually earns less), in twenty years it would be about <b>" + money(bal) + "</b>. " +
+    "7% is based on past stock market returns before inflation. What Money Does Over Time lets you change the rate.</p>" +
     (buffer
       ? "<p>You also set aside " + money(buffer) + " for surprises. That is the line that stops one bad week turning into debt, and it is doing more work than it looks like.</p>"
-      : "<p>One thing missing: a surprise fund. Even $25 a month builds the buffer that stops a flat tyre becoming a credit card balance.</p>") +
+      : "<p>One thing missing: a surprise fund. Even $25 a month builds the buffer that stops a flat tire becoming a credit card balance.</p>") +
     "</div>";
 }
 
@@ -93,14 +93,14 @@ YNSActivity.define({
         {
           mechanic: "learn",
           eyebrow: "Twelve minutes",
-          title: "A budget is not a list of what you spent.",
-          lead: "It\u2019s a decision, made in advance, about where the money goes. The class calls it zero-based: what comes in, minus everything you\u2019ve given a job, equals zero.",
+          title: "A budget is a plan for where the money goes.",
+          lead: "You make it in advance. This kind is called zero-based: what comes in, minus everything you\u2019ve given a job, equals zero.",
           points: [
-            "<b>Zero doesn\u2019t mean broke.</b> It means nothing is unassigned. Savings is a job. Fun is a job.",
-            "<b>Money with no job gets spent on whatever is loudest.</b> That\u2019s the whole reason to do this before the month rather than after.",
-            "<b>You\u2019ll take it with you.</b> At the end there\u2019s a spreadsheet to download, so this can be a habit rather than a one-off."
+            "<b>Zero means every dollar has a job.</b> Savings is a job. Fun is a job.",
+            "<b>Money with no job gets spent on whatever is loudest.</b> That\u2019s the whole reason to plan before the month starts.",
+            "<b>You\u2019ll take it with you.</b> At the end there\u2019s a spreadsheet to download, so this can become a habit."
           ],
-          note: "Managing money is mostly managing your behaviour around money. If you\u2019ve done Money, Plainly or The Floor, your numbers are already filled in.",
+          note: "Managing money is mostly managing your behavior around money. If you\u2019ve done Money, Plainly or The Floor, your numbers are already filled in.",
           cta: "Let\u2019s build it"
         }
       ]
@@ -121,7 +121,7 @@ YNSActivity.define({
           eyebrow: "What comes in",
           title: "Start with the money that actually lands.",
           scene: [
-            "After tax, in a normal month. If it moves around, use a month you\u2019d call ordinary rather than your best one."
+            "After tax, in a normal month. If it moves around, use a month you\u2019d call ordinary."
           ],
           totalLabel: "a month, to give jobs to",
           rows: [
@@ -168,7 +168,7 @@ YNSActivity.define({
           scene: function (v) {
             var inc = v && v.facts && v.facts.money_in;
             return [
-              "This is the one habit that separates people whose money situation improves from people whose doesn\u2019t, and it has almost nothing to do with how much they earn.",
+              "Deciding what you keep before you spend is a habit many budgets start with.",
               inc ? "Of the " + money(inc) + " coming in, how much goes to you first?" : "How much goes to you first?"
             ];
           },
@@ -176,8 +176,8 @@ YNSActivity.define({
           options: [
             { k: "twenty",  t: "$20 a month",  s: "Small on purpose. The habit matters more than the amount at this stage.", echo: "$20 a month" },
             { k: "five",    t: "5% of what comes in", s: "Scales with you, so a raise raises it without another decision.", echo: "5%" },
-            { k: "ten",     t: "10% of what comes in", s: "The number most advice starts at. Ambitious on a tight month.", echo: "10%" },
-            { k: "none",    t: "Nothing yet, honestly", s: "A real answer. The budget still works, and this comes back later.", echo: "nothing yet" }
+            { k: "ten",     t: "10% of what comes in", s: "A number a lot of advice starts at. Ambitious on a tight month.", echo: "10%" },
+            { k: "none",    t: "Nothing yet", s: "A real answer. The budget still works, and this comes back later.", echo: "nothing yet" }
           ]
         }
       ]
@@ -196,8 +196,8 @@ YNSActivity.define({
           eyebrow: "Give every dollar a job",
           title: "Now hand it out until there\u2019s nothing left.",
           scene: [
-            "Work down the list. The first group happens whether you like it or not. The second group is where you actually have choices, and it\u2019s the part most budgets forget to include.",
-            "You\u2019re aiming for zero left, not for zero spent."
+            "Work down the list. The first group happens whether you like it or not. The second group is where you actually have choices, and it\u2019s the part many budgets forget to include.",
+            "You\u2019re aiming for zero dollars left without a job."
           ],
           prompt: "Type the amounts. The number at the top tells you what\u2019s still unassigned.",
           rows: ROWS,
@@ -228,10 +228,10 @@ YNSActivity.define({
           ],
           prompt: "Pick the one you\u2019d actually keep.",
           options: [
-            { k: "weekly",  t: "Once a week, same day",   s: "Ten minutes. The most common answer that works.", echo: "weekly" },
+            { k: "weekly",  t: "Once a week, same day",   s: "Ten minutes, and it works for a lot of people.", echo: "weekly" },
             { k: "payday",  t: "Every payday",            s: "Tied to something that already happens.", echo: "every payday" },
-            { k: "monthly", t: "Once a month",            s: "Before the month starts, not after it ends.", echo: "monthly" },
-            { k: "unsure",  t: "I\u2019ll be honest, probably not often", s: "Then set one reminder and let that be enough.", echo: "when you can" }
+            { k: "monthly", t: "Once a month",            s: "Right before the month starts.", echo: "monthly" },
+            { k: "unsure",  t: "Probably not often", s: "Then set one reminder and let that be enough.", echo: "when you can" }
           ]
         }
       ]
@@ -267,16 +267,16 @@ YNSActivity.define({
     var savings = (alloc.save || 0) + (alloc.buffer || 0);
 
     var read = Math.abs(left) < 1
-      ? "Every dollar has a job. That\u2019s a zero-based budget, and most people never get one."
+      ? "Every dollar has a job. That\u2019s a zero-based budget."
       : left > 0
-      ? money(left) + " is still unassigned. That\u2019s not a problem, it\u2019s a decision you haven\u2019t made yet. Unassigned money is the money that disappears."
-      : money(-left) + " more is assigned than comes in. Worth knowing now rather than on the 28th. Something in the second group has to come down.";
+      ? money(left) + " is still unassigned. That\u2019s a decision you haven\u2019t made yet. Unassigned money is the money that disappears."
+      : money(-left) + " more is assigned than comes in. Good to know now, well before the 28th. For the month to work, something in the second group would need to come down.";
 
     var HABIT = {
-      weekly:  "Once a week is the answer that works for most people. Put it in the phone with the day and the time.",
+      weekly:  "Once a week works for a lot of people. A phone reminder with the day and the time helps it stick.",
       payday:  "Tying it to payday is clever, because payday already happens without you remembering it.",
-      monthly: "Once a month works as long as it\u2019s before the month rather than after it.",
-      unsure:  "Honest, and more useful than a promise you won\u2019t keep. One reminder, once a month, is a real plan."
+      monthly: "Once a month works well when you do it right before the month starts.",
+      unsure:  "That\u2019s a fair answer. One reminder, once a month, is a real plan."
     };
 
     return "<h1>Your month, decided in advance.</h1>" +
@@ -286,14 +286,14 @@ YNSActivity.define({
 
       '<div class="ya-readout"><h3>The shape of it</h3>' +
       "<p>" + money(must) + " goes out whether you like it or not. " + money(choose) + " is yours to decide on." +
-      (savings ? " Of that, " + money(savings) + " is going to you rather than to someone else." : "") + "</p></div>" +
+      (savings ? " Of that, " + money(savings) + " is going to you." : "") + "</p></div>" +
 
       savingsRead(savings, income, alloc) +
 
       (HABIT[habit] ? '<div class="ya-readout"><h3>Keeping it</h3><p>' + esc(HABIT[habit]) + "</p></div>" : "") +
 
       '<div class="ya-readout"><h3>Take it with you</h3>' +
-      "<p>The download below opens in Excel, Numbers or Google Sheets. It has your categories, your amounts, a column for what you actually spent, and the difference worked out for you. Update it next month rather than starting again.</p>" +
+      "<p>The download below opens in Excel, Numbers or Google Sheets. It has your categories, your amounts, a column for what you actually spent, and the difference worked out for you. Next month, you can update it and keep going.</p>" +
       '<p><button class="btn btn-ghost" onclick="YNSMock.exportBudget()">Download the spreadsheet</button></p></div>';
   },
 
@@ -304,7 +304,7 @@ YNSActivity.define({
       habit === "weekly" ? "Put a ten-minute budget check in your phone, same day every week"
         : habit === "payday" ? "Set the reminder for your next payday"
         : "Set one reminder for the day before the month starts",
-      "Move the savings amount out of your spending account the day you get paid"
+      "Pick the day your savings amount moves, if you set one"
     ];
   }
 });

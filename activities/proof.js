@@ -1,7 +1,7 @@
 /* =====================================================================
    Proof — evidence, not preference.
 
-   Outcome: "I know three things I'm genuinely good at, and I have a
+   Outcome: "I know three things I'm really good at, and I have a
    story for each."
 
    The missing axis in the original four. Everything else here asks what
@@ -17,11 +17,11 @@
      read off the story afterwards. Never ask for the abstraction.
 
    * Any context counts. Work, family, a side thing, school, the thing
-     you organised for your mum. Most people carrying real capability
+     you organized for your mom. Most people carrying real capability
      discount all of it because it was not paid, and that is exactly the
      group this product exists for.
 
-   Scores nothing. A story about fixing your neighbour's boiler is not
+   Scores nothing. A story about fixing your neighbor's boiler is not
    evidence for Skilled Trades over Health — it is evidence that you are
    the kind of person who fixes things, which is a different claim and
    one the person gets to make for themselves.
@@ -56,14 +56,14 @@ var OPENER = {
 };
 
 var SKILL_READING = {
-  fixing:     "diagnosis. You go at the cause rather than the symptom, and in more fields than people realize that is the entire job",
+  fixing:     "diagnosis. You go straight at the cause, and in more fields than people realize that is the entire job",
   explaining: "translation. Taking something you understand and getting it into someone else's head is a rarer skill than being the expert",
-  calming:    "steadiness under pressure. It cannot be taught, and it is the first thing anyone hiring for a hard room looks for",
+  calming:    "steadiness under pressure. It is hard to teach, and it is one of the first things anyone hiring for a hard room looks for",
   organising: "coordination. The boring skill everything else depends on, and the one people only notice in its absence",
   building:   "making. You would rather have the thing existing than the plan for it perfect",
-  persuading: "moving people. It is the part of almost every senior job that nobody puts in the job description",
+  persuading: "moving people. It is part of many senior jobs, and it rarely shows up in the job description",
   noticing:   "attention. Catching the detail that was going to cost everyone a week",
-  finishing:  "completion. It sounds like the least impressive of these and it is the one most teams are short of"
+  finishing:  "completion. It sounds like the least impressive of these, and many teams are short of it"
 };
 
 YNSActivity.define({
@@ -87,8 +87,8 @@ YNSActivity.define({
           title: "When were you the reason it went well?",
           scene: [
             "Think of a moment where something worked out and you were the reason for it. It doesn't need to be your biggest achievement, and something small and recent usually works better.",
-            "It doesn't have to be a job. The thing you sorted out for your mum counts. The thing you fixed that nobody asked you to fix counts. The shift where you were the one who stayed calm counts.",
-            "Most people carrying real ability discount everything that wasn't paid. Don't do that here."
+            "Any part of your life counts. The thing you sorted out for your mom counts. The thing you fixed that nobody asked you to fix counts. The shift where you were the one who stayed calm counts.",
+            "Many people discount everything that wasn't paid. Here, all of it counts."
           ],
           prompt: "Write one, tag what the skill was, then add it. One will do, though three gives us more to work with.",
           placeholder: "There was a time when…",
@@ -181,7 +181,7 @@ YNSActivity.define({
   /* ------------------------------------------------------------------ */
   results: function (r) {
     /* The moments slot is DROPPED for someone who has already recorded
-       strengths — correct behaviour, but results must fall back to the
+       strengths — correct behavior, but results must fall back to the
        stored fact or it reports "0 things that actually happened" to the
        person with the fullest profile in the product. */
     var items = r.extra.moments_items;
@@ -206,7 +206,7 @@ YNSActivity.define({
 
     var WITNESS = {
       said:   "Someone has already said this to you out loud. That person is a reference and doesn't " +
-              "know it yet. The ask is smaller than you think. Most people are quietly pleased to " +
+              "know it yet. The ask is smaller than you think. Many people are quietly pleased to " +
               "be asked.",
       unsaid: "People rely on you for it and nobody has ever said so. It is a common answer " +
               "here, and it is part of why capable people freeze on \"what are you good at\" in " +
@@ -217,7 +217,7 @@ YNSActivity.define({
     var witnessNote = WITNESS[witness] || "";
 
     return "<h1>That's the evidence.</h1>" +
-      '<p class="ya-result-lead">Not a personality result and not a guess. ' +
+      '<p class="ya-result-lead">' +
       items.length + (items.length === 1 ? " thing that happened" : " things that happened") +
       ", with you as the reason.</p>" +
 
@@ -239,8 +239,8 @@ YNSActivity.define({
 
       (witnessNote ? '<div class="ya-readout"><h3>Whether anyone else saw it</h3><p>' + witnessNote + "</p></div>" : "") +
 
-      '<div class="ya-readout"><h3>Where this goes next</h3><p>Treat these as raw material ' +
-      'rather than a result. <button type="button" class="lnk" onclick="YNS.open(\'abcs_a\')">Career ABCs</button> turns them into ' +
+      '<div class="ya-readout"><h3>Where this goes next</h3><p>Treat these as raw material. ' +
+      '<button type="button" class="lnk" onclick="YNS.open(\'abcs_a\')">Career ABCs</button> turns them into ' +
       "resume bullets and interview answers, and that is far easier with these in front of you " +
       "than from a blank page.</p></div>";
   },

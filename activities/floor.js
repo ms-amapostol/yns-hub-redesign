@@ -10,11 +10,11 @@
    Three mechanics, no multiple choice:
      buildup    add up the real monthly cost of your life
      estimate   guess what a role pays, then see the published percentile
-     choice     the one judgement call — what the gap means
+     choice     the one judgment call — what the gap means
 
    Every figure revealed is a published percentile selected from
    data/roles.json, never computed. That is both accurate and the
-   CareerOneStop licence term.
+   CareerOneStop license term.
    ===================================================================== */
 (function () {
 "use strict";
@@ -39,8 +39,8 @@ YNSActivity.define({
           eyebrow: "The number",
           title: "What does your month cost?",
           scene: [
-            "Think of the month where you pay what has to be paid and nothing breaks, rather than your ideal one.",
-            "Most people have never added this up, so most people negotiate against a number they guessed."
+            "Think of the month where you pay what has to be paid and nothing breaks.",
+            "Many people have never added this up, so they end up negotiating against a number they guessed."
           ],
           prompt: "Nudge each one until it looks about right.",
           totalLabel: "a month, to keep the lights on",
@@ -58,9 +58,9 @@ YNSActivity.define({
              — the value is in going line by line, not in arriving at a
              total. Zero costs a few more taps and makes the number theirs. */
           rows: [
-            { k: "housing",   t: "Rent or mortgage",         s: "Plus anything that comes with it. Service charge, lot rent, board", start: 0, step: 100, max: 8000 },
+            { k: "housing",   t: "Rent or mortgage",         s: "Plus anything that comes with it. HOA fees, lot rent, room and board", start: 0, step: 100, max: 8000 },
             { k: "food",      t: "Food",                     s: "Groceries, and the meals you don't cook", start: 0, step: 50,  max: 3000 },
-            { k: "transport", t: "Getting around",           s: "Car payment, fuel, insurance, fares",     start: 0, step: 50,  max: 2000 },
+            { k: "transport", t: "Getting around",           s: "Car payment, gas, insurance, fares",     start: 0, step: 50,  max: 2000 },
             { k: "care",      t: "People who depend on you", s: "Childcare, elder care, money you send home", start: 0, step: 100, max: 5000 },
             { k: "debt",      t: "Debt payments",            s: "The minimums you can't skip",             start: 0, step: 50,  max: 4000 },
             { k: "health",    t: "Health",                   s: "Premiums, prescriptions, the regular costs", start: 0, step: 50, max: 2000 },
@@ -138,11 +138,11 @@ YNSActivity.define({
           eyebrow: "A quick test",
           title: "What do you think this job pays?",
           scene: [
-            "Here's a job most people have an opinion about and almost nobody has a figure for.",
+            "Here's a job many people have an opinion about, and fewer know the figure for.",
             "Slide to your guess for what someone a few years into it earns in a year, before tax."
           ],
           subject: function () { return guessRole("trades", "some").title + ", a few years in"; },
-          prompt: "Most people are out by more than they expect.",
+          prompt: "Many people are out by more than they expect.",
           min: 20000, max: 160000, step: 1000,
           truthLabel: "a year, about the middle of the national pay band",
           truth: function () { return guessRole("trades", "some").mid; },
@@ -165,7 +165,7 @@ YNSActivity.define({
             return guessRole(d && d.top_category, "some").title + ", a few years in";
           },
           provenance: "Using a job from the field your other answers keep pointing at.",
-          prompt: "Most people are out by more than they expect.",
+          prompt: "Many people are out by more than they expect.",
           min: 20000, max: 200000, step: 1000,
           truthLabel: "a year, about the middle of the national pay band",
           truth: function () {
@@ -181,7 +181,7 @@ YNSActivity.define({
     },
 
     /* ---------------------------------------------------------------
-       4. The judgement call. The only slot here that scores, because
+       4. The judgment call. The only slot here that scores, because
        what someone does about a gap says something about them.
        --------------------------------------------------------------- */
     {
@@ -205,7 +205,7 @@ YNSActivity.define({
               s: "It works, but nothing can go wrong.",
               fact: "tight", echo: "the pay only just covers it", a: { order: 3 } },
             { k: "short",  t: "It doesn't clear it",
-              s: "Not at that level, anyway. Better to know that now than in year two.",
+              s: "At that level, anyway. Better to know that now than in year two.",
               fact: "short", echo: "the pay doesn't cover what I need yet", a: { leading: 2, analysis: 1 } }
           ]
         }
@@ -229,7 +229,7 @@ YNSActivity.define({
         {
           mechanic: "learn",
           eyebrow: "Worth knowing",
-          title: "What a job pays on day one is not what it pays",
+          title: "Pay usually grows the longer you do the job",
 
           lead: "For the same job, people with more experience are usually paid a lot more.",
 
@@ -296,8 +296,8 @@ YNSActivity.define({
     var VERDICT = {
       clears: "Something other than money is in the way. That's good news, and also a harder " +
               "problem, because it means the thing stopping you hasn't been named yet.",
-      tight:  "It works, with nothing spare. So the thing to protect is your cushion, not the " +
-              "pay. Enough slack that one bad month doesn't undo the whole thing.",
+      tight:  "It works, with nothing spare. So the thing to protect is your cushion: " +
+              "enough slack that one bad month doesn't undo the whole thing.",
       short:  "At that level it doesn't clear yet, and knowing today is worth a great deal more " +
               "than finding out in year two. It turns the question from <em>should I</em> into " +
               "<em>what would have to change</em>."
@@ -345,7 +345,7 @@ YNSActivity.define({
       return [
         "Find one role in this field that does clear your floor, and read what it asks for",
         "Work out the single biggest line in your month, and whether it's fixed",
-        "Look up what the training costs. The number, not the impression"
+        "Look up what the training really costs, in dollars"
       ];
     }
     return [
@@ -374,7 +374,7 @@ function growth() {
    have been about different jobs, with nothing to catch it.
 
    The band is parsed back out of the string quiz-shared renders rather
-   than recomputed, so the figure shown is always one the licence permits
+   than recomputed, so the figure shown is always one the license permits
    us to display. */
 function guessRole(cat, level, fallback) {
   var out = { title: "A skilled trade", mid: fallback || 58000 };

@@ -285,7 +285,7 @@
         (hasOAuthPrimary
           ? "We only read your name and email address. Nothing is posted anywhere."
           : (isNew
-             ? "We only ever use your address to send you your results. " +
+             ? "We use your email to sign you in and save your work. If we ever work with schools, programs or employers, we'll ask you first, every time. " +
                "<b>Write your password down.</b> We can't reset it for you yet."
              : "No account yet? Use <b>Create account</b> above.")) +
         "</p>";
@@ -588,7 +588,7 @@
 
   var LEVEL_NAMES = {
     early: "just starting out", some: "a couple of years in",
-    experienced: "genuinely experienced", leader: "running things already"
+    experienced: "experienced", leader: "running things already"
   };
 
   function initials(email) {
