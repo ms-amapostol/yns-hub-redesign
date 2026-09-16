@@ -1518,7 +1518,18 @@
   YNS.confirmReset=function(){
     track("reset", {});
     YNS.closeList();
-    try { localStorage.removeItem("yns.abcs.v1"); localStorage.removeItem("yns_pending_runs"); } catch(e){}
+    /* Everything the hub and its apps saved on this device: Career ABCs,
+       the three quizzes (yns_quiz_*, yns_runid_*), queued runs and facts.
+       The light/dark choice and the anonymous device id stay. */
+    try {
+      var keep={ yns_theme:1, yns_anon_id:1 }, gone=[];
+      for (var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if (k && /^yns[._]/.test(k) && !keep[k]) gone.push(k);
+      }
+      gone.forEach(function(k){ localStorage.removeItem(k); });
+      ["yns_abcs_hydrated","yns_auth_attempt"].forEach(function(k){ sessionStorage.removeItem(k); });
+    } catch(e){}
     if (window.YNSMock && window.YNSMock.resetAll) window.YNSMock.resetAll();
     YNS.reset();
     toast("All clear. Let\u2019s start fresh.");

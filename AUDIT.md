@@ -1,5 +1,12 @@
 # Your Next Step hub — audit
 
+## Update, build v24 (September 16, 2026)
+
+- **Bug fixed: Start over now clears the quizzes too.** The three quizzes save their answers under their own keys on the device (`yns_quiz_*`, `yns_runid_*`), and Start over left those behind. After a reset, a quiz reopened on the old results. Start over now clears every `yns` key the hub and its apps save. It keeps two: the light/dark setting and the anonymous device id.
+- **Retested:** finished A Day In The Life, used Start over, then reopened the quiz. It opens on the first question, and the card stays unmarked.
+
+---
+
 ## Update, build v23 (September 16, 2026)
 
 - **Settings is in the top bar** next to Portfolio and Planner. It offers Change my answers, Change my character, and Start over. Start over asks first, then clears everything on the device.
