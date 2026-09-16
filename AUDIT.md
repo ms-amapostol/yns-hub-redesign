@@ -1,4 +1,90 @@
-# Your Next Step hub — audit, build v20
+# Your Next Step hub — audit
+
+## Update, build v21 (September 16, 2026)
+
+**Verdict: every mechanical problem from the v20 audit is fixed and re-tested, and the app is ready for real people.** All 26 activities play to a result with no errors: 104 of 104 runs, covering two intake variants, each on desktop and on a 390px phone. No High issues remain in function, consistency or accessibility. What's left is copy. It's listed at the end of this update for Anastasia to decide on.
+
+### Anastasia's rulings, and how each was built
+
+| Ruling | What the app does now |
+|---|---|
+| **No founder photo or story in the app** | Recorded as decided. S6 is closed. |
+| **Fix The Floor** | The crash was a one-word naming bug: the results code hid its own number formatter. It's fixed. The hub now loads the real wage file, so the pay shown is BLS via CareerOneStop. That label only appears when the real data is in use. The yearly figure is now correctly described as after tax. |
+| **Fix Three Doors** | On phones each route is a stacked card with Yes/No underneath. The "fastest route" is sorted by months instead of text length. |
+| **Check-ins as on-screen pop-ups** | **Weekly:** a Planner step picked seven or more days ago gets a pop-up asking how it went: I did it / Still on it / Change it. "Still on it" and × snooze it for a week. **Monthly:** 28 days after Your Six Months, if Still True? hasn't been done in the last month, a pop-up offers it. The demo bar has "Skip ahead a week" and "Skip ahead a month" so reviewers can see both. Email reminders are listed as a planned perk of a free account. The spec for Matt is in `docs/signup-handoff.md`. |
+| **The course is an invitation, with no obligation** | Every mention now says it's an optional paid course, with videos and more structure, and that there's no obligation to join. The false "we don't sell anything" lines are gone. |
+| **Encourage a free account to save progress** | The top bar reads "Sign in or join free". After the first finished activity, a small pop-up appears once per visit: "Save your progress, free." The sign-up panel leads with "free", says every activity is free either way, and the button reads "Make my free account". |
+| **Career ABCs: verify experience instead of asking again** | The hub passes its answer (`?lvl=`). Career ABCs still shows its experience question, with the hub's answer already selected and the line "From your answers on the hub: … Still right? Change it if not." |
+
+### Status of the v20 findings
+
+| Area | Fixed | Partly | Open |
+|---|---|---|---|
+| Function (F1–F12) | F1–F8, F10, F12 | F11 (the × on in-app panels is 44px on phones; a few small links remain) | — |
+| Consistency (C1–C11) | C1–C8, C10, C11 | C9 (guarded; the signed-in path couldn't be tested without Supabase) | — |
+| Accessibility (A1–A10) | A1–A8, A10 | A9 (a few control names) | Intake radios have no arrow-key support |
+| Copy: honesty (3A–3C) | All High items, plus 3A #66–71, #82–85, #90; 3B #92, #100, #104; 3C #106–109, #113, #114, #116–118 | — | See "Still to decide" below |
+| Copy: voice (1A–1G) | #38–40, #58–61, plus fixes on lines edited this round | — | See "Still to decide" below |
+
+**New in v21, also tested:**
+- Every one of the 26 activities ends with a "Seven days" pick. The three quizzes and the three Career ABCs stages now offer it too.
+- Links inside results open the right activity in the hub (`YNS.open`), so nothing leaves the page or hits a 404.
+- The activity panel and the hub panels take keyboard focus, keep it, close with Escape, and hand focus back to the card that opened them.
+- Closing a finished results screen counts as finished.
+- "It's changed" on an "Already know this one" card brings the question back.
+- Capped money fields say "Up to $X here".
+- Solve It and The Week It's Hard read each other's answers.
+- Two Conversations shows the message the person wrote.
+- Career ABCs no longer scrolls sideways on a phone.
+- The quiz results no longer show made-up match percentages.
+
+**Low items still open:**
+
+| Item | Detail |
+|---|---|
+| N9 | Escape doesn't reach inside the six framed apps (the × still works). |
+| N13 | Career ABCs keeps its first experience answer if the hub answers change later. |
+| Missing file | `yns-ga.js` (404), which is Delante's analytics file. |
+| Missing endpoint | `/api/coach-status` (404), which is live-only. |
+| Tracking noise | `Quiz.init("hub")` logs a stray "start" event once Supabase is on. |
+| Funnel events | Not built yet (S12). |
+
+### Still to decide: copy (Anastasia)
+
+**A. Honesty and advice, with some risk. Do these first.**
+1. **Money screens that give instructions.** They should describe instead:
+   - compound, retire, invest (3B #93–99)
+   - budget0 "the one habit that separates…" (#101)
+2. **Numbers to settle:**
+   - one long-run return figure (7% vs 9%, #72)
+   - "match is dollar-for-dollar" (#76)
+   - the 25× pension rule (#77)
+   - Roth rules (#78–80)
+   - "25–31% comes out" vs "often 15–30%, default 20%" (#81)
+   - 2026 savings rates (#86, #88)
+3. **One privacy sentence for both places** (#110, #112).
+4. **About 20 unsourced "most people / almost nobody" lines** (#91).
+
+**B. Quick swaps to approve in one go.**
+- "Genuinely", "honestly" and "straightforward" (in the quiz files and activities)
+- UK spellings to US
+- The remaining "not X / rather than" lines, in titles first:
+  - The Floor card "The number you need, not the number you want."
+  - "A budget is not a list…"
+  - "A pension is a promise, not a pot."
+- "The class" and "Module N, videos 6 and 10" references
+- "SMART" and "ABLE" on screen
+
+**C. Your judgement.**
+1. How far to soften lines that assume a hard week or being stuck. Examples: "A plan for the week you want to quit", "There will be a week you want to quit", "Stuck? Start with one of these".
+2. Whether the "Experienced" description keeps "…just not sure it's the right thing".
+3. The Career ABCs model answers say "she": switch to "they", or name each speaker.
+
+The full v20 findings follow, unchanged, for reference.
+
+---
+
+# v20 audit (September 16, 2026)
 
 September 16, 2026 · review build `yns-hub-redesign` · report only, no files changed
 

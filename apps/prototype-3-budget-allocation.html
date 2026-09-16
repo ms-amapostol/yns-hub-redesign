@@ -184,13 +184,13 @@ const VALUES = [
   {k:"pay",   name:"Pay ceiling",       color:"#2952e0", avg:24,
    desc:"How high the number can go if you're good at it.",
    w:{finance:.79,biz:.77,tech:.62,trades:.43,health:.38,gov:.22,creative:.21,edu:.11,social:0},
-   hi:"Pay is your loudest signal. That's allowed, and it just means we'll rule out paths with low ceilings, even meaningful ones.",
+   hi:"Pay is your loudest signal. That's allowed, and it just means we'll lean toward paths with higher ceilings.",
    lo:"You've priced money low. That opens doors most people close on themselves."},
 
   {k:"flex",  name:"Flexibility & time", color:"#0ea5a4", avg:22,
    desc:"Where you work, when you work, and whether evenings are yours.",
    w:{creative:.93,tech:.69,biz:.48,social:.43,finance:.35,gov:.33,edu:.32,trades:.21,health:.09},
-   hi:"Time is the thing you're really buying. Worth knowing: this rules out most shift-based and on-site work, whatever else you say.",
+   hi:"Time is the thing you're really buying. Worth knowing: a lot of shift-based and on-site work won't give you this.",
    lo:"You'll trade your calendar for the right work. That widens the field a lot."},
 
   {k:"impact",name:"Impact on people",   color:"#e11d48", avg:19,
@@ -410,11 +410,6 @@ function score(){
 function renderResults(){
   const s = score();
   const all = Object.keys(Quiz.CATS).map(k=>({k,v:s[k]})).sort((a,b)=>b.v-a.v);
-  const max = all[0].v, min = all[all.length-1].v;
-  const span = (max - min) || 1;
-  /* stretch across the full 9-category range so 2nd and 3rd don't read as
-     near-ties with the winner — best match lands at 100, worst at 50 */
-  const pctOf = v => Math.round(50 + 50*Math.pow((v - min)/span, 2.5));
   const ranked = all.slice(0,3);
   const top = ranked[0].k;
   const labels = ['Best match','Strong fit','Worth exploring'];
@@ -447,13 +442,11 @@ function renderResults(){
   const cards = ranked.map((r,n)=>{
     const c = Quiz.CATS[r.k];
     const roles = Quiz.rolesFor(r.k, level);
-    const pct = pctOf(r.v);
     return `
       <div class="result-card ${n===0?'best':''}">
         <span class="tag ${n===0?'':'alt'}">${labels[n]}</span>
         <h3>${c.name}</h3>
         <p class="why">${c.blurb}</p>
-        <p class="fitline">${pct}% match to how you spent your budget</p>
         <div class="roles">
           <div class="rh">Roles matched to your ${levelWord} experience</div>
           ${roles.map(x=>`<div class="role"><span>${x[0]}</span><span class="pay">${x[1]}</span></div>`).join('')}
@@ -467,7 +460,7 @@ function renderResults(){
     <h1>You're ${Quiz.ARCHETYPE[top]}.</h1>
     <p class="sub">${ t2
         ? `You put most of your money on <b>${t1.name.toLowerCase()}</b> and <b>${t2.name.toLowerCase()}</b>.`
-        : `You put every one of your 100 points on <b>${t1.name.toLowerCase()}</b>. That's not a budget, that's a conviction.` }${
+        : `You put every one of your 100 points on <b>${t1.name.toLowerCase()}</b>. That's a conviction.` }${
       wonName ? ` Then, made to choose between them, you took <b>${wonName}</b> over <b>${lostName}</b>, which is the part your budget alone couldn't tell us.` : ''
     }</p>
     ${benchmarks.length?`<p class="sub" style="margin-top:12px">What stands out: ${benchmarks.join(', and ')}.</p>`:''}
@@ -481,7 +474,7 @@ function renderResults(){
     <button type="button" class="back" id="restart" style="margin-left:18px">↺ spend it differently</button>
     <div class="cta">
       <h3>Nice work. That's one more piece of the picture.</h3>
-      <p>Your result is saved. Head back and we'll show you what fits next.</p>
+      <p>Your result is saved in this browser. Head back and we'll show you what fits next.</p>
       <button type="button" class="btn" id="tohub">Back to your hub</button>
     </div>
   `;
@@ -515,7 +508,8 @@ function render(){
 
 READY.then(function(){
   const prior = Quiz.priorLevel();
-  if(prior) level = prior;   // still confirmed on screen 2, just pre-set
+  /* A level handed in with ?lvl= wins; screen 2 is skipped then (C9). */
+  if(prior && !PRESET_LEVEL) level = prior;   // still confirmed on screen 2, just pre-set
 
   /* Straight to the results of a finished run, unless the hub asked for
      a fresh one. */

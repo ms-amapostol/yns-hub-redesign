@@ -113,6 +113,19 @@ YNSActivity.define({
           minTotal: 1,
           cta: "That's about right",
           factsFrom: function (sum) { return { money_in: sum }; }
+        },
+        {
+          needs: { fact: "money_in" },
+          mechanic: "learn",
+          eyebrow: "Already know this one",
+          title: "We\u2019ve got what comes in.",
+          lead: function (v) {
+            var n = v && v.facts && v.facts.money_in;
+            return n ? money(n) + " a month, after tax." : "";
+          },
+          provenance: "You\u2019ve told us what comes in already, so this doesn\u2019t ask again.",
+          cta: "Use it",
+          alt: { label: "It\u2019s changed", clears: "money_in" }
         }
       ]
     },
@@ -155,9 +168,9 @@ YNSActivity.define({
             var f = v && v.facts && v.facts.floor_monthly;
             return f ? "You said " + money(f) + " a month keeps the lights on. We'll use that." : "We'll use the number you gave The Floor.";
           },
-          body: ["If that number has changed, The Floor takes six minutes to redo. Otherwise, keep going."],
           provenance: "You already set your floor in The Floor, so this skips the fixed-costs screen.",
-          cta: "Use it"
+          cta: "Use it",
+          alt: { label: "It\u2019s changed", clears: "money_fixed", bypass: true }
         }
       ]
     },
@@ -211,7 +224,7 @@ YNSActivity.define({
             "<b>Pay yourself something first, even $20.</b> The amount matters less than the habit of it existing.",
             "<b>One surprise a month is normal.</b> A plan with no room for one is a plan that breaks in week two."
           ],
-          note: "Managing money is mostly managing your behavior around money. That line is from the class, and it's the reason a budget is a habit, not a spreadsheet. If your number is negative, the first job is getting it to zero, usually starting with the minimum payments or the car.",
+          note: "Managing money is mostly managing your habits around it, which is why a budget works best as a weekly habit. If your number is negative, the first job is getting it to zero. The Floor and Every Dollar a Job help you see which line can move.",
           cta: "Got it"
         }
       ]
@@ -226,6 +239,7 @@ YNSActivity.define({
     var fixed  = r.extra.fixed_total  || f.money_fixed || f.floor_monthly || 0;
     var left   = income - fixed;
     var gap    = r.state.answers.gap || "";
+    var fromFloor = !r.extra.fixed_total && !f.money_fixed && !!f.floor_monthly;
 
     var READ = {
       room:  "Some of it is yours to decide. That's the number to give a job before next month starts.",
@@ -236,7 +250,8 @@ YNSActivity.define({
 
     return "<h1>Your three numbers.</h1>" +
       '<div class="ya-readout"><h3>Comes in</h3><p>' + money(income) + " a month</p></div>" +
-      '<div class="ya-readout"><h3>Has to go out</h3><p>' + money(fixed) + " a month</p></div>" +
+      '<div class="ya-readout"><h3>Has to go out</h3><p>' + money(fixed) + " a month</p>" +
+        (fromFloor ? '<p class="ya-fine">From The Floor.</p>' : "") + "</div>" +
       '<div class="ya-quote">' + (left >= 0 ? money(left) + " a month is yours to decide on." : money(-left) + " a month short.") + "</div>" +
       (READ[gap] ? '<p class="ya-result-lead">' + esc(READ[gap]) + "</p>" : "") +
       '<p class="ya-result-lead">These are rough and that\u2019s fine. Rough numbers you know beat exact numbers you avoid.</p>';

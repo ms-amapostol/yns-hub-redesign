@@ -240,7 +240,7 @@ YNSActivity.define({
       (witnessNote ? '<div class="ya-readout"><h3>Whether anyone else saw it</h3><p>' + witnessNote + "</p></div>" : "") +
 
       '<div class="ya-readout"><h3>Where this goes next</h3><p>Treat these as raw material ' +
-      'rather than a result. <a href="career-abcs_v2.html">Career ABCs</a> turns them into ' +
+      'rather than a result. <button type="button" class="lnk" onclick="YNS.open(\'abcs_a\')">Career ABCs</button> turns them into ' +
       "resume bullets and interview answers, and that is far easier with these in front of you " +
       "than from a blank page.</p></div>";
   },

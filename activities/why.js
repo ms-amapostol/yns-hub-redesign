@@ -220,7 +220,7 @@ YNSActivity.define({
           "You've got both a reason and a test for it, saved. Most people never write either " +
           "one down. So most career changes get judged against a standard that moves every " +
           "time the mood does.",
-          "Yours is at the top of your profile. It's there for the week you can't remember why you started."
+          "Keep it where you'll see it. It sits at the top of your Portfolio, and a free account keeps it there on any device. It's there for the week you can't remember why you started."
         ],
         cta: "Good"
       }

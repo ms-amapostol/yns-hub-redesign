@@ -142,9 +142,10 @@ YNSActivity.define({
             var n = v && v.facts && v.facts.money_in;
             return n ? money(n) + " a month, after tax." : "";
           },
-          body: ["If that\u2019s changed, Money, Plainly is the place to update it. Otherwise, straight on to giving it jobs."],
-          provenance: "You told Money, Plainly what comes in, so this doesn\u2019t ask again.",
-          cta: "Use it"
+          body: ["If it still looks right, straight on to giving it jobs."],
+          provenance: "You\u2019ve told us what comes in already, so this doesn\u2019t ask again.",
+          cta: "Use it",
+          alt: { label: "It\u2019s changed", clears: "money_in" }
         }
       ]
     },

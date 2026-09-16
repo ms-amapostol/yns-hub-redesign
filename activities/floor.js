@@ -144,9 +144,9 @@ YNSActivity.define({
           subject: function () { return guessRole("trades", "some").title + ", a few years in"; },
           prompt: "Most people are out by more than they expect.",
           min: 20000, max: 160000, step: 1000,
-          truthLabel: "The published midpoint is",
+          truthLabel: "a year, about the middle of the national pay band",
           truth: function () { return guessRole("trades", "some").mid; },
-          note: "Half the people in that job earn less than this and half earn more. It's not a starting salary."
+          note: function () { return midNote(guessRole("trades", "some").mid); }
         },
         {
           needs: { fact: "top_category" },
@@ -162,17 +162,20 @@ YNSActivity.define({
           },
           subject: function (v) {
             var d = v && v.derived;
-            return guessRole(d && d.top_category, (d && d.level) || "some").title + ", a few years in";
+            return guessRole(d && d.top_category, "some").title + ", a few years in";
           },
           provenance: "Using a job from the field your other answers keep pointing at.",
           prompt: "Most people are out by more than they expect.",
           min: 20000, max: 200000, step: 1000,
-          truthLabel: "The published midpoint is",
+          truthLabel: "a year, about the middle of the national pay band",
           truth: function () {
             var c = YNSActivity.context();
-            return guessRole(c.derived.top_category, c.derived.level || "some").mid;
+            return guessRole(c.derived.top_category, "some").mid;
           },
-          note: "Half the people in that job earn less than this and half earn more. It's not a starting salary."
+          note: function () {
+            var c = YNSActivity.context();
+            return midNote(guessRole(c.derived.top_category, "some").mid);
+          }
         }
       ]
     },
@@ -228,8 +231,7 @@ YNSActivity.define({
           eyebrow: "Worth knowing",
           title: "What a job pays on day one is not what it pays",
 
-          lead: "Almost every job here pays a lot more once you've been doing it a while. " +
-                "Same job, same place, same person.",
+          lead: "For the same job, people with more experience are usually paid a lot more.",
 
           example: function (v) {
             var e = payExample(v && v.derived && v.derived.top_category);
@@ -240,7 +242,8 @@ YNSActivity.define({
               from: money(e.low),
               toLabel: "Once experienced",
               to: money(e.high),
-              note: "A jump of " + e.pct + "%. These are published government figures, not our guess."
+              note: "A jump of " + e.pct + "%. The pay figures are from BLS via CareerOneStop. " +
+                    "The jump is our calculation from them."
             };
           },
 
@@ -253,9 +256,10 @@ YNSActivity.define({
           note: function () {
             var g = growth();
             return g
-              ? "This is not one lucky job. Across the " + g.occupations + " jobs we can track " +
+              ? "Across the " + g.occupations + " jobs we can track " +
                 "at more than one level, pay climbs by a median of " + g.median_pct + "%. The " +
-                "smallest jump is " + g.min_pct + "%. The biggest is " + g.max_pct + "%."
+                "smallest jump is " + g.min_pct + "%. The biggest is " + g.max_pct + "%. " +
+                "These jumps are our calculation from BLS figures."
               : "Every range here is a slice of one job's published pay, matched to where you " +
                 "are standing today.";
           },
@@ -282,7 +286,7 @@ YNSActivity.define({
        words-to-key translation table. */
     var gap = r.state.answers.gap || r.ctx.facts.floor_gap || "";
     var annual = Math.round(monthly * 12);
-    var esc = r.esc, money = r.money;
+    var esc = r.esc, fmt = dollars;
 
     var ctx = r.ctx;
     var cat = ctx.derived.top_category;
@@ -306,19 +310,20 @@ YNSActivity.define({
     if (!monthly) {
       return "<h1>No number yet.</h1>" +
         '<p class="ya-result-lead">We did not get as far as a figure this time, and nothing ' +
-        'you entered is lost. <a href="activity.html?a=floor">Run it again</a> when you have ' +
+        'you entered is lost. <button type="button" class="lnk" onclick="YNS.open(\'floor\')">Run it again</button> when you have ' +
         "two minutes and the build-up will pick up from there.</p>";
     }
 
-    return "<h1>" + money(monthly) + " a month.</h1>" +
+    return "<h1>" + fmt(monthly) + " a month.</h1>" +
       (recalled
         ? '<p class="ya-note">That is the floor you worked out last time, so we did not make you ' +
           "add it up again. If your life has changed, " +
-          '<a href="activity.html?a=stilltrue">say so here</a>.</p>'
+          '<button type="button" class="lnk" onclick="YNS.open(\'stilltrue\')">say so here</button>.</p>'
         : "") +
-      '<p class="ya-result-lead">That\'s your floor. About ' + money(annual) +
-      " a year before tax, just to stand still. It isn't a target and it isn't an ambition. " +
-      "It is the line under which a job does not work, no matter how much you like it.</p>" +
+      '<p class="ya-result-lead">That\'s your floor: about ' + fmt(annual) +
+      " a year after tax, just to cover the month. Before tax, a job needs to pay more than that. " +
+      "How much more depends on your state and your benefits. " +
+      "Below this line, a job doesn't work for you, however much you like it.</p>" +
 
       '<div class="ya-readout"><h3>What that changes</h3><p>' + verdict + "</p></div>" +
 
@@ -331,7 +336,7 @@ YNSActivity.define({
           (r.Quiz.salaryNote ? r.Quiz.salaryNote() : "") + "</div>"
         : '<div class="ya-readout"><h3>Next, the other half</h3><p>You now have the number. ' +
           "What you don't have yet is a field to hold it against, which is what the shorter " +
-          '<a href="prototype-1-choose-your-own-adventure.html">Story</a> is for, and it takes five minutes.</p></div>');
+          '<button type="button" class="lnk" onclick="YNS.open(\'cyoa\')">Story</button> is for, and it takes five minutes.</p></div>');
   },
 
   actions: function (state, ctx) {
@@ -438,6 +443,22 @@ function payExample(cat) {
    two money formats in one activity looks like a mistake. */
 function money(n) {
   return "$" + Math.round(n / 1000) + "k";
+}
+
+/* Whole dollars for the person's own floor. The "$2k" short form is
+   fine for pay bands, but a monthly figure rounded to the nearest
+   thousand hides most of what they just added up. */
+function dollars(n) {
+  return "$" + Math.round(n).toLocaleString("en-US");
+}
+
+/* The line under a revealed wage guess. The figure is the middle of a
+   national band, so it says that and nothing stronger. */
+function midNote(mid) {
+  var real = typeof Quiz !== "undefined" && Quiz.usingRealWages && Quiz.usingRealWages();
+  return "The middle of the national pay band for this role, for someone a few years in, is about $" +
+    Math.round(mid).toLocaleString("en-US") + (real ? " (BLS via CareerOneStop). " : ". This is an example figure, because the national data didn\u2019t load. ") +
+    "It's an estimate for people with some experience.";
 }
 
 function catName(cat) {

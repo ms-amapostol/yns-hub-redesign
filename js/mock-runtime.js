@@ -46,12 +46,13 @@ function cond(c){
   return true;
 }
 function known(k){ var v=facts[k]; return v!=null && v!=="" && !(Array.isArray(v)&&!v.length); }
-function resolve(slot){
+function resolve(slot, skipped){
   var ladder = slot.ladder || [ slot.ask || slot ];
   for (var i=ladder.length-1;i>=0;i--){
     var r=ladder[i];
     if (!cond(r.needs)) continue;
-    if (r.asks && known(r.asks) && r.mechanic!=="learn") continue;
+    if (run && run.bypass && run.bypass.indexOf(r)>=0) continue;
+    if (r.asks && known(r.asks) && r.mechanic!=="learn"){ if (skipped) skipped.push(r.asks); continue; }
     return r;
   }
   return slot.learn || null;
@@ -61,6 +62,16 @@ function resolve(slot){
 /* The last finished run of each activity, kept so its results can be
    shown again without making anyone answer everything a second time. */
 var lastRun = {};
+/* Runs that were started and closed before the end, by slug, with the
+   fact keys each one wrote. The next open of that activity skips those
+   questions, so it says so on its first screen. */
+var unfinished = {};
+function snapshot(){ var o={}; Object.keys(facts).forEach(function(k){ try { o[k]=JSON.stringify(facts[k]); } catch(e){ o[k]=String(facts[k]); } }); return o; }
+function buildSteps(d, skipped){
+  var steps=[];
+  d.slots.forEach(function(s){ var r=resolve(s, skipped); if (r) steps.push({slot:s, rung:r}); });
+  return steps;
+}
 
 function play(slug, opts){
   var d = DEFS[slug]; if (!d) return false;
@@ -68,20 +79,42 @@ function play(slug, opts){
   /* Re-open at the results of the run they already did. */
   if (opts.results && lastRun[slug]) {
     run = { slug:slug, d:d, i:0, answers:lastRun[slug].answers, extra:lastRun[slug].extra,
-            ui:{}, steps:[], completed:true, allocation:lastRun[slug].allocation };
+            ui:{}, steps:[], completed:true, allocation:lastRun[slug].allocation, fromResults:true };
     document.body.classList.add("modal-open");
     host.style.display="block";
     renderResults(); return true;
   }
-  run = { slug:slug, d:d, i:0, answers:{}, extra:{}, ui:{} };
-  d.slots.forEach(function(s){ var r=resolve(s); if (r) run.steps=(run.steps||[]).concat([{slot:s, rung:r}]); });
-  run.steps = run.steps || [];
+  run = { slug:slug, d:d, i:0, answers:{}, extra:{}, ui:{}, snap:snapshot() };
+  var skipped=[];
+  run.steps = buildSteps(d, skipped);
+  var prev = unfinished[slug];
+  run.resumed = !!(prev && skipped.some(function(k){ return prev[k]; }));
   if (!run.steps.length){ run.steps=[{slot:{id:"empty"}, rung:{mechanic:"learn", eyebrow:d.title, title:"Nothing to ask you right now.", body:["This activity works from things you've said elsewhere, and there's nothing new to compare yet."], cta:"Okay"}}]; }
   document.body.classList.add("modal-open");
   host.style.display="block";
   renderStep(); return true;
 }
-function close(){ host.style.display="none"; host.innerHTML=""; document.body.classList.remove("modal-open"); run=null; }
+function closeRun(finished){
+  var r=run, slug=r && r.slug;
+  if (r && !finished && r.snap){
+    /* Remember which facts this unfinished run wrote. */
+    var now=snapshot(), rec=unfinished[slug]||{}, any=false;
+    Object.keys(now).forEach(function(k){ if (now[k]!==r.snap[k]){ rec[k]=true; any=true; } });
+    if (any || unfinished[slug]) unfinished[slug]=rec;
+  }
+  host.style.display="none"; host.innerHTML=""; document.body.classList.remove("modal-open"); run=null;
+  return slug ? { slug:slug, done: !!finished || !!(r && r.fromResults) } : null;
+}
+function tellHub(info){
+  if (!info) return;
+  try { if (global.YNS && global.YNS.activityClosed) global.YNS.activityClosed(info.slug, info.done); } catch(e){}
+}
+function close(){
+  /* Closing on the results screen of a fresh run means it was finished:
+     record it and mark it done, with no weekly step picked. */
+  if (run && !run.fromResults && run.steps && run.steps.length && run.i>=run.steps.length) return finish(null);
+  tellHub(closeRun(false));
+}
 function next(){ run.i++; renderStep(); }
 function back(){ run.i=Math.max(0,run.i-1); renderStep(); }
 function cur(){ return run.steps[run.i]; }
@@ -90,8 +123,9 @@ function cur(){ return run.steps[run.i]; }
 function shell(r, inner, footer){
   var v=view();
   var scene = val(r.scene, v) || []; if (typeof scene==="string") scene=[scene];
-  var h = '<div class="am-card"><div class="am-top"><span class="am-eyebrow">'+esc(val(r.eyebrow,v))+'</span><span class="am-dots">'+run.steps.map(function(_,k){return '<i class="'+(k<run.i?"done":k===run.i?"now":"")+'"></i>';}).join("")+'</span><button class="am-x" onclick="YNSMock.close()" aria-label="Close">×</button></div>';
-  h += '<h2>'+esc(val(r.title,v))+'</h2>';
+  var h = '<div class="am-card" data-run="1"><div class="am-top"><span class="am-eyebrow">'+esc(val(r.eyebrow,v))+'</span><span class="am-dots" role="img" aria-label="Step '+(run.i+1)+' of '+run.steps.length+'">'+run.steps.map(function(_,k){return '<i class="'+(k<run.i?"done":k===run.i?"now":"")+'"></i>';}).join("")+'</span><button class="am-x" onclick="YNSMock.close()" aria-label="Close">×</button></div>';
+  h += '<h2 id="amTitle" tabindex="-1">'+esc(val(r.title,v))+'</h2>';
+  if (run.resumed && run.i===0) h += '<p class="am-prov am-resume">Picking up where you left off. Your earlier answers are still here.</p>';
   if (r.provenance) h += '<p class="am-prov">'+esc(val(r.provenance,v))+'</p>';
   scene.forEach(function(p){ h+='<p class="am-scene">'+p+'</p>'; });   /* scene may carry <b> */
   h += inner;
@@ -102,7 +136,16 @@ function shell(r, inner, footer){
 function primary(label, fn, disabled){ return '<button class="btn btn-primary" onclick="'+fn+'" '+(disabled?'disabled':'')+'>'+esc(label||"Next")+'</button>'; }
 function skip(r){ return r.optional ? '<button class="btn-quiet" onclick="YNSMock.skipStep()">'+esc(r.skipLabel||"Skip this one")+'</button>' : '<span></span>'; }
 function skipStep(){ var r=cur().rung; if (r.skipTo){ var j=run.i+1; while (j<run.steps.length && run.steps[j].slot.id!==r.skipTo) j++; run.i=j; renderStep(); } else next(); }
-function prompt(r){ var p=val(r.prompt); return p ? '<p class="am-prompt">'+esc(p)+'</p>' : ''; }
+function prompt(r){ var p=val(r.prompt); return p ? '<p class="am-prompt" id="amPrompt">'+esc(p)+'</p>' : ''; }
+/* The id a field should be named by: the question if there is one,
+   otherwise the screen heading. */
+function nameId(r){ return val(r.prompt) ? "amPrompt" : "amTitle"; }
+function tagsHTML(r){
+  return '<p class="am-prompt" id="amTagPrompt">'+esc(r.tagPrompt||"")+'</p><div class="am-tags" role="group" aria-labelledby="amTagPrompt">'+r.tags.map(function(t){return '<button type="button" class="am-tag" data-k="'+esc(t.k)+'" aria-pressed="false" onclick="YNSMock.tag(this)">'+esc(t.t)+'</button>';}).join("")+'</div>';
+}
+/* Re-render, then put focus back on the control that was used, so a tap
+   that repaints the screen doesn't drop keyboard users back at the top. */
+function renderKeep(sel){ renderStep(); var el=sel && host.querySelector(sel); if (el) el.focus(); }
 
 /* ---------- mechanics ---------------------------------------------- */
 var M = {};
@@ -115,8 +158,23 @@ M.learn = function(r){
   var pts=val(r.points,v)||[]; if (pts.length) h+='<ul class="am-points">'+pts.map(function(p){return '<li>'+p+'</li>';}).join("")+'</ul>';
   var body=val(r.body,v)||[]; if (typeof body==="string") body=[body]; body.forEach(function(p){ h+='<p class="am-scene">'+esc(p)+'</p>'; });
   var note=val(r.note,v); if (note) h+='<p class="am-note">'+esc(note)+'</p>';
-  shell(r, h, '<span></span>'+primary(r.cta,"YNSMock.next()"));
+  var alt = r.alt ? '<button type="button" class="btn btn-ghost" onclick="YNSMock.altStep()">'+esc(val(r.alt.label,v)||"It\u2019s changed")+'</button>' : '<span></span>';
+  shell(r, h, alt+primary(r.cta,"YNSMock.next()"));
 };
+/* A learn card that stands in for a question already answered can offer
+   a way to answer it again: clear the fact, then resolve the ladders
+   again so the asking rung comes back in this same spot. */
+function altStep(){
+  var s=cur(), r=s.rung; if (!r.alt) return;
+  var keys=r.alt.clears; if (!Array.isArray(keys)) keys=keys?[keys]:[];
+  keys.forEach(function(k){ delete facts[k]; });
+  if (r.alt.bypass) run.bypass=(run.bypass||[]).concat([r]);
+  var steps=buildSteps(run.d), id=s.slot.id, j=-1;
+  steps.forEach(function(x,k){ if (j<0 && x.slot.id===id) j=k; });
+  if (!steps.length) return;
+  run.steps=steps; run.i = j>=0 ? j : Math.min(run.i, steps.length-1);
+  renderStep();
+}
 
 M.choice = function(r){
   var h = prompt(r)+'<div class="am-opts">'+r.options.map(function(o){ return '<button class="opt" onclick="YNSMock.pick(\''+esc(o.k)+'\')"><i class="dot"></i><div><strong>'+esc(o.t)+'</strong>'+(o.s?'<span>'+esc(o.s)+'</span>':'')+'</div></button>'; }).join("")+'</div>';
@@ -141,10 +199,10 @@ M.text = function(r){
   var aside = r.aside ? '<div class="am-aside"><b>'+esc(r.aside.title)+'</b><ul>'
       + r.aside.points.map(function(x){ return "<li>"+x+"</li>"; }).join("")
       + "</ul>"+(r.aside.note?'<span>'+esc(r.aside.note)+'</span>':'')+"</div>" : "";
-  var h = prompt(r)+aside+'<textarea id="amText" rows="'+(r.rows||4)+'" maxlength="'+(r.maxLength||600)+'" placeholder="'+esc(r.placeholder||"")+'">'+esc(pre)+'</textarea>';
+  var h = prompt(r)+aside+'<textarea id="amText" aria-labelledby="'+nameId(r)+'" rows="'+(r.rows||4)+'" maxlength="'+(r.maxLength||600)+'" placeholder="'+esc(r.placeholder||"")+'">'+esc(pre)+'</textarea>';
   if (pre) h += '<p class="am-note">We started this for you. Change any of it.</p>';
   if (r.examples) h += '<div class="am-examples"><span>Examples</span>'+r.examples.map(function(e){return '<button type="button" class="am-chip" onclick="YNSMock.useExample(this)">'+esc(e)+'</button>';}).join("")+'</div>';
-  if (r.tags) h += '<p class="am-prompt">'+esc(r.tagPrompt||"")+'</p><div class="am-tags">'+r.tags.map(function(t){return '<button type="button" class="am-tag" data-k="'+esc(t.k)+'" onclick="YNSMock.tag(this)">'+esc(t.t)+'</button>';}).join("")+'</div>';
+  if (r.tags) h += tagsHTML(r);
   shell(r, h, skip(r)+primary(r.cta,"YNSMock.submitText()"));
 };
 function submitText(){
@@ -163,9 +221,10 @@ M.buildup = function(r){
      stepper buttons stay for nudging, and the field takes the number. */
   var h = prompt(r)+'<div class="am-total"><b id="amSum">$'+sum.toLocaleString("en-US")+'</b><span>'+esc(r.totalLabel||"a month")+'</span></div><div class="am-build">'+r.rows.map(function(row){
     return '<div class="am-row"><div><strong>'+esc(row.t)+'</strong>'+(row.s?'<span>'+esc(row.s)+'</span>':'')+'</div>'
-      +'<div class="am-step"><button type="button" onclick="YNSMock.bump(\''+row.k+'\',-'+row.step+')" aria-label="less">\u2212</button>'
-      +'<span class="am-money"><i>$</i><input type="text" inputmode="numeric" value="'+b[row.k].toLocaleString("en-US")+'" data-k="'+row.k+'" aria-label="'+esc(row.t)+'" oninput="YNSMock.typeAmount(this)"></span>'
-      +'<button type="button" onclick="YNSMock.bump(\''+row.k+'\','+row.step+')" aria-label="more">+</button></div></div>';
+      +'<div class="am-step"><button type="button" onclick="YNSMock.bump(\''+row.k+'\',-'+row.step+')" aria-label="Less for '+esc(row.t)+'">\u2212</button>'
+      +'<span class="am-money"><i>$</i><input type="text" inputmode="numeric" value="'+b[row.k].toLocaleString("en-US")+'" data-k="'+row.k+'" aria-label="'+esc(row.t)+'" aria-describedby="cap-b-'+row.k+'" oninput="YNSMock.typeAmount(this)" onblur="YNSMock.capBlur(this)"></span>'
+      +'<button type="button" onclick="YNSMock.bump(\''+row.k+'\','+row.step+')" aria-label="More for '+esc(row.t)+'">+</button></div>'
+      +'<p class="am-cap" id="cap-b-'+row.k+'" hidden></p></div>';
   }).join("")+'</div>';
   shell(r, h, '<span></span>'+primary(r.cta,"YNSMock.submitBuild()", sum<(r.minTotal||0)));
 };
@@ -175,9 +234,28 @@ function typeAmount(input){
   var k=input.getAttribute("data-k");
   var n=parseInt(String(input.value).replace(/[^0-9]/g,""),10); if (isNaN(n)) n=0;
   var r=cur().rung, row=r.rows.filter(function(x){return x.k===k;})[0];
-  if (row && row.max && n>row.max) n=row.max;
+  var capped = !!(row && row.max && n>row.max);
+  if (capped) n=row.max;
   run.ui.build[k]=n;
+  showCap("cap-b-"+k, capped ? "$"+row.max.toLocaleString("en-US") : null);
   refreshSum();
+}
+/* A field that went over its limit says so underneath, and the number
+   it's really using goes back into the box once they leave it. Never
+   while they're typing: repainting a field mid-keystroke loses focus. */
+function showCap(id, maxText){
+  var p=host && host.querySelector("#"+id); if (!p) return;
+  if (maxText){ p.textContent="Up to "+maxText+" here"; p.hidden=false; if (p.parentNode) p.parentNode.classList.add("has-cap"); }
+  else { p.hidden=true; p.textContent=""; }
+}
+function capBlur(input){
+  if (!run) return;
+  var k=input.getAttribute("data-k"), c=input.getAttribute("data-c"), n, shown;
+  if (k!=null){ if (!run.ui.build) return; n=run.ui.build[k]||0; shown=n.toLocaleString("en-US"); }
+  else if (c!=null){ if (!run.ui.calc) return; n=run.ui.calc[c]||0; shown=String(n); }
+  else return;
+  var typed=parseFloat(String(input.value).replace(/[^0-9.]/g,""));
+  if (!isNaN(typed) && typed>n) input.value=shown;
 }
 function refreshSum(){
   var r=cur().rung, b=run.ui.build||{}, sum=0;
@@ -188,6 +266,7 @@ function refreshSum(){
 function bump(k,d){
   var r=cur().rung, row=r.rows.filter(function(x){return x.k===k;})[0], b=run.ui.build;
   var n=(b[k]||0)+d; if(n<0)n=0; if(row&&row.max&&n>row.max)n=row.max; b[k]=n;
+  showCap("cap-b-"+k, null);
   var input=host.querySelector('input[data-k="'+k+'"]'); if (input) input.value=n.toLocaleString("en-US");
   refreshSum();
 }
@@ -206,8 +285,8 @@ M.estimate = function(r){
   var h = (subject?'<p class="am-lead">'+esc(subject)+'</p>':'')+prompt(r);
   if (!run.ui.revealed){
     h += '<div class="am-total"><b>$'+g.toLocaleString("en-US")+'</b><span>a year, your guess</span></div>'+
-         '<input type="range" id="amRange" min="'+lo+'" max="'+hi+'" step="'+step+'" value="'+g+'" oninput="YNSMock.guess(this.value)">';
-    shell(r, h, '<span></span>'+primary("Show me the real figure","YNSMock.reveal()"));
+         '<input type="range" id="amRange" aria-labelledby="'+nameId(r)+'" aria-valuetext="$'+g.toLocaleString("en-US")+' a year" min="'+lo+'" max="'+hi+'" step="'+step+'" value="'+g+'" oninput="YNSMock.guess(this.value)">';
+    shell(r, h, '<span></span>'+primary("Show me the figure","YNSMock.reveal()"));
   } else {
     var truth = 0; try { truth = r.truth(v); } catch(e){}
     var off=Math.abs(g-truth), pct=truth?Math.round(off/truth*100):0;
@@ -238,10 +317,10 @@ function sortTo(p){ var st=run.ui.sort; var c=cur().rung.cards[st.i]; st[p].push
 
 M.collect = function(r){
   var st=run.ui.items||(run.ui.items=[]); var full = st.length>=(r.count||3);
-  var h = prompt(r)+'<div class="am-items">'+st.map(function(it,i){ var lbl=(r.tags||[]).filter(function(t){return t.k===it.tag;})[0]; return '<div class="am-item"><span>'+esc(it.text)+'</span>'+(lbl?'<em>'+esc(lbl.t)+'</em>':'')+'<button type="button" onclick="YNSMock.removeItem('+i+')" aria-label="Remove">×</button></div>'; }).join("")+'</div>';
+  var h = prompt(r)+'<div class="am-items">'+st.map(function(it,i){ var lbl=(r.tags||[]).filter(function(t){return t.k===it.tag;})[0]; return '<div class="am-item"><span>'+esc(it.text)+'</span>'+(lbl?'<em>'+esc(lbl.t)+'</em>':'')+'<button type="button" onclick="YNSMock.removeItem('+i+')" aria-label="Remove: '+esc(it.text)+'">×</button></div>'; }).join("")+'</div>';
   if (!full){
-    h += '<label class="am-note">'+esc(r.itemLabel||"One")+'</label><textarea id="amText" rows="3" placeholder="'+esc(r.placeholder||"")+'"></textarea>';
-    if (r.tags) h += '<p class="am-prompt">'+esc(r.tagPrompt||"")+'</p><div class="am-tags">'+r.tags.map(function(t){return '<button type="button" class="am-tag" data-k="'+esc(t.k)+'" onclick="YNSMock.tag(this)">'+esc(t.t)+'</button>';}).join("")+'</div>';
+    h += '<label class="am-note" for="amText">'+esc(r.itemLabel||"One")+'</label><textarea id="amText" rows="3" placeholder="'+esc(r.placeholder||"")+'"></textarea>';
+    if (r.tags) h += tagsHTML(r);
     h += '<div style="margin-top:10px"><button class="btn btn-ghost" onclick="YNSMock.addItem()">Add this one</button></div>';
   }
   var can = st.length>=(r.min||1);
@@ -262,7 +341,7 @@ M.hours = function(r){
     var daily=!!row.daily, v=daily?st.perDay[row.k]:st.weekly[row.k];
     return '<div class="am-row am-hrow"><div><strong>'+esc(row.t)+'</strong><span>'+esc(row.s||"")+'</span></div>'+
       '<div class="am-hval"><span class="am-money"><input type="text" inputmode="decimal" value="'+v+'" data-h="'+row.k+'" aria-label="'+esc(row.t)+'" oninput="YNSMock.hour(this.getAttribute(\'data-h\'),this.value)"></span><span>'+(daily?"hrs a day":"hrs a week")+'</span>'+(daily?'<em id="hw-'+row.k+'">'+Math.round(st.weekly[row.k]*10)/10+'/wk</em>':'')+
-      (daily&&row.daily.adjustable?'<div class="am-days"><button type="button" onclick="YNSMock.days(\''+row.k+'\',-1)">−</button>'+st.days[row.k]+' days<button type="button" onclick="YNSMock.days(\''+row.k+'\',1)">+</button></div>':'')+'</div></div>';
+      (daily&&row.daily.adjustable?'<div class="am-days"><button type="button" data-d="'+row.k+':-1" onclick="YNSMock.days(\''+row.k+'\',-1)" aria-label="One fewer day for '+esc(row.t)+'">−</button><span aria-live="off">'+st.days[row.k]+' days</span><button type="button" data-d="'+row.k+':1" onclick="YNSMock.days(\''+row.k+'\',1)" aria-label="One more day for '+esc(row.t)+'">+</button></div>':'')+'</div></div>';
   }).join("")+'</div>';
   shell(r, h, '<span></span>'+primary(r.cta,"YNSMock.submitHours()", left<0));
 };
@@ -280,7 +359,7 @@ function hour(k,v){
   var wk=host.querySelector("#hw-"+k); if (wk) wk.textContent=Math.round(st.weekly[k]*10)/10+"/wk";
   var cta=host.querySelector(".am-foot .btn-primary"); if (cta) cta.disabled = used>total;
 }
-function days(k,d){ var st=run.ui.hours; st.days[k]=Math.min(7,Math.max(1,st.days[k]+d)); st.weekly[k]=(st.perDay[k]||0)*st.days[k]; renderStep(); }
+function days(k,d){ var st=run.ui.hours; st.days[k]=Math.min(7,Math.max(1,st.days[k]+d)); st.weekly[k]=(st.perDay[k]||0)*st.days[k]; renderKeep('button[data-d="'+k+':'+d+'"]'); }
 function renderStepKeepFocus(k){ renderStep(); var el=host.querySelector('input[oninput*="\''+k+'\'"]'); if (el) el.focus(); }
 function submitHours(){ var s=cur(), r=s.rung, id=s.slot.id, st=run.ui.hours; var alloc={}; r.rows.forEach(function(row){ alloc[row.k]=st.weekly[row.k]||0; }); run.extra[id+"_allocation"]=alloc; run.allocation=alloc; run.ui.hours=null; next(); }
 
@@ -307,10 +386,11 @@ M.diff = function(r){
   var rows = run.ui.rows || (run.ui.rows = (function(){ try { return r.rows(ctx())||[]; } catch(e){ return []; } })());
   var d=run.ui.diff||(run.ui.diff={});
   if (!rows.length){ shell(r, '<p class="am-lead">Nothing to compare yet. Do a couple of activities first and come back.</p>', '<span></span>'+primary("Okay","YNSMock.close()")); return; }
-  var h = prompt(r)+'<div class="am-diff">'+rows.map(function(row){ return '<div class="am-drow"><div><span class="am-note">'+esc(row.label)+(row.when?' · '+esc(row.when):'')+'</span><strong>'+esc(row.then)+'</strong></div><div class="am-dbtns"><button type="button" class="'+(d[row.key]==="true"?"on":"")+'" onclick="YNSMock.diffMark(\''+row.key+'\',\'true\')">Still true</button><button type="button" class="'+(d[row.key]==="changed"?"on":"")+'" onclick="YNSMock.diffMark(\''+row.key+'\',\'changed\')">Not any more</button></div></div>'; }).join("")+'</div>';
+  var h = prompt(r)+'<div class="am-diff">'+rows.map(function(row){ return '<div class="am-drow"><div><span class="am-note">'+esc(row.label)+(row.when?' · '+esc(row.when):'')+'</span><strong>'+esc(row.then)+'</strong></div><div class="am-dbtns"><button type="button" data-m="'+esc(row.key)+':true" class="'+(d[row.key]==="true"?"on":"")+'" aria-pressed="'+(d[row.key]==="true")+'" aria-label="Still true: '+esc(row.then)+'" onclick="YNSMock.diffMark(\''+row.key+'\',\'true\')">Still true</button><button type="button" data-m="'+esc(row.key)+':changed" class="'+(d[row.key]==="changed"?"on":"")+'" aria-pressed="'+(d[row.key]==="changed")+'" aria-label="Not any more: '+esc(row.then)+'" onclick="YNSMock.diffMark(\''+row.key+'\',\'changed\')">Not any more</button></div></div>'; }).join("")+'</div>';
   shell(r, h, '<span></span>'+primary(r.cta,"YNSMock.submitDiff()"));
 };
-function diffMark(k,v){ run.ui.diff[k]=v; renderStep(); }
+function diffMark(k,v){ run.ui.diff[k]=v; renderKeep('button[data-m="'+cssq(k+":"+v)+'"]'); }
+function cssq(s){ return String(s).replace(/["\\]/g,"\\$&"); }
 function submitDiff(){ var id=cur().slot.id, rows=run.ui.rows||[], d=run.ui.diff||{}; run.extra[id+"_diff"]=d; run.extra[id+"_changedRows"]=rows.filter(function(x){return d[x.key]==="changed";}); run.ui.rows=null; run.ui.diff=null; next(); }
 
 M.chain = function(r){
@@ -335,7 +415,7 @@ M.rate = function(r){
   var done=r.items.every(function(it){ return all[it.k]; });
   var h = prompt(r)+'<div class="am-rate">'+r.items.map(function(it){
     return '<div class="am-ritem" data-k="'+it.k+'"><span class="am-rq">'+esc(it.t)+'</span><div class="am-ropts">'
-      + r.options.map(function(o){ return '<button type="button" data-v="'+o.k+'" class="'+(all[it.k]===o.k?"on":"")+'" onclick="YNSMock.rate(\''+it.k+'\',\''+o.k+'\')">'+esc(o.t)+'</button>'; }).join("")
+      + r.options.map(function(o){ return '<button type="button" data-v="'+o.k+'" class="'+(all[it.k]===o.k?"on":"")+'" aria-pressed="'+(all[it.k]===o.k)+'" aria-label="'+esc(o.t)+': '+esc(it.t)+'" onclick="YNSMock.rate(\''+it.k+'\',\''+o.k+'\')">'+esc(o.t)+'</button>'; }).join("")
       + '</div></div>';
   }).join("")+'</div>';
   shell(r, h, '<span></span>'+primary(r.cta,"YNSMock.submitRate()", !done));
@@ -347,7 +427,7 @@ function rate(k,v){
      list jumps under your thumb between question two and question
      three. */
   var row=host.querySelector('.am-ritem[data-k="'+k+'"]');
-  if (row) row.querySelectorAll(".am-ropts button").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-v")===v); });
+  if (row) row.querySelectorAll(".am-ropts button").forEach(function(b){ var on=b.getAttribute("data-v")===v; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on?"true":"false"); });
   var r=cur().rung, all=run.extra.rate_all;
   var done=r.items.every(function(it){ return all[it.k]; });
   var cta=host.querySelector(".am-foot .btn-primary");
@@ -441,9 +521,10 @@ M.calc = function(r){
   var res=(r.compute||compute)(v, r.mode);
   var h = prompt(r)+'<div class="am-build">'+r.inputs.map(function(i){
     return '<div class="am-row"><div><strong>'+esc(i.t)+'</strong>'+(i.s?'<span>'+esc(i.s)+'</span>':'')+'</div>'
-      +'<div class="am-step"><button type="button" onclick="YNSMock.calcBump(\''+i.k+'\',-'+i.step+')" aria-label="less">\u2212</button>'
-      +'<span class="am-money">'+(i.prefix?'<i>'+i.prefix+'</i>':'')+'<input type="text" inputmode="numeric" value="'+v[i.k]+'" data-c="'+i.k+'" aria-label="'+esc(i.t)+'" oninput="YNSMock.calcType(this)">'+(i.suffix?'<i>'+i.suffix+'</i>':'')+'</span>'
-      +'<button type="button" onclick="YNSMock.calcBump(\''+i.k+'\','+i.step+')" aria-label="more">+</button></div></div>';
+      +'<div class="am-step"><button type="button" onclick="YNSMock.calcBump(\''+i.k+'\',-'+i.step+')" aria-label="Less for '+esc(i.t)+'">\u2212</button>'
+      +'<span class="am-money">'+(i.prefix?'<i>'+i.prefix+'</i>':'')+'<input type="text" inputmode="numeric" value="'+v[i.k]+'" data-c="'+i.k+'" aria-label="'+esc(i.t)+'" aria-describedby="cap-c-'+i.k+'" oninput="YNSMock.calcType(this)" onblur="YNSMock.capBlur(this)">'+(i.suffix?'<i>'+i.suffix+'</i>':'')+'</span>'
+      +'<button type="button" onclick="YNSMock.calcBump(\''+i.k+'\','+i.step+')" aria-label="More for '+esc(i.t)+'">+</button></div>'
+      +'<p class="am-cap" id="cap-c-'+i.k+'" hidden></p></div>';
   }).join("")+'</div>'
   + '<div class="am-calcout" id="calcOut">'+(r.render||calcHTML)(res,v,r.mode)+'</div>';
   shell(r, h, '<span></span>'+primary(r.cta,"YNSMock.submitCalc()"));
@@ -475,7 +556,7 @@ function calcHTML(res,v,mode){
   if (mode==="match"){
     return '<div class="calc-big">$'+Math.round(res.matchYear).toLocaleString("en-US")+' a year</div>'
       +'<p class="calc-sub">from your employer, for $'+Math.round(res.youYear).toLocaleString("en-US")+' from you</p>'
-      +'<p class="calc-late">'+(res.matchYear>0 ? "Over ten years at the same numbers, about $"+Math.round(res.tenYear).toLocaleString("en-US")+" in the account, using the same 7% assumption as the compounding activity." : "No match means no free money on this one. A Roth IRA is the one you open yourself.")+'</p>';
+      +'<p class="calc-late">'+(res.matchYear>0 ? "Over ten years at the same numbers, about $"+Math.round(res.tenYear).toLocaleString("en-US")+" in the account, using the same 7% assumption as the compounding activity." : "No match here. An IRA is an account you can open on your own.")+'</p>';
   }
   if (mode==="net"){
     return '<div class="calc-big">$'+Math.round(res.netMonth).toLocaleString("en-US")+' a month</div>'
@@ -497,13 +578,15 @@ function calcType(input){
   var k=input.getAttribute("data-c");
   var n=parseFloat(String(input.value).replace(/[^0-9.]/g,"")); if (isNaN(n)) n=0;
   var i=cur().rung.inputs.filter(function(x){return x.k===k;})[0];
-  if (i && i.max && n>i.max) n=i.max;
+  var capped = !!(i && i.max && n>i.max);
+  if (capped) n=i.max;
+  showCap("cap-c-"+k, capped ? (i.prefix||"")+i.max.toLocaleString("en-US")+(i.suffix||"") : null);
   run.ui.calc[k]=n; refreshCalc();
 }
 function calcBump(k,d){
   var i=cur().rung.inputs.filter(function(x){return x.k===k;})[0];
   var n=(run.ui.calc[k]||0)+d; if(n<0)n=0; if(i&&i.max&&n>i.max)n=i.max;
-  run.ui.calc[k]=n;
+  run.ui.calc[k]=n; showCap("cap-c-"+k, null);
   var input=host.querySelector('input[data-c="'+k+'"]'); if (input) input.value=n;
   refreshCalc();
 }
@@ -516,11 +599,15 @@ function submitCalc(){
 
 M.compare = function(r){
   var v=view(), routes=val(r.routes,v)||[], p=run.ui.picks||(run.ui.picks={});
-  var h = prompt(r)+'<div class="am-table"><table><thead><tr><th>'+esc(r.rowHeader||"")+'</th>'+r.columns.map(function(c){return '<th>'+esc(c.t)+'</th>';}).join("")+'<th></th></tr></thead><tbody>'+
-    routes.map(function(x){ return '<tr><td><strong>'+esc(x.t)+'</strong><span>'+esc(x.s||"")+'</span></td>'+r.columns.map(function(c){return '<td>'+esc(x[c.k]||"")+'</td>';}).join("")+'<td class="am-yn"><button type="button" class="'+(p[x.k]==="yes"?"on":"")+'" onclick="YNSMock.compareMark(\''+x.k+'\',\'yes\')">Yes</button><button type="button" class="'+(p[x.k]==="no"?"on":"")+'" onclick="YNSMock.compareMark(\''+x.k+'\',\'no\')">No</button></td></tr>'; }).join("")+'</tbody></table></div>';
+  /* One table. On a phone the CSS turns each row into its own card, with
+     every figure labelled and Yes/No underneath, so nothing sits off the
+     right edge. */
+  function yn(x, v, t){ var on=p[x.k]===v; return '<button type="button" data-y="'+esc(x.k)+':'+v+'" class="'+(on?"on":"")+'" aria-pressed="'+on+'" aria-label="'+t+', '+esc(x.t)+'" onclick="YNSMock.compareMark(\''+x.k+'\',\''+v+'\')">'+t+'</button>'; }
+  var h = prompt(r)+'<div class="am-table am-cmp"><table><thead><tr><th scope="col">'+esc(r.rowHeader||"")+'</th>'+r.columns.map(function(c){return '<th scope="col">'+esc(c.t)+'</th>';}).join("")+'<th scope="col"><span class="sr-only">Could you start this within a year?</span></th></tr></thead><tbody>'+
+    routes.map(function(x){ return '<tr><th scope="row" class="am-rt"><strong>'+esc(x.t)+'</strong><span>'+esc(x.s||"")+'</span></th>'+r.columns.map(function(c){return '<td data-label="'+esc(c.t)+'">'+esc(x[c.k]||"")+'</td>';}).join("")+'<td class="am-yn">'+yn(x,"yes","Yes")+yn(x,"no","No")+'</td></tr>'; }).join("")+'</tbody></table></div>';
   shell(r, h, '<span></span>'+primary(r.cta,"YNSMock.submitCompare()", Object.keys(p).length<routes.length));
 };
-function compareMark(k,v){ run.ui.picks[k]=v; renderStep(); }
+function compareMark(k,v){ run.ui.picks[k]=v; renderKeep('button[data-y="'+cssq(k+":"+v)+'"]'); }
 function submitCompare(){ var s=cur(), r=s.rung, id=s.slot.id, p=run.ui.picks||{}; var routes=val(r.routes)||[]; run.extra[id+"_picks"]=p; run.extra[id+"_rowCount"]=routes.length; var yes=routes.filter(function(x){return p[x.k]==="yes";})[0]; if (r.asks && yes) facts[r.asks]=yes.k; run.ui.picks=null; next(); }
 
 /* ---------- render / results --------------------------------------- */
@@ -542,10 +629,13 @@ function renderResults(){
     try { d.onComplete({ extra:run.extra, ctx:ctx(), state:{answers:run.answers}, setFact:function(k,v){ facts[k]=v; }, DB:null }); } catch(e){}
   }
   var acts=[]; try { acts=d.actions({answers:run.answers, extra:run.extra}, ctx())||[]; } catch(e){}
-  var h='<div class="am-card am-results"><div class="am-top"><span class="am-eyebrow">'+esc(d.title)+'</span><button class="am-x" onclick="YNSMock.close()" aria-label="Close">×</button></div>'+html;
+  var h='<div class="am-card am-results" data-run="1"><div class="am-top"><span class="am-eyebrow">'+esc(d.title)+'</span><button class="am-x" onclick="YNSMock.close()" aria-label="Close">×</button></div>'+html;
   if (hooks.resultsFooter){ try { h+=hooks.resultsFooter(run.slug)||""; } catch(e){} }
-  h+='<div class="am-seven"><h3>Seven days</h3><p class="am-scene">Pick one thing to do this week. It goes on your hub until you tick it off.</p>'+acts.map(function(a){return '<button class="opt" onclick="YNSMock.finish(this)"><i class="dot"></i><div><strong>'+esc(a)+'</strong></div></button>';}).join("")+'<button class="btn-quiet" onclick="YNSMock.finish(null)">Skip for now</button></div></div>';
+  h+='<div class="am-seven"><h3>Seven days</h3><p class="am-scene">Pick one thing to do this week. It goes in your Planner until you tick it off.</p>'+acts.map(function(a){return '<button class="opt" onclick="YNSMock.finish(this)"><i class="dot"></i><div><strong>'+esc(a)+'</strong></div></button>';}).join("")+'<button class="btn-quiet" onclick="YNSMock.finish(null)">Skip for now</button></div></div>';
   host.innerHTML=h; host.scrollTop=0;
+  /* Name the panel after the result's own heading. */
+  var hd=host.querySelector("h1,h2");
+  if (hd){ if (!hd.id) hd.id="amTitle"; hd.setAttribute("tabindex","-1"); }
 }
 function finish(el){
   var slug=run.slug;
@@ -556,8 +646,109 @@ function finish(el){
   if (el){
     var text=el.textContent.trim();
     facts.steps_open = (facts.steps_open||[]).filter(function(x){ return x.text!==text; });
-    facts.steps_open.push({ id: slug+"-"+Date.now(), slug: slug, text: text, from: (DEFS[slug]||{}).title || slug, at: Date.now(), done: false });
-  } if (el) facts.next_action=el.textContent.trim(); facts.activities_completed=(facts.activities_completed||[]).concat([slug]); close(); hooks.onDone(slug); }
+    var at=(global.YNS && global.YNS.now) ? global.YNS.now() : Date.now();
+    facts.steps_open.push({ id: slug+"-"+Date.now(), slug: slug, text: text, from: (DEFS[slug]||{}).title || slug, at: at, done: false });
+  } if (el) facts.next_action=el.textContent.trim(); facts.activities_completed=(facts.activities_completed||[]).concat([slug]);
+  delete unfinished[slug];
+  var info=closeRun(true); hooks.onDone(slug); tellHub(info); }
+
+/* ---------- the shared panel: focus, name, Escape -------------------
+   #actModal is used by these activities and by the hub's own panels
+   (Planner, Portfolio, sign-up, the framed apps), which open and close
+   it by setting style.display and innerHTML. So this watches the
+   element, and no caller has to manage focus:
+   - opening: remember what had focus, make the page behind inert, move
+     focus to the panel's heading (or its first control);
+   - repainting while open: if focus was lost, move it to the new heading;
+   - closing: lift inert and put focus back where it came from.
+   The heading also names the dialog (aria-labelledby). */
+var FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),iframe,summary,[tabindex]:not([tabindex="-1"])';
+function watchModal(){
+  var m=document.getElementById("actModal");
+  if (!m || !global.MutationObserver || m.__ynsWatch) return;
+  m.__ynsWatch=true;
+  var isOpen=false, opener=null, sig=null;
+  function page(){ return document.querySelector(".wrap"); }
+  function shown(){ return !!m.style.display && m.style.display!=="none"; }
+  function visible(el){ return !!(el && el.isConnected && (el.offsetWidth || el.offsetHeight || el.getClientRects().length)); }
+  function focusables(){ return Array.prototype.filter.call(m.querySelectorAll(FOCUSABLE), function(el){ return visible(el) && !el.closest("[hidden]"); }); }
+  function name(){
+    var h=m.querySelector("h1,h2"), t=h || m.querySelector(".am-eyebrow");
+    if (!t){ m.removeAttribute("aria-labelledby"); return null; }
+    if (!t.id) t.id="amTitle";
+    m.setAttribute("aria-labelledby", t.id);
+    if (h && !h.hasAttribute("tabindex")) h.setAttribute("tabindex","-1");
+    return h;
+  }
+  function focusIn(){
+    var h=name();
+    var target = h || m.querySelector("iframe") || focusables()[0];
+    if (target){ try { target.focus({ preventScroll:true }); } catch(e){ target.focus(); } }
+  }
+  function signature(el){ return { tag:el.tagName, id:el.id, cls:el.className, text:(el.textContent||"").trim().slice(0,120), oc:el.getAttribute("onclick") }; }
+  function findLike(s){
+    if (!s) return null;
+    if (s.id){ var byId=document.getElementById(s.id); if (visible(byId)) return byId; }
+    var root=page()||document.body, list=root.querySelectorAll(s.tag), best=null;
+    for (var i=0;i<list.length;i++){
+      var el=list[i]; if (!visible(el)) continue;
+      if (el.className===s.cls && (el.textContent||"").trim().slice(0,120)===s.text && el.getAttribute("onclick")===s.oc) return el;
+      if (!best && s.text && (el.textContent||"").trim().slice(0,120)===s.text && el.className===s.cls) best=el;
+    }
+    return best;
+  }
+  function setInert(on){
+    var w=page(); if (!w) return;
+    if (on){ w.inert=true; w.setAttribute("inert",""); }
+    else { w.inert=false; w.removeAttribute("inert"); }
+  }
+  function sync(){
+    var open=shown(), active=document.activeElement;
+    if (open && !isOpen){
+      isOpen=true;
+      opener = (active && active!==document.body && !m.contains(active)) ? active : null;
+      sig = opener ? signature(opener) : null;
+      setInert(true);
+      if (!m.contains(document.activeElement)) focusIn(); else name();
+    } else if (open && isOpen){
+      if (!m.contains(active)) focusIn(); else name();
+    } else if (!open && isOpen){
+      isOpen=false;
+      setInert(false);
+      m.removeAttribute("aria-labelledby");
+      var card = opener && opener.closest ? opener.closest("[data-slug]") : null;
+      var slugSel = card ? '[data-slug="'+card.getAttribute("data-slug")+'"]' : null;
+      var back = visible(opener) ? opener : findLike(sig);
+      if (!back && slugSel){ var c2=document.querySelector(slugSel); if (visible(c2)) back = c2.querySelector("button") || c2; }
+      opener=null; sig=null;
+      if (back && !m.contains(document.activeElement)){ try { back.focus({ preventScroll:true }); } catch(e){ back.focus(); } }
+    }
+  }
+  new MutationObserver(sync).observe(m, { attributes:true, attributeFilter:["style"], childList:true });
+  document.addEventListener("keydown", function(e){
+    if (!isOpen || !shown()) return;
+    if (e.defaultPrevented) return;
+    if (e.key==="Escape" || e.key==="Esc"){
+      /* An inline editor in the Planner uses Escape to cancel itself. */
+      var t=e.target; if (t && t!==document.body && m.contains(t) && typeof t.onkeydown==="function") return;
+      e.preventDefault();
+      if (run && m.querySelector("[data-run]")) close();
+      else if (m.querySelector("iframe") && global.YNS && global.YNS.closeApp) global.YNS.closeApp();
+      else if (m.querySelector('[data-back="planner"]') && global.YNS && global.YNS.planner) global.YNS.planner();
+      else if (global.YNS && global.YNS.closeList) global.YNS.closeList();
+      return;
+    }
+    if (e.key==="Tab"){
+      var f=focusables(); if (!f.length){ e.preventDefault(); return; }
+      var first=f[0], last=f[f.length-1], a=document.activeElement;
+      if (!m.contains(a)){ e.preventDefault(); (e.shiftKey?last:first).focus(); }
+      else if (e.shiftKey && a===first){ e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && a===last){ e.preventDefault(); first.focus(); }
+    }
+  });
+  sync();
+}
+if (document.readyState==="loading") document.addEventListener("DOMContentLoaded", watchModal); else watchModal();
 
 /* ---------- public --------------------------------------------------- */
 global.YNSActivity = {
@@ -575,7 +766,7 @@ global.YNSMock = {
      skipping every question whose answer is still on file. An activity
      owns a fact if one of its rungs declares it with `asks`. */
   resetActivity: function(slug){
-    var d=DEFS[slug]; delete lastRun[slug];
+    var d=DEFS[slug]; delete lastRun[slug]; delete unfinished[slug];
     if (!d) return [];
     var cleared=[];
     (d.slots||[]).forEach(function(sl){
@@ -591,9 +782,9 @@ global.YNSMock = {
   setFact: function(k,v){ facts[k]=v; },
   play: play, close: close, next: next, back: back, pick: pick,
   useExample: function(el){ $("amText").value=el.textContent; $("amText").focus(); },
-  tag: function(el){ host.querySelectorAll(".am-tag").forEach(function(t){t.classList.remove("on");}); el.classList.add("on"); run.ui.tag=el.getAttribute("data-k"); },
+  tag: function(el){ host.querySelectorAll(".am-tag").forEach(function(t){t.classList.remove("on"); t.setAttribute("aria-pressed","false");}); el.classList.add("on"); el.setAttribute("aria-pressed","true"); run.ui.tag=el.getAttribute("data-k"); },
   submitText: submitText, bump: bump, submitBuild: submitBuild,
-  guess: function(v){ run.ui.guess=parseInt(v,10); var b=host.querySelector(".am-total b"); if (b) b.textContent="$"+run.ui.guess.toLocaleString("en-US"); },
+  guess: function(v){ run.ui.guess=parseInt(v,10); var t="$"+run.ui.guess.toLocaleString("en-US"); var b=host.querySelector(".am-total b"); if (b) b.textContent=t; var rg=host.querySelector("#amRange"); if (rg) rg.setAttribute("aria-valuetext", t+" a year"); },
   reveal: function(){ if (run.ui.guess==null){ var r=cur().rung; run.ui.guess=Math.round(((r.min||0)+(r.max||200000))/2); } run.ui.revealed=true; renderStep(); },
   finishEstimate: finishEstimate,
   sortTo: sortTo, addItem: addItem, removeItem: removeItem, submitCollect: submitCollect,
@@ -603,7 +794,8 @@ global.YNSMock = {
   chainPick: chainPick, submitChain: submitChain,
   compareMark: compareMark, submitCompare: submitCompare,
   finish: finish, skipStep: skipStep, rate: rate, submitRate: submitRate,
-  typeAmount: typeAmount,
+  typeAmount: typeAmount, capBlur: capBlur, altStep: altStep,
+  isOpen: function(){ return !!run; },
   budgetType: budgetType, submitBudget: submitBudget, exportBudget: exportBudget,
   calcType: calcType, calcBump: calcBump, submitCalc: submitCalc
 };

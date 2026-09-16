@@ -211,7 +211,7 @@ YNSActivity.define({
       (SOON[soon] ? '<div class="ya-readout"><h3>Money you need within a year</h3><p>' + esc(SOON[soon]) + "</p></div>" : "") +
       (FAR[far] ? '<div class="ya-readout"><h3>Money you won\u2019t touch for ten years</h3><p>' + esc(FAR[far]) + "</p></div>" : "") +
       '<p class="ya-result-lead">None of this is advice about what to buy. It\u2019s the map. ' +
-      "The full version of Module 5, with the videos and the coach, goes deeper on all five.</p>";
+      "Module 5 of the optional paid Your Next Step course goes deeper on all five, with videos.</p>";
   },
 
   actions: function () {

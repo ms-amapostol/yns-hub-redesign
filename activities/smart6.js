@@ -151,7 +151,7 @@ YNSActivity.define({
           prompt: "One sentence. Past tense.",
           prefill: function (ctx) {
             var f = (ctx && ctx.facts) || {};
-            var ROUTE = { degree: "enrolled in a program", apprenticeship: "started an apprenticeship", certificate: "finished a certificate", sideways: "moved into a role closer to the work" };
+            var ROUTE = { degree: "enrolled in a program", apprenticeship: "started an apprenticeship", certificate: "finished a certificate", lateral: "moved into a role closer to the work" };
             if (f.route_preference && ROUTE[f.route_preference]) return "By then I've " + ROUTE[f.route_preference] + " in ";
             return "By then I've ";
           },
@@ -405,7 +405,7 @@ YNSActivity.define({
       monthCheck(months) +
       check +
       (CONF[conf] ? '<p class="ya-result-lead">' + esc(CONF[conf]) + "</p>" : "") +
-      '<p class="ya-result-lead">When the six months are up, the class says to rinse and repeat: pick the next six-month piece of the same five-year picture. Still True? will ask you about this in a month. Say what changed. Plans that get checked are the ones that happen.</p>';
+      '<p class="ya-result-lead">When the six months are up, the class says to rinse and repeat: pick the next six-month piece of the same five-year picture. In a month, you\u2019ll see a reminder here to check in with Still True? Say what changed. Plans that get checked are the ones that happen.</p>';
   },
 
   /* Each month line gets the same two questions asked of it: is there a

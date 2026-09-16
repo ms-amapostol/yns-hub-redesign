@@ -40,6 +40,25 @@ var VALUE_WORDS = {
   stable: "stability", growth: "growth", craft: "craft and mastery"
 };
 
+/* Plain words for the stored keys, taken from the option text in
+   168 Hours (time_protected) and Three Doors (route_blocker). */
+var PROTECT_WORDS = {
+  evenings: "your evenings with the people you live with",
+  weekends: "your weekends",
+  sleep: "sleep",
+  own_time: "the one thing you do that\u2019s yours"
+};
+
+var BLOCKER_WORDS = {
+  money: "the money",
+  time: "the time",
+  unclear: "not knowing what the first step is",
+  entry: "getting accepted",
+  confidence: "whether you could do it"
+};
+
+function plain(k) { return String(k).replace(/_/g, " "); }
+
 function when(days) {
   if (days == null) return "";
   if (days < 1) return "today";
@@ -74,8 +93,11 @@ function buildRows(ctx) {
   }
   if (ctx.facts.floor_monthly) add("floor_monthly", "Your monthly floor was", "$" + Math.round(ctx.facts.floor_monthly).toLocaleString("en-US"));
   if (ctx.facts.why_statement) add("why_statement", "You said your reason was", String(ctx.facts.why_statement));
-  if (ctx.facts.time_protected) add("time_protected", "You said you would not give up", String(ctx.facts.time_protected).replace(/_/g, " "));
-  if (ctx.facts.route_blocker && ctx.facts.route_blocker !== "none") add("route_blocker", "What was blocking you was", String(ctx.facts.route_blocker));
+  var tp = ctx.facts.time_protected;
+  if (tp === "flexible") add("time_protected", "You said your time was", "mostly up for grabs, for the right job");
+  else if (tp) add("time_protected", "You said you would not give up", PROTECT_WORDS[tp] || plain(tp));
+  var rb = ctx.facts.route_blocker;
+  if (rb && rb !== "none") add("route_blocker", "What was blocking you was", BLOCKER_WORDS[rb] || plain(rb));
   /* Open steps, not the retired next_action scalar. Two at most: this is
      a check-in, and a wall of your own unfinished tasks is a different
      and much worse screen. */
@@ -173,7 +195,7 @@ YNSActivity.define({
           eyebrow: "The context",
           title: "Has anything changed around you?",
           scene: [
-            "A move, a birth, a diagnosis, a a layoff, a relationship, a bill. The things that decide what is possible, and that no quiz ever asks about."
+            "A move, a birth, a diagnosis, a layoff, a relationship, a bill. The things that decide what is possible, and that no quiz ever asks about."
           ],
           prompt: "Anything you think is worth us knowing, or skip this one.",
           placeholder: "Since last time…",
@@ -224,8 +246,7 @@ YNSActivity.define({
       (changed.length
         ? '<div class="ya-readout"><h3>What you said is no longer true</h3>' +
           changed.map(function (c) { return "<p>" + esc(c.label) + " <b>" + esc(c.then) + "</b></p>"; }).join("") +
-          "<p>Recorded as a change, not an erasure. The old answer stays in your history with its " +
-          "date, because a record you can edit is not a record.</p></div>"
+          "<p>With an account, the old answer stays in your history with its date.</p></div>"
         : "") +
 
       '<div class="ya-readout"><h3>What happened since</h3><p>' +

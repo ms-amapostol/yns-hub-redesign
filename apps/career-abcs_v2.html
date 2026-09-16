@@ -165,6 +165,19 @@ img,svg{max-width:100%}
 .appbar-nav .chip-btn{text-decoration:none; white-space:nowrap}
 @media(max-width:640px){ .appbar-nav .chip-btn{padding:6px 9px; font-size:var(--yns-t-xs)} }
 .appbar-act{display:flex; align-items:center; gap:var(--yns-s2)}
+/* Phones (F3): the bar wraps instead of pushing the page sideways. The
+   account bar that yns-abcs-sync.js mounts inside .appbar-in takes its own
+   row, and its Back/Home, dots and theme toggle wrap within that row. */
+@media(max-width:480px){
+  .appbar-in{flex-wrap:wrap; row-gap:var(--yns-s2); min-width:0}
+  .appbar-in > *{min-width:0}
+  .appbar-nav{margin-left:0}
+  .appbar-act{flex-wrap:wrap; justify-content:flex-end; min-width:0}
+  .appbar-act .chip-btn{padding:6px 9px; white-space:nowrap}
+  #yns-account-bar{flex:1 1 100%; min-width:0; max-width:100%; margin-left:0 !important; flex-wrap:wrap}
+  #yns-account-bar .yns-bar--inline{flex-wrap:wrap; row-gap:6px; min-width:0; max-width:100%}
+  #yns-account-bar .yns-dots{display:flex; flex-wrap:wrap; min-width:0}
+}
 .chip-btn{
   background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.3);
   font-family:var(--yns-display); font-weight:700; font-size:var(--yns-t-xs);
@@ -207,6 +220,9 @@ img,svg{max-width:100%}
 .spine-s{font-size:var(--yns-t-xs);color:var(--yns-muted);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media(max-width:700px){ .spine-s{display:none} .spine-btn{gap:7px;padding:8px} }
+/* F3: the labels are spans, so the ellipsis above only works once they are blocks. */
+.spine-t,.spine-s{display:block}
+@media(max-width:380px){ .spine{padding:4px} .spine-btn{gap:5px;padding:6px} .spine-l{width:28px;height:28px} }
 
 /* ---------- cards ---------- */
 .card{background:var(--yns-paper); border:1px solid var(--yns-line);
@@ -634,6 +650,7 @@ body.front-open{overflow:hidden}
 .front-lead{font-size:var(--yns-t-lg); color:var(--yns-muted); margin-bottom:var(--yns-s4)}
 
 .front-opts{margin:var(--yns-s5) 0 var(--yns-s4)}
+.front-verify{margin:var(--yns-s3) 0 0; padding:var(--yns-s3) var(--yns-s4); border-left:3px solid var(--yns-blue); background:var(--yns-tint); border-radius:var(--yns-r-sm); color:var(--yns-ink)}
 .front-opts .survey-opt{padding:var(--yns-s4) var(--yns-s5)}
 
 .front-actions{margin-top:var(--yns-s5); display:flex; gap:var(--yns-s3)}
@@ -3531,6 +3548,18 @@ body.front-open{overflow:hidden}
         education: get("about.education", ""),
         direction: get("about.direction", "")
       };
+      /* C2: the hub passes the level it already knows as ?lvl=. Preselect it
+         on the experience question and ask the person to confirm it. A
+         stored stage wins only once the person has answered here before. */
+      let hubStage = "";
+      try {
+        const lvl = new URLSearchParams(location.search).get("lvl") || "";
+        hubStage = { early: "starting_out", some: "early_ic", experienced: "experienced_ic", leader: "people_leader" }[lvl] || "";
+      } catch {
+        hubStage = "";
+      }
+      if (hubStage && (!answers.stage || !get("seen.survey"))) answers.stage = hubStage;
+      else hubStage = "";
       let step = resume ? 0 : -1;
       const root = el("div", { class: "front", role: "dialog", "aria-modal": "true", "aria-label": "Getting started" });
       document.body.append(root);
@@ -3591,10 +3620,12 @@ body.front-open{overflow:hidden}
       function stepHTML() {
         const s = INTAKE[step];
         const chosen = answers[s.id];
+        const hubPick = s.id === "stage" && hubStage ? s.options.find((o) => o.key === hubStage) : null;
         return `
         <p class="front-eyebrow">Question ${step + 1} of ${INTAKE.length}</p>
         <h1 class="front-h1 front-h1-sm">${esc(s.question)}</h1>
         <p class="front-lead">${esc(s.help)}</p>
+        ${hubPick ? `<p class="front-verify" role="note">From your answers on the hub: <strong>${esc(hubPick.label)}</strong>. Still right? Change it if not.</p>` : ""}
         <div class="front-opts">
           ${s.options.map((o) => `
             <button type="button" class="survey-opt" data-opt="${esc(o.key)}"

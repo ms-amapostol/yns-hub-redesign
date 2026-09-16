@@ -6,7 +6,7 @@ A working mock of a redesigned `apps.yournextstepai.com`. Open `index.html` in a
 
 1. Asks the person to pick a character, then three questions: do they know what they want, what brought them here, where they are with work.
 2. Routes them to one of five **starting doors**: Get to know you · Explore what's out there · Get the job · Mindset and money · Make the plan. All five stay open.
-3. Plays **13 activities inside the hub** from their real content files in `activities/`. Nine are the live files from the current hub, unmodified. Four are new (Doors 4 and 5) and were written to `ACTIVITY-SPEC.md`.
+3. Plays **26 activities**: 20 inside the hub from their content files in `activities/`, plus the three quizzes and the three Career ABCs stages from their own pages in `apps/`.
 4. Fills in the character piece by piece as activities finish, and gives it a speech bubble that quotes what the person actually said.
 
 **What's stubbed**

@@ -133,6 +133,27 @@ var GENERIC = [
     time: "6–24 months", cost: "Near zero", entry: "Nothing formal needed", risk: "High" }
 ];
 
+/* The lower bound of each route's `time`, in months, so "fastest" is a
+   number comparison. Sorting on the length of the text once put a
+   "3–5 years" apprenticeship ahead of a "6–18 months" certificate.
+   The unit is the first one written after the first number, so
+   "6 months–2 years" is 6 and "1–3 years" is 12. */
+function minMonths(time) {
+  var t = String(time || "").toLowerCase();
+  var m = t.match(/(\d+(?:\.\d+)?)/);
+  if (!m) return /week/.test(t) ? 0.5 : /day/.test(t) ? 0.1 : 999;
+  var n = parseFloat(m[1]);
+  var rest = t.slice(m.index);
+  var unit = rest.match(/year|month|week|day/);
+  var u = unit ? unit[0] : "month";
+  return u === "year" ? n * 12 : u === "week" ? n / 4 : u === "day" ? n / 30 : n;
+}
+
+[GENERIC].concat(Object.keys(ROUTES).map(function (k) { return ROUTES[k]; }))
+  .forEach(function (set) {
+    set.forEach(function (x) { if (x.months == null) x.months = minMonths(x.time); });
+  });
+
 function routesFor(cat) { return ROUTES[cat] || GENERIC; }
 
 function escHTML(t) {
@@ -356,7 +377,10 @@ YNSActivity.define({
         "fix.";
     }
 
-    var fastest = yes.slice().sort(function (a, b) { return a.time.length - b.time.length; })[0];
+    var fastest = yes.slice().sort(function (a, b) {
+      return (a.months != null ? a.months : minMonths(a.time)) -
+             (b.months != null ? b.months : minMonths(b.time));
+    })[0];
 
     return "<h1>" + esc(lead) + "</h1>" +
       '<p class="ya-result-lead">' + reading + "</p>" +

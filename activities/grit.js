@@ -198,7 +198,7 @@ YNSActivity.define({
             "<b>Angela Duckworth</b> calls the long version of this grit: passion and perseverance for a long-term goal. Resilience is the short version, bouncing back from one setback.",
             "None of this is a personality type. Every time you face a hard thing instead of avoiding it, you're practicing it."
           ],
-          note: "The class's version is in Module 4, videos 6 and 10, if you want the full idea.",
+          note: "The optional paid Your Next Step course covers this in Module 4, with video, if you want the full idea.",
           cta: "Got it"
         }
       ]

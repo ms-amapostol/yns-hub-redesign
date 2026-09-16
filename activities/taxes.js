@@ -122,7 +122,7 @@ YNSActivity.define({
         : "") +
       '<div class="ya-readout"><h3>The four lines</h3><p><b>Federal tax</b> \u00b7 <b>State tax</b> \u00b7 <b>FICA</b> (Social Security and Medicare) \u00b7 <b>What you chose</b> (insurance, retirement).</p></div>' +
       (STATUS[status] ? '<div class="ya-readout"><h3>Where you are with it</h3><p>' + esc(STATUS[status]) + "</p></div>" : "") +
-      '<p class="ya-result-lead">This is the high-level version, which is the level that matters for negotiating and budgeting. Module 5 has the full lesson with the video.</p>';
+      '<p class="ya-result-lead">This is the high-level version, which is the level that matters for negotiating and budgeting. Module 5 of the optional paid Your Next Step course has the full lesson, with video.</p>';
   },
 
   actions: function () {

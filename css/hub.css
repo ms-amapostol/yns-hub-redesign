@@ -24,7 +24,10 @@ h3{font-size:1.15rem;line-height:1.35;color:var(--yns-heading)}
 p{margin:0}
 a{color:var(--yns-blue-deep)}
 button{font:inherit}
-:focus-visible{outline:none;box-shadow:var(--focus)}
+:focus-visible{outline:3px solid var(--yns-blue);outline-offset:2px}
+/* Headings take focus only so a screen reader starts reading there. */
+[tabindex="-1"]:focus:not(:focus-visible){outline:none}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .wrap{max-width:1240px;margin:0 auto;padding:var(--s4) var(--s4) var(--s8)}
 .muted{color:var(--yns-muted)}
 .small{font-size:.88rem}
@@ -220,7 +223,8 @@ body.modal-open{overflow:hidden}
 .am-ex-n{font-size:.82rem;color:var(--yns-muted);margin-top:6px}
 .am-opts{display:grid;gap:8px}
 #actModal textarea{width:100%;font:inherit;padding:12px;border-radius:var(--r-sm);border:1.5px solid var(--yns-line);resize:vertical;line-height:1.5}
-#actModal textarea:focus{border-color:var(--yns-blue);box-shadow:var(--focus);outline:0}
+#actModal textarea:focus{border-color:var(--yns-blue)}
+#actModal textarea:focus-visible{outline:3px solid var(--yns-blue);outline-offset:2px}
 .am-examples{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;align-items:center}
 .am-examples>span{font-size:.8rem;color:var(--yns-muted);width:100%}
 .am-chip,.am-tag{font:inherit;font-size:.82rem;padding:6px 10px;border-radius:999px;border:1px solid var(--yns-line);background:var(--yns-sunk);cursor:pointer;text-align:left}
@@ -404,7 +408,7 @@ body.modal-open{overflow:hidden}
 .am-money{display:inline-flex;align-items:center;gap:2px;background:#fff;border:1.5px solid var(--yns-line);border-radius:var(--r-sm);padding:4px 8px}
 .am-money i{font-style:normal;color:var(--yns-muted);font-size:.9rem}
 .am-money input{border:0;outline:0;font:inherit;font-family:var(--yns-display);font-weight:500;width:78px;text-align:right;background:none;color:var(--yns-ink)}
-.am-money:focus-within{border-color:var(--yns-blue);box-shadow:var(--focus)}
+.am-money:focus-within{border-color:var(--yns-blue);outline:3px solid var(--yns-blue);outline-offset:2px}
 .am-hval .am-money input{width:52px;text-align:right}
 
 /* ---- planner ------------------------------------------------------ */
@@ -446,7 +450,8 @@ body.modal-open{overflow:hidden}
 .pl-acts .lnk{background:none;border:0;color:var(--yns-blue-deep);text-decoration:underline;cursor:pointer;font-family:var(--yns-body);font-size:.78rem;padding:0}
 .pl-acts .lnk:hover{color:var(--yns-blue)}
 .pl-dated{grid-template-columns:1fr auto}
-.pl-edit{display:block;width:100%;min-width:0;font:inherit;font-size:.95rem;line-height:1.4;padding:7px 10px;border:1.5px solid var(--yns-blue);border-radius:var(--r-sm);outline:0;background:#fff;color:var(--yns-ink)}
+.pl-edit{display:block;width:100%;min-width:0;font:inherit;font-size:.95rem;line-height:1.4;padding:7px 10px;border:1.5px solid var(--yns-blue);border-radius:var(--r-sm);background:#fff;color:var(--yns-ink)}
+.pl-edit:focus-visible{outline:3px solid var(--yns-blue);outline-offset:2px}
 
 /* ---- the printable portfolio -------------------------------------
    Hidden on screen, and the only thing on the page when printing.
@@ -454,7 +459,7 @@ body.modal-open{overflow:hidden}
 #printRoot{display:none}
 @media print{
   body{background:#fff}
-  .wrap,#actModal,.toast{display:none !important}
+  .wrap,#actModal,.toast,.checkin{display:none !important}
   #printRoot{display:block;font-family:var(--yns-body);color:#14203A;padding:0;max-width:none}
   .pp-head{border-bottom:3px solid var(--yns-blue);padding-bottom:14px;margin-bottom:22px}
   .pp-logo{width:120px;height:auto;display:block;margin-bottom:14px}
@@ -511,3 +516,67 @@ body.modal-open{overflow:hidden}
 .iv-row:nth-child(5) .iv-bar i{background:var(--yns-gold)}
 .iv-n{font-family:var(--yns-display);font-weight:500;font-size:.9rem;white-space:nowrap}
 @media (max-width:560px){.iv-row{grid-template-columns:1fr auto}.iv-bar{display:none}}
+
+/* ---- accessibility and phone fixes (v20 audit) --------------------- */
+/* Components with their own box-shadow keep the outline ring on top. */
+.dcard:focus-visible,.ptone:focus-visible,.pbody:focus-visible,.opt:focus-visible,.act:focus-visible,
+.pbody[aria-checked="true"]:focus-visible,.ptone[aria-checked="true"]:focus-visible,.dcard.current:focus-visible{outline:3px solid var(--yns-blue);outline-offset:3px}
+#actModal h1:focus,#actModal h2:focus{outline-offset:4px}
+.am-dbtns button[aria-pressed="true"],.am-yn button[aria-pressed="true"],.am-ropts button[aria-pressed="true"]{font-weight:600}
+
+/* A money field that went over its limit. */
+.am-cap{flex-basis:100%;margin:2px 0 0;text-align:right;font-size:.8rem;color:var(--yns-muted)}
+.am-cap[hidden]{display:none}
+.am-row.has-cap{flex-wrap:wrap}
+.am-row.has-cap>div:first-child{flex:1 1 0;min-width:0}
+.am-resume{margin-top:calc(var(--s2) * -1)}
+
+/* Three Doors: on a phone, one card per route, Yes/No underneath. */
+.am-cmp .am-rt{text-align:left;font-weight:400;color:inherit;font-size:inherit;padding:8px;border-bottom:1px solid var(--yns-line-soft);vertical-align:top}
+.am-cmp .am-rt strong{display:block;font-weight:500;font-family:var(--yns-display)}
+.am-cmp .am-rt span{display:block;font-size:.78rem;color:var(--yns-muted)}
+.am-yn button{min-height:36px;min-width:52px}
+.am-table td.am-yn{display:table-cell;white-space:nowrap}
+.am-table td.am-yn button+button{margin-left:6px}
+@media (max-width:600px){
+  .am-cmp{overflow:visible}
+  .am-cmp table,.am-cmp tbody,.am-cmp tr,.am-cmp th,.am-cmp td{display:block;width:auto}
+  .am-cmp thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+  .am-cmp tr{background:var(--yns-sunk);border-radius:var(--r-sm);padding:12px;margin-bottom:10px}
+  .am-cmp .am-rt,.am-cmp td{border:0;padding:0}
+  .am-cmp .am-rt{margin-bottom:8px}
+  .am-cmp .am-rt strong{font-size:1.05rem}
+  .am-cmp td[data-label]{display:flex;justify-content:space-between;gap:12px;padding:4px 0;border-top:1px solid var(--yns-line-soft);overflow-wrap:anywhere}
+  .am-cmp td[data-label]::before{content:attr(data-label);color:var(--yns-muted);font-size:.8rem;flex:none;max-width:45%}
+  .am-cmp td[data-label]{text-align:right}
+  .am-cmp td.am-yn{display:flex;gap:10px;margin-top:10px;white-space:normal}
+  .am-cmp td.am-yn button+button{margin-left:0}
+  .am-cmp .am-yn button{flex:1;min-height:44px;font-size:.95rem}
+}
+
+/* Small text links: a full-size tap target on touch and narrow screens. */
+@media (pointer:coarse),(max-width:600px){
+  .lnk,.demo .lnk,.qd .lnk,.pl-acts .lnk{min-height:44px;min-width:44px;padding:10px 8px;display:inline-flex;align-items:center;justify-content:center}
+  .pl-acts{gap:4px}
+  .am-days button{width:36px;height:36px}
+}
+
+/* ---------- check-ins and the save nudge (on-screen) ---------- */
+.checkin{position:fixed;right:16px;bottom:16px;z-index:60;max-width:360px;width:calc(100% - 32px);
+  background:var(--yns-paper,#fff);border:1px solid var(--yns-line);border-left:4px solid var(--yns-blue);
+  border-radius:14px;box-shadow:0 12px 32px rgba(20,32,58,.18);padding:16px 18px 14px;display:none}
+.checkin.show{display:block}
+.checkin p{margin:0 0 6px}
+.checkin-eyebrow{font-family:var(--yns-display);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--yns-blue-deep)}
+.checkin-acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.checkin-x{position:absolute;top:2px;right:2px;border:0;background:none;font-size:22px;line-height:1;cursor:pointer;color:var(--yns-muted);min-width:44px;min-height:44px}
+body.modal-open .checkin{display:none}
+/* The activity title is the card's button, so keyboard and screen readers get one clear control. */
+.act h3 .act-open{all:unset;cursor:pointer;font:inherit;color:inherit;display:inline;border-radius:4px}
+.act h3 .act-open:focus-visible{outline:3px solid var(--yns-blue);outline-offset:2px}
+.act h3 .act-open::after{content:"";position:absolute;inset:0}
+.act{position:relative}
+.act .act-actions,.act .bringin{position:relative;z-index:1}
+@media (max-width:600px),(pointer:coarse){
+  .am-x{min-width:44px;min-height:44px}
+}

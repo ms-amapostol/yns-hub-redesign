@@ -636,9 +636,7 @@
      CitationSuggested, rendered verbatim rather than paraphrased. */
   function salaryNote() {
     if (!liveRoles) {
-      return '<p class="q-note">Salary ranges are placeholder bands for the prototype, not ' +
-        'a quote for your area. They will be replaced with real BLS figures adjusted for ' +
-        'your location before this ships.</p>';
+      return '<p class="q-note">These pay ranges are examples only. The real national figures didn\u2019t load, so check back when you\u2019re online.</p>';
     }
 
     var year = liveRoles.wage_year ? " (May " + escapeHTML(String(liveRoles.wage_year)) + ")" : "";

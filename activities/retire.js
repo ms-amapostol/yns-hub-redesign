@@ -258,11 +258,11 @@ YNSActivity.define({
       none:         "Nothing at work yet. A Roth IRA doesn\u2019t need an employer: any year you have earned income, you can put in up to $7,500."
     };
     return "<h1>Three ways to fill the pot.</h1>" +
-      (m.end ? '<div class="ya-quote">Your match is worth ' + money(m.end - m.endAlone) + " over " + m.years + " years.</div>" : "") +
+      (m.end ? '<div class="ya-quote">Your match is worth ' + money(m.end - m.endAlone) + " over " + m.years + " years if the account grows 7% a year. That rate is an assumption.</div>" : "") +
       (ro.trad ? '<div class="ya-readout"><h3>Taxed now or later</h3><p>On your numbers, the 401k lands at ' + money(ro.tradNet) + " after tax and the Roth at " + money(ro.roth) + ". The gap is " + money(Math.abs(ro.tradNet - ro.roth)) + ", and it flips entirely on what tax rate you retire into, which nobody knows. That is why plenty of people hold both.</p></div>" : "") +
-      '<div class="ya-readout"><h3>The rules that bite</h3><p>Money out of a 401k or 403b before 59\u00bd usually costs a <b>10% penalty on top of the income tax</b>. A Roth is gentler: what you put in can come out at any time, though the growth has its own rules. Limits for 2026 are $24,500 for workplace plans and $7,500 for IRAs.</p></div>' +
+      '<div class="ya-readout"><h3>The rules that bite</h3><p>Money out of a 401k or 403b before 59\u00bd usually costs a <b>10% penalty on top of the income tax</b>. A Roth is gentler: what you put in can come out at any time, though the growth has its own rules. IRS limits for 2026 are $24,500 for workplace plans and $7,500 for IRAs.</p></div>' +
       (S[st] ? '<div class="ya-readout"><h3>Your next move</h3><p>' + esc(S[st]) + "</p></div>" : "") +
-      '<div class="ya-readout"><h3>What this is not</h3><p>This explains how the accounts work. It doesn\u2019t recommend a provider, a fund or an amount, and we sell nothing. Your plan documents and HR are the truth; a website is not.</p></div>';
+      '<div class="ya-readout"><h3>What this is not</h3><p>This explains how the accounts work. It doesn\u2019t recommend a provider, a fund or an amount. Your plan documents and HR have the final word.</p></div>';
   },
 
   actions: function (state) {

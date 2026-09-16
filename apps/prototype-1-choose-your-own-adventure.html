@@ -404,7 +404,6 @@ function goBack(){
 function renderResults(){
   const scores = Quiz.score(state.axes);
   const all = Quiz.rank(scores);
-  const pctOf = Quiz.pctScaler(all);
   const ranked = all.slice(0,3);
   const top = ranked[0].k;
   const labels = ['Best match','Strong fit','Worth exploring'];
@@ -418,7 +417,6 @@ function renderResults(){
         <span class="tag ${n===0?'':'alt'}">${labels[n]}</span>
         <h3>${c.name}</h3>
         <p class="why">${c.blurb}</p>
-        <p class="fitline">${pctOf(r.v)}% match to the story you told</p>
         <div class="roles">
           <div class="rh">Roles matched to your ${levelWord} experience</div>
           ${roles.map(x=>`<div class="role"><span>${x[0]}</span><span class="pay">${x[1]}</span></div>`).join('')}
@@ -434,9 +432,6 @@ function renderResults(){
     <p class="scene">${Quiz.ARCHETYPE_LINE[top]}</p>
     <p class="scene" style="margin-top:14px">
       Across your story you told us <b>${state.echoes.slice(0,3).join('</b>, <b>')}</b>${state.echoes.length>3?', and more':''}.
-      ${state.money>=2
-        ? "You also took the bigger number over the shorter week, so we've weighted toward paths with real earning ceilings."
-        : "You also took the shorter week over the bigger number, so we've weighted toward paths with room to breathe."}
     </p>
     ${Quiz.continuityHTML(top)}
     ${Quiz.shareHTML()}
@@ -447,7 +442,7 @@ function renderResults(){
     <button type="button" class="back" id="restart" style="margin-left:18px">↺ start over</button>
     <div class="cta">
       <h3>Nice work. That's one more piece of the picture.</h3>
-      <p>Your result is saved. Head back and we'll show you what fits next.</p>
+      <p>Your result is saved in this browser. Head back and we'll show you what fits next.</p>
       <button type="button" class="btn" id="tohub">Back to your hub</button>
     </div>
   `;
@@ -483,11 +478,14 @@ function renderResults(){
 function applyPriorLevel(){
   const prior = Quiz.priorLevel();
   if(!prior) return;
+  /* C9: with ?lvl= the level beat was already removed, so the last beat is
+     a story chapter. Find the level beat itself, and stop if it's gone. */
+  const b = BEATS.find(x => x.id === "level");
+  if(!b) return;
   state.level = prior;
-  const b = BEATS[BEATS.length-1];
-  b.title = "Still standing in the same place?";
+  b.title = "Is this still where you are?";
   b.scene = [
-    "You've told us this before, so this is a confirmation rather than a question.",
+    "You've told us this before, so this is a quick check.",
     "Tap the same one if nothing's changed, or pick the new one if it has."
   ];
   b.prompt = "Where are you right now, really?";

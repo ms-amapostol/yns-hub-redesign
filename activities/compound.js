@@ -98,10 +98,10 @@ YNSActivity.define({
           title: "Real money doesn\u2019t move in a smooth line.",
           lead: "A calculator draws a tidy curve. Actual markets go up and down, and some years they go down a lot.",
           points: [
-            "<b>The number you just saw is a model</b>, not a forecast, and not an offer.",
+            "<b>The number you just saw is a model.</b> It shows what could happen if the assumptions hold.",
             "<b>Pay off high-interest debt first.</b> A card at 24% beats any return you\u2019re likely to earn, so clearing it is the better move.",
             "<b>If your job offers a retirement match, that\u2019s the first place money should go.</b> A match is an immediate return nothing else competes with.",
-            "<b>We don\u2019t sell anything.</b> This site has no product to recommend and no fee attached to what you do next."
+            "<b>We don\u2019t recommend any provider, fund or account.</b> Your Next Step does offer an optional paid course, with videos and more structure. Joining is always up to you."
           ],
           cta: "Understood"
         }

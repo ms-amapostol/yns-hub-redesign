@@ -6,11 +6,19 @@ This doc is what it needs from Supabase.
 
 ## The screen
 
-Opens from "Sign in" in the top bar, and once from the hub after the person's
-next-step sentence first exists ("That's your next step. Make it stay."). Never
-on arrival, never more than once unprompted.
+Opens from "Sign in or join free" in the top bar, and from one small "Save your
+progress, free" pop-up that appears once per visit, after the person finishes
+their first activity. Never on arrival, never more than once unprompted. The
+headline reads "That's your next step. Save it, free." when a next-step sentence
+exists, and "Save your progress with a free account." otherwise.
 
-Four perks, in this order: it saves · the coach · check-ins · first to hear.
+Four perks, in this order: it saves · the coach · check-ins that follow you ·
+first to hear. The check-ins perk says weekly check-ins already show on the page
+(on-screen pop-ups, built in `js/hub.js`, `afterFinish`), that an account brings
+them back on any device, and that email reminders are on the way. **Email
+reminders are a future build:** when they ship, send the same two check-ins the
+page shows (a Planner step 7+ days old; Still True? 28 days after Your Six
+Months), using `steps_open[].at`, `nudgedAt`, `smart_set_at` and `stilltrue_at`.
 Then email, password, one unticked consent box, and the terms line.
 
 ## Consent — approved wording, do not edit without Anastasia

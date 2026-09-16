@@ -30,6 +30,43 @@
 
 var DAYS = ["Today", "Tomorrow", "This weekend", "Monday"];
 
+/* The Week It's Hard asks the same three things (able_problem,
+   able_options, able_step), so whichever of the two runs second finds
+   them on file and drops the question. These helpers let this activity
+   show what was stored instead of going quiet about it. */
+function escHTML(t) {
+  return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+}
+
+/* able_options arrives in two shapes: a list of {moment} from this
+   activity's collect screen, or one block of text, a line per idea,
+   from The Week It's Hard. */
+function optionList(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) {
+    return val.map(function (x) {
+      return String((x && (x.moment || x.text)) || (typeof x === "string" ? x : "")).trim();
+    }).filter(Boolean);
+  }
+  return String(val).split(/\n+/).map(function (l) {
+    return l.replace(/^\s*(?:\d+[.)]|[-*\u2022])\s*/, "").trim();
+  }).filter(Boolean);
+}
+
+/* Where a stored answer came from, said only as precisely as we know. */
+function fromWhere(v) {
+  var done = (v && v.facts && v.facts.activities_completed) || [];
+  return done.indexOf("bounce") >= 0 ? "in The Week It\u2019s Hard" : "earlier";
+}
+
+function storedItems(v) {
+  var own = (v && v.extra && v.extra.b_items) || [];
+  if (own.length) return own.map(function (i) { return i.text; });
+  return optionList(v && v.facts && v.facts.able_options);
+}
+
 YNSActivity.define({
   slug: "able",
   title: "Solve It",
@@ -87,6 +124,16 @@ YNSActivity.define({
             "I keep saying I'll apply and then I don't.",
             "My hours got cut and rent is due in two weeks."
           ]
+        },
+        {
+          needs: { fact: "able_problem" },
+          mechanic: "learn",
+          eyebrow: "A \u00b7 Assess",
+          title: function (v) { return "You named this problem " + fromWhere(v) + "."; },
+          provenance: "You've told us this already, so this doesn't ask again.",
+          lead: function (v) { return "\u201c" + ((v && v.facts && v.facts.able_problem) || "") + "\u201d"; },
+          body: ["We'll take this one apart here, one step at a time."],
+          cta: "Use this one"
         }
       ]
     },
@@ -105,9 +152,9 @@ YNSActivity.define({
           eyebrow: "Still A",
           title: "Now say it as a question that has an answer.",
           scene: function (v) {
-            var pr = v && v.extra && v.extra.a_text;
+            var pr = (v && v.extra && v.extra.a_text) || (v && v.facts && v.facts.able_problem);
             return [
-              pr ? "\u201c" + pr + "\u201d" : "",
+              pr ? "\u201c" + escHTML(pr) + "\u201d" : "",
               "\u201cWhy is this happening to me\u201d has no answer you can act on. \u201cHow do I get to work by 6\u201d does. Rewrite yours as a how question."
             ].filter(Boolean);
           },
@@ -143,6 +190,18 @@ YNSActivity.define({
           min: 1,
           cta: "That\u2019ll do",
           ctaFull: "That\u2019s my three"
+        },
+        {
+          needs: { fact: "able_options" },
+          mechanic: "learn",
+          eyebrow: "B \u00b7 Brainstorm",
+          title: function (v) { return "You listed these " + fromWhere(v) + "."; },
+          provenance: "You've told us this already, so this doesn't ask again.",
+          points: function (v) {
+            return storedItems(v).map(function (t, n) { return (n + 1) + ". " + escHTML(t); });
+          },
+          body: ["These are the ways through it you already wrote. Next, you'll pick the one you could start."],
+          cta: "Use these"
         }
       ]
     },
@@ -159,10 +218,15 @@ YNSActivity.define({
           mechanic: "choice",
           eyebrow: "L \u00b7 List",
           title: "Which one could you actually start soonest?",
-          scene: [
-            "Not the best one. Not the cleverest one. The one you could begin without anything else having to happen first.",
-            "That is usually the right one, because a started solution beats a perfect plan."
-          ],
+          scene: function (v) {
+            var items = storedItems(v);
+            return (items.length
+              ? ["Your list:<br>" + items.map(function (t, n) { return (n + 1) + ". " + escHTML(t); }).join("<br>")]
+              : []).concat([
+              "Not the best one. Not the cleverest one. The one you could begin without anything else having to happen first.",
+              "That is usually the right one, because a started solution beats a perfect plan."
+            ]);
+          },
           prompt: "The one you could start.",
           options: [
             { k: "first",  t: "The first one I wrote",  s: "Often the obvious one, and obvious is fine.", echo: "your first idea" },
@@ -195,6 +259,16 @@ YNSActivity.define({
           rows: 3,
           maxLength: 220,
           cta: "That\u2019s the start"
+        },
+        {
+          needs: { fact: "able_step" },
+          mechanic: "learn",
+          eyebrow: "E \u00b7 Execute",
+          title: function (v) { return "You picked a first step " + fromWhere(v) + "."; },
+          provenance: "You've told us this already, so this doesn't ask again.",
+          lead: function (v) { return "\u201c" + ((v && v.facts && v.facts.able_step) || "") + "\u201d"; },
+          body: ["Next, pick the day you'll do it."],
+          cta: "Use this step"
         }
       ]
     },
@@ -219,10 +293,12 @@ YNSActivity.define({
   results: function (r) {
     var esc = r.esc;
     var problem = r.extra.a_text || r.ctx.facts.able_problem || "";
-    var question = r.extra.reframe_text || "";
-    var items = r.extra.b_items || [];
+    var question = r.extra.reframe_text || r.ctx.facts.able_reframe || "";
+    var items = (r.extra.b_items && r.extra.b_items.length)
+      ? r.extra.b_items
+      : optionList(r.ctx.facts.able_options).map(function (t) { return { text: t }; });
     var pick = r.state.answers.l || "";
-    var step = r.extra.e_text || "";
+    var step = r.extra.e_text || r.ctx.facts.able_step || "";
     var when = r.extra.when_label || "";
 
     var PICK = { first: 0, second: 1, third: 2 };
@@ -247,9 +323,9 @@ YNSActivity.define({
       "It works the same on the next one, and the one after that, which is the point of learning it on a small problem.</p>";
   },
 
-  actions: function (state) {
+  actions: function (state, ctx) {
     var when = (state && state.extra && state.extra.when_label) || "this week";
-    var step = (state && state.extra && state.extra.e_text) || "";
+    var step = (state && state.extra && state.extra.e_text) || (ctx && ctx.facts && ctx.facts.able_step) || "";
     return [
       step ? step + " \u00b7 " + when : "Do the first ten minutes " + when.toLowerCase(),
       "Tell one person what you decided to try",

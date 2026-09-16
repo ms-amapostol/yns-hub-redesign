@@ -238,10 +238,36 @@ YNSActivity.define({
     };
     var whoNote = WHO[who] || "";
 
+    /* Their own message, quoted back. The runtime keeps the assembled
+       text; a blank left empty shows as its example ("[Sam]"), which
+       would read like a real name, so those become a plain fill-in. */
+    var draft = String(r.extra.draft_text || "");
+    var BLANK_LABEL = { Sam: "their name", "we worked together at the warehouse": "how you know them",
+      "you're an electrician now": "what they do", "I'm looking at getting into the trade": "where you're at",
+      "I want work that doesn't follow me home": "why you're looking" };
+    draft = draft.replace(/\[([^\]]+)\]/g, function (m, k) { return "[" + (BLANK_LABEL[k] || k) + "]"; });
+    var name = (blanks.name || "").trim();
+    var WHO_SHORT = { direct: "someone you know who does this work", second: "someone who can introduce you",
+      cold: "someone you found", none: "the first person you find" };
+    var whoLabel = WHO_SHORT[who] || "";
+    var sendTo = name
+      ? "For <b>" + esc(name) + "</b>" + (whoLabel ? ", " + esc(whoLabel) : "") + "."
+      : (whoLabel ? "For " + esc(whoLabel) + "." : "");
+    var draftBlock = draft
+      ? '<div class="ya-readout"><h3>Your message</h3>' +
+        (sendTo ? "<p>" + sendTo + "</p>" : "") +
+        '<div class="ya-quote"><p style="white-space:pre-line;margin:0">' + esc(draft) + "</p></div>" +
+        '<p><button type="button" class="lnk" onclick="var t=this.parentNode.previousElementSibling.textContent;' +
+        'if(navigator.clipboard){navigator.clipboard.writeText(t);this.textContent=\'Copied\';}">Copy the message</button></p>' +
+        "</div>"
+      : "";
+
     return "<h1>" + esc(lead) + "</h1>" +
       '<p class="ya-result-lead">Fifteen minutes with someone who does this will tell you more ' +
       "than any activity here, including this one. We don't say that to be modest. It's the " +
       "difference between a model of the work and the work.</p>" +
+
+      draftBlock +
 
       (whoNote ? '<div class="ya-readout"><h3>Who you\u2019re starting with</h3><p>' + whoNote + "</p></div>" : "") +
 

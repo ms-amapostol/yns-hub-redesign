@@ -383,7 +383,6 @@ function goBack(){
 function renderResults(){
   const scores = Quiz.score(state.axes);
   const all = Quiz.rank(scores);
-  const pctOf = Quiz.pctScaler(all);
   const ranked = all.slice(0,3);
   const top = ranked[0].k;
   const levelWord = Quiz.LEVEL_WORD[state.level];
@@ -408,7 +407,6 @@ function renderResults(){
       <span class="tag ${n===0?'':'alt'}">${labels[n]}</span>
       <h3>${c.name}</h3>
       <p class="why">${c.blurb}</p>
-      <p class="fitline">${pctOf(r.v)}% match to the shape of your day</p>
       <div class="roles">
         <div class="rh">Roles matched to your ${levelWord} experience</div>
         ${roles.map(x=>`<div class="role"><span>${x[0]}</span><span class="pay">${x[1]}</span></div>`).join('')}
@@ -436,7 +434,7 @@ function renderResults(){
     <button type="button" class="back" id="restart" style="margin-left:18px">↺ live a different day</button>
     <div class="cta">
       <h3>Nice work. That's one more piece of the picture.</h3>
-      <p>Your result is saved. Head back and we'll show you what fits next.</p>
+      <p>Your result is saved in this browser. Head back and we'll show you what fits next.</p>
       <button type="button" class="btn" id="tohub">Back to your hub</button>
     </div>
   </div>`;
@@ -464,9 +462,12 @@ function renderResults(){
 function applyPriorLevel(){
   const prior = Quiz.priorLevel();
   if(!prior) return;
+  /* C9: with ?lvl= the level moment was already removed, so the last
+     moment is a story one. Find the level moment itself, and stop if it's gone. */
+  const m = MOMENTS.find(x => x.type === "level");
+  if(!m) return;
   state.level = prior;
-  const m = MOMENTS[MOMENTS.length-1];
-  m.title = "Still standing in the same place?";
+  m.title = "Is this still where you are?";
   m.scene = ["You've told us this before. Tap the same one if it's still true, or pick the new one if it isn't."];
   m.options = m.options.map(o =>
     o.level === prior ? {...o, s: (o.s||'') + ". This is what you told us last time"} : o);

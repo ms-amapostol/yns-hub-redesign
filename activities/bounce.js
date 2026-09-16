@@ -25,6 +25,42 @@
 (function () {
 "use strict";
 
+function escHTML(t) {
+  return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+}
+
+/* able_options is a block of text here, but Solve It stores a list of
+   {moment}. Either way this gives back plain lines. */
+function optionList(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) {
+    return val.map(function (x) {
+      return String((x && (x.moment || x.text)) || (typeof x === "string" ? x : "")).trim();
+    }).filter(Boolean);
+  }
+  return String(val).split(/\n+/).map(function (l) {
+    return l.replace(/^\s*(?:\d+[.)]|[-*\u2022])\s*/, "").trim();
+  }).filter(Boolean);
+}
+
+/* Anything still in [brackets] is a fill-in nobody filled. It must not
+   reach the saved note, the Planner or the hub. */
+var FILL = {
+  "name": "the person you thought of",
+  "day": "the end of the week",
+  "ten minutes of ___": "ten minutes of the next step"
+};
+function clearFills(t) {
+  /* Only the fill-ins the draft itself put there. Anything else in
+     brackets is the person's own writing and stays as typed. */
+  return String(t || "").replace(/\[([^\]]*)\]/g, function (m, k) {
+    var key = k.trim().toLowerCase();
+    return FILL[key] ? FILL[key] : m;
+  });
+}
+
 YNSActivity.define({
   slug: "bounce",
   title: "The Week It's Hard",
@@ -97,7 +133,7 @@ YNSActivity.define({
           ],
           prompt: "Do you have someone?",
           options: [
-            { k: "yes",   t: "Yes, I know who",           s: "You'll write their name on the next screen.", echo: "you have someone" },
+            { k: "yes",   t: "Yes, I know who",           s: "Keep them in mind for the note at the end.", echo: "you have someone" },
             { k: "maybe", t: "Maybe. Someone I'd have to ask", s: "That's fine. Asking is the step.", echo: "you have someone to ask" },
             { k: "no",    t: "Not right now",             s: "A lot of people are here. The plan still works.", echo: "you don't have someone yet" }
           ]
@@ -131,6 +167,27 @@ YNSActivity.define({
             "The certificate costs $900 and I have $200.",
             "I keep saying I'll apply and then I don't."
           ]
+        },
+        {
+          needs: { fact: "able_problem" },
+          mechanic: "learn",
+          eyebrow: "A \u00b7 Assess",
+          title: function (v) {
+            var done = (v && v.facts && v.facts.activities_completed) || [];
+            return done.indexOf("able") >= 0
+              ? "You already ran this in Solve It."
+              : "You already wrote this part down.";
+          },
+          provenance: "You've told us this already, so this doesn't ask again.",
+          lead: function (v) { return "The problem: \u201c" + ((v && v.facts && v.facts.able_problem) || "") + "\u201d"; },
+          points: function (v) {
+            var f = (v && v.facts) || {};
+            var out = optionList(f.able_options).map(function (t, n) { return "Way " + (n + 1) + ": " + escHTML(t); });
+            if (f.able_step) out.push("<b>First ten minutes:</b> " + escHTML(f.able_step));
+            return out;
+          },
+          body: ["Your note at the end will use these."],
+          cta: "Use these"
         }
       ]
     },
@@ -144,8 +201,8 @@ YNSActivity.define({
           eyebrow: "B · Brainstorm",
           title: "Three ways it could be solved. Bad ideas welcome.",
           scene: function (v) {
-            var pr = v && v.extra && v.extra.able_a_text;
-            return [ (pr ? "\u201c" + pr + "\u201d " : "") + "There's usually more than one way. Write three, even if two are silly. The point is getting past the first one." ];
+            var pr = (v && v.extra && v.extra.able_a_text) || (v && v.facts && v.facts.able_problem);
+            return [ (pr ? "\u201c" + escHTML(pr) + "\u201d " : "") + "There's usually more than one way. Write three, even if two are silly. The point is getting past the first one." ];
           },
           prompt: "One per line.",
           placeholder: "1.\n2.\n3.",
@@ -162,7 +219,12 @@ YNSActivity.define({
           mechanic: "choice",
           eyebrow: "L · List",
           title: "Which of your three is the most realistic this week?",
-          scene: ["The class says list them from most to least realistic and start at the top. You only need the top one."],
+          scene: function (v) {
+            var items = optionList((v && v.extra && v.extra.able_b_text) || (v && v.facts && v.facts.able_options));
+            return (items.length
+              ? ["Your list:<br>" + items.map(function (t, n) { return (n + 1) + ". " + escHTML(t); }).join("<br>")]
+              : []).concat(["The class says list them from most to least realistic and start at the top. You only need the top one."]);
+          },
           prompt: "Your top one.",
           options: [
             { k: "first",  t: "The first one I wrote",  s: "Usually the obvious one, and obvious is fine.", echo: "your first idea" },
@@ -211,13 +273,16 @@ YNSActivity.define({
             var a = (ctx && ctx.answers) || {};
             var SIG = { avoid: "I've stopped opening things", tired: "I'm flat in a way sleep doesn't fix", doubt: "I'm rewriting the whole plan", snap: "I'm short with people", hide: "I've gone quiet" };
             var ex = (ctx && ctx.extra) || {};
-            var person = a.person === "yes" ? "Text [name]." : a.person === "maybe" ? "Text [name], even if it feels weird." : "Tell one person, anyone.";
-            var step = ex.able_e_text ? ex.able_e_text : "[ten minutes of ___]";
-            return "If " + (SIG[a.signal] || "it's a hard week") + ", this is a hard week. That's all it is.\n" +
+            var f = (ctx && ctx.facts) || {};
+            var who = a.person || f.hard_week_person;
+            var sig = a.signal || f.hard_week_signal;
+            var person = who === "yes" ? "Text the person you thought of." : who === "maybe" ? "Text the person you have in mind, even if it feels weird." : "Tell one person, anyone.";
+            var step = ex.able_e_text || f.able_step || "ten minutes of the next step";
+            return "If " + (SIG[sig] || "it's a hard week") + ", this is a hard week. That's all it is.\n" +
               "1. " + person + "\n" +
               "2. Do the smallest version of the thing: " + step + "\n" +
               "3. If it's a problem, run ABLE: assess it, brainstorm three ways, pick the realistic one, do ten minutes.\n" +
-              "4. No big decisions until [day]. Especially not quitting.";
+              "4. No big decisions until the end of the week. Especially not quitting.";
           },
           rows: 8,
           maxLength: 900,
@@ -256,7 +321,7 @@ YNSActivity.define({
   /* ------------------------------------------------------------------ */
   results: function (r) {
     var esc = r.esc;
-    var plan = r.extra.plan_text || r.ctx.facts.hard_week_plan || "";
+    var plan = clearFills(r.extra.plan_text || r.ctx.facts.hard_week_plan || "");
     var person = r.state.answers.person || "";
     var signedIn = !!(window.YNS && YNS.signedIn && YNS.signedIn());
     return "<h1>Your note to future you.</h1>" +
@@ -271,10 +336,22 @@ YNSActivity.define({
         : "");
   },
 
-  actions: function (state) {
-    var person = (state && state.answers && state.answers.person) || "";
+  /* The saved note is free text, so tidy any unfilled [fill-in] before
+     it is stored where the Planner and the hub read it. */
+  onComplete: function (r) {
+    var f = (r && r.ctx && r.ctx.facts) || {};
+    var t = (r && r.extra && r.extra.plan_text) || f.hard_week_plan || "";
+    if (t && /\[[^\]]*\]/.test(t)) {
+      var clean = clearFills(t);
+      if (r.extra && r.extra.plan_text) r.extra.plan_text = clean;
+      if (r.setFact) r.setFact("hard_week_plan", clean);
+    }
+  },
+
+  actions: function (state, ctx) {
+    var person = (state && state.answers && state.answers.person) || (ctx && ctx.facts && ctx.facts.hard_week_person) || "";
     return [
-      person === "yes" ? "Tell the person you named that they're in your plan"
+      person === "yes" ? "Tell the person you thought of that they're in your plan"
         : person === "maybe" ? "Ask the person you have in mind if you can text them on a bad week"
         : "Do Two Conversations and find one person",
       "Put the note somewhere you'll see it on a bad day",

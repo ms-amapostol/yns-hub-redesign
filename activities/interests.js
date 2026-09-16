@@ -251,9 +251,9 @@ YNSActivity.define({
     var best = cats.slice(0, 3);
     var flat = area[ranked[0]] - area[ranked[5]] <= 4;
 
-    var appetite = r.state.answers.appetite || "";
+    var appetite = r.state.answers.appetite || r.ctx.facts.training_appetite || "";
     var APPETITE = {
-      none:   "You said no training right now, so the roles above are ones you can start from where you are. Module 2's point stands: a job with tuition benefits is the cheapest degree there is, and Starbucks, Walmart and Target all run one.",
+      none:   "You said no training right now, so the roles above are ones you can start from where you are. Some large employers, including retail and food chains, help pay for school, which can cut what a degree costs you. A job's benefits page usually says whether it does.",
       short:  "You said something short. That's where certificates and licences live, and in several of these fields a few weeks of training is the whole difference in pay.",
       medium: "You said a year or two. That opens apprenticeships, trade programs and associate degrees, which is where a lot of the best pay-to-training ratios sit.",
       long:   "You said you'd go the whole way. Worth checking which of these actually needs a four-year degree, because a few of them don't, and the ones that don't will get you earning sooner."
