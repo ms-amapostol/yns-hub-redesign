@@ -26,7 +26,7 @@ Every activity ends with a result screen, a "Seven days" pick, and lands back on
 
 Check that these facts are only ever asked once across the whole site and read everywhere else: `level`, `why_statement`, `top_category`, `money_in`, `floor_monthly`, `training_appetite`. Flag any second asking.
 
-Check the counts: the demo bar, the rail heading "All N activities", and the actual number of cards across the five doors must agree.
+Check the counts: the rail heading "All N activities" and the actual number of cards across the five doors must agree.
 
 ## 3. Honesty
 

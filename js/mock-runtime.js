@@ -770,6 +770,7 @@ function watchModal(){
       if (run && m.querySelector("[data-run]")) close();
       else if (m.querySelector("iframe") && global.YNS && global.YNS.closeApp) global.YNS.closeApp();
       else if (m.querySelector('[data-back="planner"]') && global.YNS && global.YNS.planner) global.YNS.planner();
+      else if (m.querySelector('[data-back="settings"]') && global.YNS && global.YNS.settings) global.YNS.settings();
       else if (global.YNS && global.YNS.closeList) global.YNS.closeList();
       return;
     }
@@ -840,6 +841,7 @@ global.YNSMock = {
   finish: finish, skipStep: skipStep, rate: rate, submitRate: submitRate,
   typeAmount: typeAmount, capBlur: capBlur, altStep: altStep,
   isOpen: function(){ return !!run; },
+  resetAll: function(){ lastRun = {}; unfinished = {}; },
   budgetType: budgetType, submitBudget: submitBudget, exportBudget: exportBudget,
   calcType: calcType, calcBump: calcBump, submitCalc: submitCalc
 };

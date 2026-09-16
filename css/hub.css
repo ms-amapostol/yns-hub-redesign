@@ -42,11 +42,6 @@ button{font:inherit}
 .bar .acct{display:flex;gap:var(--s2);align-items:center;font-size:.88rem;color:var(--yns-muted);flex-wrap:wrap;justify-content:flex-end}
 .chip{display:inline-flex;max-width:46vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--yns-paper);border:1px solid var(--yns-line);font-size:.8rem;color:var(--yns-muted)}
 
-/* ---- demo strip (remove in production) ---------------------------- */
-.demo{display:flex;flex-wrap:wrap;gap:var(--s2);align-items:center;margin:var(--s2) 0 var(--s4);padding:10px 14px;border-radius:var(--r-sm);background:var(--yns-gold-tint);border:1px dashed #d9c700;font-size:.85rem;color:var(--yns-gold-deep)}
-.demo b{font-weight:600}
-.demo button{margin-left:auto}
-.demo .lnk{background:none;border:0;color:var(--yns-gold-deep);text-decoration:underline;cursor:pointer;padding:0;margin-left:0}
 
 /* ---- buttons ------------------------------------------------------ */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:var(--r-sm);border:1px solid transparent;cursor:pointer;text-decoration:none;font-family:var(--yns-display);font-weight:500;font-size:1rem;line-height:1.2;transition:background .15s,transform .15s}
@@ -416,7 +411,7 @@ body.modal-open{overflow:hidden}
 .planner-btn:hover{background:var(--yns-tint)}
 .pl-count{background:var(--yns-blue);color:#fff;border-radius:999px;min-width:19px;height:19px;display:inline-grid;place-items:center;font-size:.72rem;padding:0 5px}
 .pl-row{display:grid;grid-template-columns:22px 1fr auto;gap:4px 10px;align-items:start;padding:10px 0;border-top:1px solid var(--yns-line-soft)}
-.pl-row input[type=checkbox]{margin-top:3px;width:17px;height:17px;accent-color:var(--yns-blue)}  /* scoped: an unscoped rule here squashed the edit field to tick-box size */
+.pl-row input[type=checkbox]{margin:0;width:22px;height:22px;accent-color:var(--yns-blue);cursor:pointer}  /* scoped: an unscoped rule here squashed the edit field to tick-box size */
 .pl-t{font-size:.96rem}
 .pl-from{grid-column:2/4;font-size:.76rem;color:var(--yns-muted)}
 .pl-off{grid-template-columns:1fr;opacity:.55;text-decoration:line-through}
@@ -556,7 +551,7 @@ body.modal-open{overflow:hidden}
 
 /* Small text links: a full-size tap target on touch and narrow screens. */
 @media (pointer:coarse),(max-width:600px){
-  .lnk,.demo .lnk,.qd .lnk,.pl-acts .lnk{min-height:44px;min-width:44px;padding:10px 8px;display:inline-flex;align-items:center;justify-content:center}
+  .lnk,.qd .lnk,.pl-acts .lnk{min-height:44px;min-width:44px;padding:10px 8px;display:inline-flex;align-items:center;justify-content:center}
   .pl-acts{gap:4px}
   .am-days button{width:36px;height:36px}
 }
@@ -579,4 +574,29 @@ body.modal-open .checkin{display:none}
 .act .act-actions,.act .bringin{position:relative;z-index:1}
 @media (max-width:600px),(pointer:coarse){
   .am-x{min-width:44px;min-height:44px}
+}
+
+/* ---------- v23: settings, bigger tap targets ---------- */
+.pl-row{grid-template-columns:44px 1fr auto}
+.pl-tick{display:flex;align-items:center;justify-content:center;width:44px;height:44px;margin:-10px 0 -10px -11px;cursor:pointer;border-radius:10px}
+.pl-tick:hover{background:var(--yns-tint)}
+.set-list{display:flex;flex-direction:column;gap:10px;margin-top:var(--s3)}
+.set-row{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;width:100%;padding:14px 16px;border:1px solid var(--yns-line);border-radius:var(--r);background:var(--yns-paper);cursor:pointer}
+.set-row b{font-family:var(--yns-display);font-weight:500;color:var(--yns-blue-deep)}
+.set-row span{font-size:.88rem;color:var(--yns-muted)}
+.set-row:hover{background:var(--yns-tint)}
+.set-row:focus-visible{outline:3px solid var(--yns-blue);outline-offset:2px}
+.set-danger b{color:#9B2C2C}
+.act .notme{position:relative;z-index:2;min-height:44px;padding:12px 10px 12px 0;display:inline-flex;align-items:center}
+@media (max-width:600px),(pointer:coarse){
+  .am-step button{width:44px;height:44px}
+}
+/* Phone top bar: logo, then one row of Portfolio · Planner · Settings, then the sign-in link.
+   The status chip repeats what the rail already shows, so it steps aside. */
+@media (max-width:600px){
+  .bar{flex-wrap:wrap;gap:10px}
+  .bar .acct{width:100%;justify-content:flex-start;gap:8px}
+  .bar .acct .chip{display:none}
+  .bar .acct .planner-btn{padding:8px 12px;min-height:40px}
+  .bar .acct a{flex-basis:100%;padding:6px 0}
 }

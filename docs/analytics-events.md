@@ -42,6 +42,8 @@ of `ACTS` in `js/hub.js`, for example `why`, `floor`, `abcs_a`, `cyoa`.
 | `planner_open` | none | The Planner panel opened. Repaints while it's open (ticking, editing, deleting) don't count. | `YNS.planner()` |
 | `portfolio_open` | none | The Portfolio panel opened. Repaints (adding a place, the zip code) don't count. | `YNS.profile()` |
 | `portfolio_pdf` | none | The person pressed "Save as PDF", which opens the print dialog. | `YNS.portfolio()` |
+| `settings_open` | none | The person opened Settings. | `YNS.settings()` |
+| `reset` | none | The person confirmed "Start over" in Settings. Everything on the device is cleared. | `YNS.confirmReset()` |
 
 ## Plugging it in
 

@@ -838,7 +838,7 @@
     var list = open.length
       ? open.map(function(s){
           return '<div class="pl-row" id="row-'+s.id+'">'
-            + '<input type="checkbox" onchange="YNS.tickStep(\''+s.id+'\')" aria-label="Mark done: '+String(s.text).replace(/"/g,"&quot;")+'">'
+            + '<label class="pl-tick"><input type="checkbox" onchange="YNS.tickStep(\''+s.id+'\')" aria-label="Mark done: '+String(s.text).replace(/"/g,"&quot;")+'"></label>'
             + '<span class="pl-t" id="t-'+s.id+'">'+s.text+'</span>'
             + '<span class="pl-acts"><button class="lnk" onclick="YNS.editStep(\''+s.id+'\')">Edit</button>'
             + '<button class="lnk" onclick="YNS.askDeleteStep(\''+s.id+'\')">Delete</button></span>'
@@ -1403,7 +1403,6 @@
     pickAvatar: function(){ renderPicker(); showQ(0); show("intake"); },
     /* Review build only: mark activities done without playing them, so
        the team can see the scene fill. Remove with the demo strip. */
-    demoFill: function(list){ (list||Object.keys(ACTS)).forEach(function(k){ if(!ACTS[k].soon) state.done[k]=true; }); render(); },
     acceptOffer: function(){ notNeeded().forEach(function(k){ state.aside[k]=true; }); state.offerAnswered=true; render(); toast("Done. They're in the panel on the right whenever you want them."); },
     declineOffer: function(){ state.offerAnswered=true; render(); },
     asideDoor: function(k){ state.aside[k]=true; render(); },
@@ -1426,8 +1425,8 @@
      open; with an account the same list will come by email once that
      is built. In this review build nothing survives a reload, so the
      demo bar can move the clock forward to show them. */
-  var WEEK=7*86400000, MONTH=28*86400000, nudgedSave=false, clockShift=0;
-  function now(){ return Date.now()+clockShift; }
+  var WEEK=7*86400000, MONTH=28*86400000, nudgedSave=false;
+  function now(){ return Date.now(); }
   function dueCheckin(){
     var t=now();
     var wk=openSteps().filter(function(s){ return t-s.at>=WEEK && (!s.nudgedAt || t-s.nudgedAt>=WEEK); })[0];
@@ -1492,7 +1491,38 @@
   YNS.saveLater=function(){ track("checkin_action", { kind:"save", action:"not_now" }); YNS.dismissPopup(); };
   /* Review build only: move the clock so the check-ins can be seen. */
   YNS.now=now;
-  YNS.skipAhead=function(days){ clockShift+=days*86400000; toast("Moved the clock ahead "+days+" days."); afterFinish(); };
+  /* ---------- settings ---------------------------------------------
+     Change the three answers, change the character, or start over.
+     Starting over asks first, because it clears everything on this
+     device. */
+  YNS.settings=function(){
+    var m=$("actModal"); var already=m.style.display==="block";
+    m.style.display="block"; document.body.classList.add("modal-open");
+    if (!already) track("settings_open", {});
+    m.innerHTML='<div class="am-card am-results"><div class="am-top"><span class="am-eyebrow">Settings</span><button class="am-x" onclick="YNS.closeList()" aria-label="Close">\u00d7</button></div>'
+      +'<h2>Settings</h2>'
+      +'<div class="set-list">'
+      +'<button class="set-row" onclick="YNS.closeList();YNS.retake()"><b>Change my answers</b><span>Answer the three starting questions again. Everything you\u2019ve done stays.</span></button>'
+      +'<button class="set-row" onclick="YNS.closeList();YNS.pickAvatar()"><b>Change my character</b><span>Pick a different face for your page.</span></button>'
+      +'<button class="set-row set-danger" onclick="YNS.askReset()"><b>Start over</b><span>Clear everything on this device and begin again.</span></button>'
+      +'</div></div>';
+  };
+  YNS.askReset=function(){
+    var m=$("actModal");
+    m.innerHTML='<div class="am-card"><div class="am-top"><span class="am-eyebrow">Just checking</span><button class="am-x" onclick="YNS.settings()" aria-label="Back">\u00d7</button></div>'
+      +'<h2>Start over from the beginning?</h2>'
+      +'<p class="am-scene">This clears your answers, your finished activities, your Planner and your Portfolio on this device. It can\u2019t be undone. With a free account, your saved work stays in your account.</p>'
+      +'<div class="am-foot" data-back="settings"><button class="btn-quiet" onclick="YNS.settings()">Keep everything</button>'
+      +'<button class="btn btn-primary" onclick="YNS.confirmReset()">Yes, start over</button></div></div>';
+  };
+  YNS.confirmReset=function(){
+    track("reset", {});
+    YNS.closeList();
+    try { localStorage.removeItem("yns.abcs.v1"); localStorage.removeItem("yns_pending_runs"); } catch(e){}
+    if (window.YNSMock && window.YNSMock.resetAll) window.YNSMock.resetAll();
+    YNS.reset();
+    toast("All clear. Let\u2019s start fresh.");
+  };
 
   window.YNSHub = { addEvidence: addEvidence };
   window.YNSMock.mount($("actModal"),

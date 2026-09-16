@@ -1,5 +1,19 @@
 # Your Next Step hub — audit
 
+## Update, build v23 (September 16, 2026)
+
+- **Settings is in the top bar** next to Portfolio and Planner. It offers Change my answers, Change my character, and Start over. Start over asks first, then clears everything on the device.
+- **The demo bar is removed from the code,** along with its review-only helpers ("Skip ahead", "demoFill"). The weekly and monthly check-ins now run on real time only.
+- **Bigger tap targets.** Each is now at least 44px:
+  - The Planner tick box has a 44px tap area.
+  - The money +/− buttons are 44px on phones. Typing still works too.
+  - "Not for me right now" is 44px tall and sits above the card's tap zone.
+- **Phone top bar:** the logo sits on its own row, then Portfolio · Planner · Settings in one row, then "Sign in or join free". The status chip is hidden on phones, since the rail already shows the same answers.
+- **Two new tracking events:** `settings_open` and `reset`.
+- **Tested:** all 26 activities on phone and desktop, 0 errors. Settings, Start over, Escape and the new tap sizes were checked at 390px and 1280px.
+
+---
+
 ## Update, build v22 (September 16, 2026)
 
 **Verdict: Anastasia's approved copy and product calls are built, and the full suite passes.** All 26 activities were played on desktop and on phone with no errors, and the Career ABCs resume test passes 11 of 11 bullets.
