@@ -3349,12 +3349,16 @@ body.front-open{overflow:hidden}
   var timers = /* @__PURE__ */ new WeakMap();
   var ROTATE_MS = 11e3;
   function reelCard(stage, opts = {}) {
-    const pool2 = opts.tag ? reelsByTag(stage, opts.tag) : shuffledReels(stage, get("prefs.reelSeed", 1));
+    let pool2 = opts.tag ? reelsByTag(stage, opts.tag) : shuffledReels(stage, get("prefs.reelSeed", 1));
     const host = el("div", { class: `reel ${opts.compact ? "reel-compact" : ""}` });
+    if (!get("prefs.reelsOn", true)) pool2 = [];
+    /* One guidance block per screen: the persona note, when there is one,
+       is the first card of the strip and stays put until the person
+       moves on to the tips. */
+    if (opts.lead) pool2 = [{ title: opts.lead.title, body: opts.lead.body, tag: "lead" }, ...pool2];
     if (!pool2.length) return host;
-    if (!get("prefs.reelsOn", true)) return host;
     let i = 0;
-    let paused = false;
+    let paused = Boolean(opts.lead);
     host.innerHTML = `
     <div class="reel-head">
       <span class="reel-eyebrow">${esc(opts.title || "While you work")}</span>
@@ -3391,12 +3395,13 @@ body.front-open{overflow:hidden}
       paused = true;
     });
     host.addEventListener("mouseleave", () => {
-      paused = false;
+      paused = Boolean(opts.lead) && i === 0;
     });
     host.addEventListener("focusin", () => {
       paused = true;
     });
     paint2();
+    if (pool2.length < 2) { const ctl = $(".reel-ctl", host); if (ctl) ctl.remove(); }
     const timer = setInterval(() => {
       if (!paused) step(1);
     }, ROTATE_MS);
@@ -3503,10 +3508,19 @@ body.front-open{overflow:hidden}
     }
   }
   function guidanceNote(stage) {
+    return `<div data-coach="${esc(stage)}"></div>`;
+  }
+  /* The screen's single guidance block: persona note first, tips after. */
+  function coachStrip(stage, title) {
     const persona = personaFor(get("about.persona"));
     const text = guidanceFor(persona.key, guidanceKey(stage));
-    if (!text) return "";
-    return `<div class="note note-info"><span class="note-t">Where you are starting from</span>${esc(text)}</div>`;
+    return reelCard(stage, { compact: true, title, lead: text ? { title: "Where you are starting from", body: text } : null });
+  }
+  function mountCoach(root, stage, title, fallbackSel) {
+    const slot = $(`[data-coach="${stage}"]`, root);
+    const old = fallbackSel ? $(fallbackSel, root) : null;
+    if (slot) { slot.replaceWith(coachStrip(stage, title)); if (old) old.remove(); }
+    else if (old) old.replaceChildren(coachStrip(stage, title));
   }
 
   // src/app/onboarding.js
@@ -11054,7 +11068,7 @@ body.front-open{overflow:hidden}
       test: (doc) => {
         const bullets = allBullets(doc);
         if (!bullets.length) return false;
-        return bullets.every((b) => countWords(b) <= 34);
+        return bullets.every((b) => countWords(b) <= 35);
       }
     },
     {
@@ -11394,6 +11408,24 @@ h1, .contact, .headline { text-align: center; }
 
 .resume strong { font-weight: 700; }
 .resume em { font-style: italic; }
+
+/* The markup resumeHTML() actually writes: h1, .contact, .headline, h2,
+   .job, .job-h. Dates float right so they line up down the page in the
+   browser and in Word, which ignores flexbox. */
+.resume h1 { font-size: 19pt; font-weight: 700; margin: 0 0 3pt; line-height: 1.15; }
+.resume .contact { font-size: 9.75pt; margin: 0 0 6pt; color: #333333; }
+.resume .headline { font-size: 11pt; font-weight: 700; margin: 0 0 8pt !important; }
+.resume h2 {
+  font-size: 10.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em;
+  margin: 11pt 0 5pt; padding: 0 0 2pt; border-bottom: 0.75pt solid #333333;
+  break-after: avoid; page-break-after: avoid;
+}
+.resume .job { margin: 0 0 7pt; break-inside: avoid; page-break-inside: avoid; }
+.resume .job-h { overflow: hidden; }
+.resume .job-h b { font-weight: 700; }
+.resume .job-h span { float: right; padding-left: 12pt; white-space: nowrap; color: #333333; font-size: 10pt; }
+.resume ul { margin: 2pt 0 0; padding-left: 14pt; }
+.resume li { margin: 0 0 2pt; }
 `;
   function deepFreeze4(value, seen) {
     const visited = seen || /* @__PURE__ */ new WeakSet();
@@ -11543,8 +11575,7 @@ h1, .contact, .headline { text-align: center; }
     </div>
   `;
     mountPoint.replaceChildren(host);
-    const reelSlot = $("#a-reel", host);
-    if (reelSlot) reelSlot.replaceChildren(reelCard("storyBank", { compact: true, title: "While you write" }));
+    mountCoach(host, "storyBank", "While you write", "#a-reel");
     wire(host);
   }
   function scenarioCard(sc) {
@@ -13955,6 +13986,10 @@ h1, .contact, .headline { text-align: center; }
             <label for="r-sum">Summary</label>
             <p class="field-hint">Two or three short sentences. Optional, and worth having.</p>
             <textarea id="r-sum" rows="3" data-bind="build.summary">${esc(b.summary)}</textarea>
+            <div class="row" style="margin-top:8px">
+              <button class="btn btn-ghost btn-sm" data-act="draft-summary" type="button">Draft it for me</button>
+              <span class="sub">Built from your jobs and stories. Edit every word.</span>
+            </div>
           </div>
           <div id="r-ai" aria-live="polite"></div>
         </section>
@@ -14099,14 +14134,149 @@ h1, .contact, .headline { text-align: center; }
         return { id: c.id, label: c.label, pass };
       });
     }
-    const failing = results.filter((r) => !r.pass);
+    const yrs = yearsOfExperience(doc.experience);
+    /* One page is the rule under ten years; past that, two is fine. */
+    const failing = results.filter((r) => !(r.pass ?? r.passed) && !(r.id === "fits_one_page" && yrs >= 10)).concat(extraChecks(state2));
     return `
     <section class="card card-sm">
       <h4 style="margin-top:0">Before you send it</h4>
       ${failing.length === 0 ? `<div class="note note-ok" style="margin:0">Everything checks out. This is ready to go.</div>` : `<ul style="margin:0;padding-left:20px;font-size:var(--yns-t-sm)">
-             ${failing.slice(0, 8).map((r) => `<li>${esc(r.label)}</li>`).join("")}
+             ${failing.slice(0, 8).map((r) => `<li>${esc(r.label)}${r.help ? `<div class="sub" style="margin:2px 0 6px">${esc(r.help)}</div>` : ""}</li>`).join("")}
            </ul>`}
     </section>`;
+  }
+  /* ---- Resume substance: headline, summary, skills, length ----
+     Everything drafted here is built from what the person already wrote
+     in the app. Nothing is claimed that they have not said. */
+  var NUM_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+  function yearsOfExperience(exp) {
+    const years = (exp || []).map((j) => Number((String(j.from || "").match(/\b(?:19|20)\d{2}\b/) || [])[0])).filter(Boolean);
+    if (!years.length) return 0;
+    return Math.max(0, (/* @__PURE__ */ new Date()).getFullYear() - Math.min(...years));
+  }
+  function yearsPhrase(n) {
+    if (n < 1) return "";
+    return n === 1 ? "one year" : `${n <= 10 ? NUM_WORDS[n] : n} years`;
+  }
+  function draftHeadline(state2) {
+    const b = state2.build, a = state2.about;
+    const current = ((b.experience || [])[0] || {}).title || "";
+    const target = (b.target || {}).role || "";
+    const span = yearsPhrase(yearsOfExperience(b.experience));
+    let line = current ? current + (span ? ` with ${span} of experience` : "") : (span ? `${cap1(span)} of experience` : "");
+    if (target && target.toLowerCase() !== current.toLowerCase()) {
+      const t = target;
+      const tail = a.direction === "change_field" ? `moving into ${t} work`
+        : a.direction === "move_up" ? `ready to step up to ${t}`
+        : `looking for a ${t} role`;
+      line = line ? `${line}, ${tail}` : cap1(tail);
+    }
+    return line;
+  }
+  function cap1(t) { return t ? t.charAt(0).toUpperCase() + t.slice(1) : ""; }
+  /* The strongest proof on the page: a bullet's result phrase with a number in it. */
+  function topResult(exp) {
+    const phrases = [];
+    (exp || []).forEach((j) => (j.bullets || []).forEach((t) => {
+      const m = String(t).match(/,\s+((?:cutting|raising|retaining|earning|holding|keeping|fixing|saving|growing|reducing)\b[^.]*)\.?$/i);
+      if (m && /\d/.test(m[1])) phrases.push(m[1].replace(/,\s*up from.*$/i, ""));
+    }));
+    return phrases[0] || "";
+  }
+  function draftSummary(state2) {
+    const b = state2.build, a = state2.about;
+    const yearOf = (j) => Number((String(j.from || "").match(/\b(?:19|20)\d{2}\b/) || [])[0]) || 9999;
+    const current = (j) => !String(j.to || "").trim() || /present|now|current/i.test(j.to);
+    /* Lead with the main job: current before past, and among current
+       jobs the one held longest. */
+    const jobs = (b.experience || []).filter((j) => j.title).slice().sort((x, y) =>
+      (current(y) ? 1 : 0) - (current(x) ? 1 : 0) || (current(x) ? yearOf(x) - yearOf(y) : yearOf(y) - yearOf(x)));
+    if (!jobs.length) return "";
+    const span = yearsPhrase(yearsOfExperience(jobs));
+    const place = (j) => String(j.where || "").split(",")[0].trim();
+    const role = (j) => String(j.title || "").replace(/\s*\([^)]*\)/g, "").trim().toLowerCase();
+    const an = (t) => (/^[aeiou]/i.test(t) ? "an " : "a ") + t;
+    const first = jobs[0];
+    const earliest = jobs[jobs.length - 1];
+    /* A promotion reads as growth only when the earlier job ended. */
+    const sameEmployer = jobs.length > 1 && place(earliest) && place(earliest) === place(first) && Boolean(String(earliest.to || "").trim());
+    const sentences = [];
+    if (sameEmployer) {
+      sentences.push(`${cap1(span || "Time")} at ${place(first)}, growing from ${role(earliest)} to ${role(first)}.`);
+    } else {
+      const ownSpan = yearsPhrase(yearsOfExperience([first]));
+      const other = jobs[1];
+      const tail = !other ? "" : current(other) ? `, plus ${role(other)} work` : `, with earlier work as ${an(role(other))}`;
+      sentences.push(`${ownSpan ? `${cap1(ownSpan)} as ${an(role(first))}` : cap1(an(role(first)))}${place(first) ? ` at ${place(first)}` : ""}${tail}.`);
+    }
+    const strengths = (a.strengths || []).slice(0, 2).map((x) => x.toLowerCase());
+    const proof = topResult(jobs).replace(/\s+(?:the next|the following|over the next|within the first|in the first)\b.*$/i, "");
+    if (strengths.length || proof) {
+      const joined = strengths.length < 2 ? strengths.join("") : strengths.some((x) => / and /.test(x)) ? `${strengths[0]}, plus ${strengths[1]}` : `${strengths[0]} and ${strengths[1]}`;
+      let s2 = strengths.length ? `Strongest in ${joined}` : "";
+      if (proof) s2 += s2 ? `, with a record of ${proof}` : `Record includes ${proof}`;
+      sentences.push(s2 + ".");
+    }
+    const target = (b.target || {}).role;
+    if (target) {
+      const t = target;
+      sentences.push(a.direction === "change_field"
+        ? `Bringing that experience to a ${t} role.`
+        : a.direction === "move_up" ? `Ready to take on the ${t} role.` : `Looking to bring that to a ${t} role.`);
+    }
+    return sentences.join(" ");
+  }
+  /* Skills that add something. Tools and systems named anywhere in the
+     stories come first, because a reader scans for them. A strength the
+     bullets already prove is left off so the section is not an echo. */
+  var TOOL_WORDS = /\b(POS|Excel|Word|PowerPoint|Outlook|Google (?:Sheets|Docs|Workspace)|QuickBooks|Salesforce|Zendesk|Kronos|UKG|ADP|WMS|Square|Toast|Epic|Cerner|Workday|Canva|Slack|forklift|pallet jack|CPR|First Aid|ServSafe|OSHA\s*\d*|Spanish|bilingual)\b|\b[A-Z][a-z]+[A-Z][A-Za-z]+\b/g;
+  var GENERIC_SKILL_WORDS = /^(and|the|with|skills?|handling|procedures|support|systems?|working|awareness|knowledge|basic|under|standards|management)$/i;
+  function resumeSkills(state2) {
+    const a = state2.about, b = state2.build;
+    const bulletText = (b.experience || []).flatMap((j) => j.bullets || []).join(" ").toLowerCase();
+    const storyText = (a.stories || []).map((st) => [st.whatIDid, st.situation, st.whatChanged].join(" ")).join(" ") + " " + (b.experience || []).flatMap((j) => j.bullets || []).join(" ");
+    const tools = [];
+    (storyText.match(TOOL_WORDS) || []).forEach((t) => { if (!tools.some((x) => x.toLowerCase() === t.toLowerCase())) tools.push(t); });
+    const stem = (w) => w.toLowerCase().replace(/(ing|ed|es|s)$/, "");
+    /* Echo = every meaningful word of the skill already sits in one
+       bullet. "Documentation and charting" next to "charted every
+       record" is an echo; "Cash handling" next to "cashier" is not. */
+    const proven = (skill) => {
+      const ws = skill.split(/[\s/-]+/).filter((w) => w.length >= 4 && !GENERIC_SKILL_WORDS.test(w));
+      return ws.length > 0 && ws.every((w) => new RegExp("\\b" + stem(w).replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(e|es|s|ed|ing|er|ers)?\\b", "i").test(bulletText));
+    };
+    const all = (a.strengths || []).filter((x) => !tools.some((t) => t.toLowerCase() === x.toLowerCase()));
+    const fresh = all.filter((x) => !proven(x));
+    const echoes = all.filter((x) => proven(x));
+    const out = [...tools, ...fresh];
+    while (out.length < 6 && echoes.length) out.push(echoes.shift());
+    return out.slice(0, 12);
+  }
+  function extraChecks(state2) {
+    const doc = resumeObject(state2);
+    const out = [];
+    if (!doc.summary && (doc.experience || []).some((j) => (j.bullets || []).length)) {
+      out.push({ id: "summary", label: "Add a two-line summary under your headline. \u201cDraft it for me\u201d writes one from your stories." });
+    }
+    const flagged = [];
+    (doc.experience || []).forEach((j) => (j.bullets || []).forEach((t, i) => {
+      const issues = XYZ.check(t);
+      if (issues.length) flagged.push({ where: j.title || "a job", i, issue: issues[0] });
+    }));
+    flagged.slice(0, 3).forEach((f) => out.push({ id: "bullet", label: `Bullet ${f.i + 1} under ${f.where}: ${f.issue}` }));
+    if (flagged.length > 3) out.push({ id: "bullet_more", label: `${flagged.length - 3} more bullets could use the same look.` });
+    const perJob = (doc.experience || []).map((j) => (j.bullets || []).length);
+    if (perJob.some((n) => n > 6)) out.push({ id: "too_many", label: "One job has more than six bullets. The strongest four or five say more than all of them." });
+    return out;
+  }
+  function resumeFileName(name) {
+    const parts = String(name || "").trim().split(/\s+/).filter(Boolean).map((p) => p.replace(/[^A-Za-z.'-]/g, ""));
+    return parts.length >= 2 ? `${parts[0]}_${parts[parts.length - 1]}_Resume.pdf` : "Resume.pdf";
+  }
+  /* The printable document: resumeHTML inside the .resume wrapper the
+     print stylesheet is written against. */
+  function resumePrintHTML(state2) {
+    return `<div class="resume">${resumeHTML(state2)}</div>`;
   }
   function resumeObject(state2) {
     const a = state2.about, b = state2.build;
@@ -14116,8 +14286,12 @@ h1, .contact, .headline { text-align: center; }
       summary: b.summary,
       experience: b.experience,
       education: b.education,
-      skills: a.strengths || [],
-      template: b.template
+      skills: resumeSkills(state2),
+      template: b.template,
+      /* RESUME.CHECKS read sections[].items[] and fileName. Without these
+         every bullet check failed, even on a finished resume. */
+      sections: [{ key: "experience", items: (b.experience || []).map((j) => ({ title: j.title, org: j.where, start: j.from, end: j.to, bullets: j.bullets || [] })) }],
+      fileName: resumeFileName(a.name)
     };
   }
   function resumeHTML(state2) {
@@ -14126,7 +14300,10 @@ h1, .contact, .headline { text-align: center; }
     if (!d.contact.name && !d.experience.length) {
       return `<p style="color:#666;font-family:system-ui">Your resume will appear here as you fill things in.</p>`;
     }
-    const order = sectionOrderFor(state2.build.roleFamily) || ["contact", "headline", "summary", "experience", "skills", "certifications", "education"];
+    const order = (sectionOrderFor(state2.build.roleFamily) || ["contact", "headline", "summary", "experience", "skills", "certifications", "education"]).slice();
+    /* Some families leave summary out of their order; a summary the
+       person wrote still prints, straight under the headline. */
+    if (order.indexOf("summary") < 0) order.splice(order.indexOf("headline") + 1 || 1, 0, "summary");
     const blocks = {
       contact: () => `
       <h1>${esc(d.contact.name || "Your Name")}</h1>
@@ -14194,22 +14371,549 @@ h1, .contact, .headline { text-align: center; }
     });
     on(body, "click", '[data-act="headline-help"]', () => headlineHelp());
     on(body, "click", '[data-act="ai-summary"]', () => aiSummary(body));
-    const reelSlot = $("#b-reel", body);
-    if (reelSlot) reelSlot.replaceChildren(reelCard("resume", { compact: true, title: "While you build" }));
+    on(body, "click", '[data-act="draft-summary"]', async () => {
+      const st = load();
+      const sum = draftSummary(st);
+      if (!sum) { toast("Add a job first, then this can write from it", "warn"); return; }
+      if (st.build.summary && st.build.summary.trim() && st.build.summary.trim() !== sum) {
+        if (!await confirmAsk({ title: "Replace your summary?", message: "The draft will take the place of what you wrote.", confirmLabel: "Replace" })) return;
+      }
+      if (!st.build.headline) set("build.headline", draftHeadline(st));
+      set("build.summary", sum);
+      toast(st.build.headline ? "Summary drafted" : "Headline and summary drafted", "ok");
+      refresh();
+    });
+    mountCoach(body, "resume", "While you build", "#b-reel");
     on(body, "click", '[data-act="print-resume"]', () => {
-      printDocument({ title: `${get("about.name") || "Resume"}`, css: RESUME.PRINT_CSS, bodyHTML: resumeHTML(load()) });
+      printDocument({ title: resumeFileName(get("about.name")).replace(/\.pdf$/, ""), css: RESUME.PRINT_CSS, bodyHTML: resumePrintHTML(load()) });
     });
     on(body, "click", '[data-act="word-resume"]', () => {
       const name = (get("about.name") || "resume").replace(/\s+/g, "-").toLowerCase();
-      downloadAsWord(`${name}-resume.doc`, "Resume", RESUME.PRINT_CSS, resumeHTML(load()));
+      downloadAsWord(`${name}-resume.doc`, "Resume", RESUME.PRINT_CSS, resumePrintHTML(load()));
       toast("Downloaded", "ok");
     });
   }
+  /* XYZ-COMPOSER:BEGIN */
+  // src/content/xyz.js
+  /* The impact-statement composer. Module 3's XYZ: what you did (Z),
+     measured by what (Y), with what result (X), written as ONE sentence.
+
+     prefill(story, family) turns a story as typed (first person, run-on,
+     present tense) into three clean boxes. compose(boxes, family) writes
+     the bullet from whatever is in the boxes, so the person's own edits
+     flow straight through.
+
+     The rules, in the order they are applied:
+       - a strong past-tense verb first, chosen for the role family when
+         the person's own verb is weak (did, was, helped, made sure)
+       - the number folded into the action ("for 100-150 customers a day")
+       - the result carried in the same sentence as a participle phrase
+         ("cutting shrink 18%") or a "so" clause, never a second sentence
+       - no first person, no semicolons, no comma splices
+       - 28 words at most; what goes first when it runs long is the
+         least specific part (vague results, then extra measures, then
+         the second action)
+
+     Everything here is plain string work so it runs without AI, and it
+     is written to be read and extended: the phrase tables near the top
+     are where new patterns belong. */
+  var XYZ = function () {
+    var MAX_WORDS = 28;   // what the composer aims for
+    var WARN_WORDS = 35;  // what the checker lets through
+
+    /* Verbs that open a clause. Present, base and past forms all count. */
+    var PAST = {
+      make: "made", makes: "made", take: "took", takes: "took", run: "ran", runs: "ran", keep: "kept", keeps: "kept",
+      lead: "led", leads: "led", teach: "taught", teaches: "taught", sell: "sold", sells: "sold", build: "built", builds: "built",
+      deal: "dealt", deals: "dealt", do: "did", does: "did", go: "went", goes: "went", have: "had", has: "had",
+      is: "was", am: "was", are: "were", get: "got", gets: "got", hold: "held", holds: "held", find: "found", finds: "found",
+      meet: "met", meets: "met", pay: "paid", pays: "paid", say: "said", says: "said", see: "saw", sees: "saw",
+      speak: "spoke", speaks: "spoke", stand: "stood", stands: "stood", tell: "told", tells: "told", think: "thought",
+      win: "won", wins: "won", write: "wrote", writes: "wrote", drive: "drove", drives: "drove", bring: "brought",
+      brings: "brought", put: "put", puts: "put", set: "set", sets: "set", cut: "cut", cuts: "cut", catch: "caught",
+      catches: "caught", spend: "spent", spends: "spent", show: "showed", shows: "showed", oversee: "oversaw",
+      oversees: "oversaw", give: "gave", gives: "gave", begin: "began", begins: "began", send: "sent", sends: "sent",
+      lock: "locked", locks: "locked", close: "closed", closes: "closed", open: "opened", opens: "opened"
+    };
+    var ING = {
+      got: "getting", kept: "keeping", ran: "running", led: "leading", made: "making", took: "taking", cut: "cutting",
+      set: "setting", put: "putting", won: "winning", built: "building", taught: "teaching", brought: "bringing",
+      caught: "catching", held: "holding", went: "going", did: "doing", had: "having", saw: "seeing", gave: "giving",
+      stopped: "stopping", planned: "planning", dropped: "dropping", shipped: "shipping", tried: "trying",
+      went_down: "bringing down", sent: "sending", began: "beginning", found: "finding", paid: "paying", sold: "selling"
+    };
+    var VERBS = ("add answer arrange assign assist balance bathe book build call calm catch chart check clean close coach " +
+      "collect complete cook count cover create cut deal deliver design do dress drive enter feed file fill find fix " +
+      "follow get give go greet guide handle help hire hold keep label lead learn load lock log make manage mentor " +
+      "move notice onboard open order organize orient pack pay pick plan prep prepare process put reach record " +
+      "reduce ring rotate run schedule serve set show solve sort start stock supervise support take teach tell " +
+      "track train turn unload update use wash watch work write start stay step pull push lift restock resolve " +
+      "reorganize document report escalate flag alert monitor observe communicate coordinate verify confirm sanitize " +
+      "fold stack scan ship receive replenish prioritize cross-train shadow welcome recruit interview cashier " +
+      "reconcile deposit count audit inspect repair install maintain operate troubleshoot pioneer cultivate exceed " +
+      "achieve generate provide prepare present launch design develop implement improve increase grow retain " +
+      "partner negotiate analyze survey engage mentor advise plan chart orient assign start call lock").split(" ");
+    var VERB_SET = {};
+    VERBS.forEach(function (v) { VERB_SET[v] = 1; });
+
+    /* The person's verb is weak or vague: swap it for one that says what
+       the work was. Keyed by role family; "any" is the fallback. */
+    var WEAK = /^(did|do|does|was|were|is|am|helped|help|assisted|worked|made sure|ensured|ensure|got|had|handled stuff)$/i;
+    var STRONG = {
+      hands_on: "Completed", customer_facing: "Handled", office_admin: "Handled", care_health: "Provided",
+      technical_trades: "Completed", creative_marketing: "Produced", leading_people: "Handled", any: "Handled"
+    };
+
+    /* Phrase rewrites applied to every box before anything else. Plain
+       spoken phrasing on the left, resume phrasing on the right. */
+    var PHRASES = [
+      [/\bdrive[ -]?thru\b/gi, "drive-thru"],
+      [/\bmade the orders?\b/gi, "prepared orders"],
+      [/\btook the orders?\b/gi, "took orders"],
+      [/\b(and )?(ensured|made sure of) (customer|guest) satisfaction\b/gi, ""],
+      [/\bwith a smile\b/gi, ""],
+      [/\bpretty much\b/gi, ""],
+      [/\b(a lot of|lots of)\b/gi, "significant"],
+      [/\bmaybe\b/gi, "about"],
+      [/\bcall offs?\b/gi, "call-offs"],
+      [/\bthe end of (my|the|our) shift\b/gi, "shift end"],
+      [/\b(\d+)%\s*(?:-|–|to)\s*(\d+)%/g, "$1–$2%"],
+      [/\b(\d+)\s*(?:-|to)\s*(\d+)\b/g, "$1–$2"],
+      [/\bterm over term\b/gi, "term-over-term"],
+      [/\bday to day\b/gi, "day-to-day"],
+      [/\bbetween (\d+–\d+)\b/gi, "$1"],
+      [/\bat the same time\b/gi, "at once"],
+      [/\bmade sure (?:that )?the (\w+) (?:is|was) ready for\b/gi, "prepared the $1 for"],
+      [/\b(?:i )?never had (?:my|the|a) drawer come up short\b/gi, "closed every drawer without a shortage"],
+      [/\bhow to (?:do|use|work|run) (the )?/gi, "$1"],
+      [/\ba little\b/gi, "a"],
+      [/\bone page\b/gi, "one-page"],
+      [/\bwrote down what i (?:saw|noticed)\b/gi, "documented observed changes"],
+      [/\bwrote down\b/gi, "documented"],
+      [/\bringing people up\b/gi, "ringing up customers"],
+      [/\bby themselves\b/gi, "on their own"],
+      [/\b(?:my|our) (?:little|younger|baby) (?:brother|sister|sibling)\b/gi, "a younger sibling"],
+      [/\bdo the deposit\b/gi, "make the deposit"],
+      [/\b(\d[\d\u2013-]*) people (a|per|each) (day|shift|night)\b/gi, "$1 customers $2 $3"],
+      [/\b(?:all\s+)?(?:their\s+|the\s+)?ADLs?,\s*([a-z]+),\s*([a-z]+),?\s*(?:and\s+)?([a-z]+)\b/gi, "daily care ($1, $2, and $3)"],
+      [/\bdidnt\b/gi, "did not"], [/\bdoesnt\b/gi, "does not"], [/\bhasnt\b/gi, "has not"],
+      [/\bwasnt\b/gi, "was not"], [/\bdont\b/gi, "do not"], [/\bcant\b/gi, "cannot"], [/\bwont\b/gi, "will not"],
+      [/\bim\b/g, "I'm"], [/\bive\b/g, "I've"]
+    ];
+
+    /* Results worth less than a number. Kept only when there is room. */
+    var VAGUE_RESULT = /\b(most popular|satisf|happy|smile|good job|great job|liked it|told the owner|told me|thanked|praised|appreciated)\b/i;
+    var PEOPLE = "customers|guests|people|residents|patients|clients|callers|students|kids|children|members|shoppers|visitors|families|associates|employees|staff|hires|aides|workers";
+
+    function words(t) { return String(t || "").trim().split(/\s+/).filter(Boolean).length; }
+    function squash(t) { return String(t || "").replace(/\s+/g, " ").replace(/\s+([,.;:])/g, "$1").replace(/,\s*,/g, ",").trim(); }
+    function cap(t) { return t ? t.charAt(0).toUpperCase() + t.slice(1) : ""; }
+    function lower(t) { return t && !/^[A-Z]{2,}/.test(t) && !/^I\b/.test(t) ? t.charAt(0).toLowerCase() + t.slice(1) : t || ""; }
+    function stripEnd(t) { return squash(t).replace(/[\s.;,:!]+$/, ""); }
+    function phrase(t) { var s = String(t || ""); PHRASES.forEach(function (p) { s = s.replace(p[0], p[1]); }); return squash(s); }
+
+    var PAST_FORMS = {};
+    Object.keys(PAST).forEach(function (k) { PAST_FORMS[PAST[k]] = k.replace(/(es|s)$/, "") || k; });
+    var BASE = { caught: "catch", got: "get", kept: "keep", made: "make", took: "take", ran: "run", led: "lead", found: "find", went: "go", did: "do", had: "have", saw: "see", brought: "bring", taught: "teach", held: "hold", gave: "give", finished: "finish", stopped: "stop" };
+    function baseOf(past) {
+      var lw = past.toLowerCase();
+      if (BASE[lw]) return BASE[lw];
+      if (PAST_FORMS[lw]) return PAST_FORMS[lw];
+      var tries = [lw.slice(0, -1), lw.slice(0, -2), lw.replace(/ied$/, "y"), lw.replace(/(.)\1ed$/, "$1")];
+      for (var t = 0; t < tries.length; t++) if (/ed$/.test(lw) && VERB_SET[tries[t]]) return tries[t];
+      if (/ied$/.test(lw)) return lw.replace(/ied$/, "y");
+      if (/([^aeiouls])\1ed$/.test(lw)) return lw.slice(0, -3);
+      if (/(at|iz|us|ov|ag|ir|ur|v|c)ed$/.test(lw)) return lw.slice(0, -1);
+      if (/ed$/.test(lw)) return lw.slice(0, -2);
+      return lw;
+    }
+    function pastOf(w) {
+      var lw = w.toLowerCase();
+      if (PAST_FORMS[lw] || lw === "set" || lw === "put" || lw === "cut") return lw;
+      if (PAST[lw]) return PAST[lw];
+      if (/ed$/.test(lw)) return lw;
+      if (/ies$/.test(lw)) return lw.replace(/ies$/, "ied");
+      if (/(sh|ch|ss|x|z)es$/.test(lw)) return lw.replace(/es$/, "ed");
+      if (/[^s]s$/.test(lw)) lw = lw.replace(/s$/, "");
+      if (/e$/.test(lw)) return lw + "d";
+      if (/[^aeiou]y$/.test(lw)) return lw.replace(/y$/, "ied");
+      if (/^[^aeiou]*[aeiou][bdgmnpt]$/.test(lw) && lw.length <= 4) return lw + lw.slice(-1) + "ed";
+      return lw + "ed";
+    }
+    function ingOf(past) {
+      var lw = past.toLowerCase();
+      if (ING[lw]) return ING[lw];
+      if (/ied$/.test(lw)) return lw.replace(/ied$/, "ying");
+      if (/([^aeiou])\1ed$/.test(lw)) return lw.replace(/ed$/, "ing");
+      if (/ed$/.test(lw)) {
+        var stem = lw.slice(0, -2);
+        if (/(at|iz|us|in|ir|ag|ov|ar|ur|v|c|g)$/.test(stem) && !/(ing|ain|oin|ar)$/.test(stem.slice(-3))) return stem + "ing";
+        return stem + "ing";
+      }
+      return lw + "ing";
+    }
+    function isVerb(w) {
+      var lw = String(w || "").toLowerCase().replace(/[^a-z]/g, "");
+      if (!lw) return false;
+      if (VERB_SET[lw] || PAST[lw] || PAST_FORMS[lw]) return true;
+      var base = lw.replace(/(ed|es|s)$/, "");
+      return Boolean(VERB_SET[base] || VERB_SET[base + "e"] || VERB_SET[lw.replace(/ied$/, "y")] || VERB_SET[lw.replace(/(.)\1ed$/, "$1")]);
+    }
+
+    var SUBJECT = /^(?:and\s+|also\s+|then\s+)?(?:i\s+am\s+the\s+one\s+who|i'm\s+the\s+one\s+who|i\s+was\s+the\s+one\s+who|i\s+usually|i\s+always|i\s+also|i\s+just|i\s+would|i\s+have|i've|i'd|i\s+|we\s+|me\s+and\s+\w+\s+)/i;
+
+    /* One action clause: subject gone, first verb in past tense, weak verb
+       swapped, first-person words neutralised. */
+    function cleanClause(c, family) {
+      var s = phrase(c).replace(SUBJECT, "").replace(SUBJECT, "");
+      s = stripEnd(s);
+      if (/^stood out as\b/i.test(s)) return squash(s);
+      if (/^\w+\s+(it|this|that)$/i.test(s)) return "";
+      var adv = "";
+      var am = s.match(/^(also|then|always|usually|just|still|often)\s+(.*)$/i);
+      if (am) { adv = ""; s = am[2]; }
+      var m = s.match(/^(\w+)(.*)$/);
+      if (!m) return s;
+      var verb = m[1], rest = m[2];
+      if (/^never$/i.test(verb)) return squash(s);
+      if (/^was$|^is$|^am$/i.test(verb) && /^\s+(the|a|an)\s/i.test(rest)) {
+        verb = "Stood out as";
+        rest = rest.replace(/^\s+(the|a|an)\s/i, " the ");
+      } else if (WEAK.test(verb)) {
+        if (/^(helped|help|assisted)$/i.test(verb)) verb = "Supported";
+        else verb = /\b(adls?|bathing|dressing|feeding|care|meals|transfers)\b/i.test(rest) ? "Provided" : STRONG[family] || STRONG.any;
+        rest = rest.replace(/^\s+all\s+(their|the|of the)\s+/i, " ").replace(/^\s+(their|the)\s+/i, " ");
+      } else {
+        verb = pastOf(verb);
+      }
+      s = verb + rest;
+      s = s.replace(/\bmy\s+(coworkers?|crew|team|manager|residents?|patients?|hall|unit|shift|drawer|store)\b/gi, "the $1")
+        .replace(/\bour\s+(\w+)/gi, "the $1").replace(/\bmy\s+/gi, "the ").replace(/\bI\s+/g, "")
+        .replace(/\btheir\s+(first)\b/gi, "their $1").replace(/\bmyself\b/gi, "");
+      return squash(s);
+    }
+
+    /* Split what-I-did into action clauses. A comma or "and" only starts a
+       new clause when a verb (or "I") follows; otherwise it is a list. */
+    function splitActions(text) {
+      var bits = String(text || "").split(/(\.\s+|,\s*and\s+|,\s+|\s+and\s+)/i);
+      var clauses = [];
+      for (var i = 0; i < bits.length; i += 2) {
+        var p = bits[i], sep = i > 0 ? bits[i - 1] : "";
+        if (!p) continue;
+        var head = p.replace(SUBJECT, "").split(/\s+/)[0];
+        var startsNew = !clauses.length || /\.\s/.test(sep) || /^\s*(i|we)\s/i.test(p) ||
+          (isVerb(head) && !/ing$/i.test(head) && !/^(the|a|an)$/i.test(head));
+        var prevBare = clauses.length && !/\s/.test(clauses[clauses.length - 1].replace(SUBJECT, "").trim());
+        if (startsNew && !prevBare) clauses.push(p);
+        else clauses[clauses.length - 1] += sep + p;
+      }
+      return clauses.map(function (c) { return c.trim(); }).filter(Boolean);
+    }
+
+    /* Tail clauses that can go when a bullet runs long. */
+    function compressAction(a) {
+      var c = a.replace(/\s+(so|because|which|that|who|so that|to make sure)\s+.*$/i, "").replace(/\s+for (their|the) first \w+ \w+$/i, "");
+      if (c !== a) c = c.replace(/\s+with them\b/i, "");
+      return stripEnd(c);
+    }
+
+    /* "Prepared orders" + "took orders at the drive-thru" -> "Prepared and
+       took orders at the drive-thru". */
+    function mergeShared(a, b) {
+      var ma = a.match(/^(\S+)\s+(\S+)$/), mb = b.match(/^(\S+)\s+(\S+)(.*)$/);
+      if (ma && mb && ma[2].toLowerCase() === mb[2].toLowerCase()) return ma[1] + " and " + lower(mb[1]) + " " + mb[2] + mb[3];
+      return null;
+    }
+    function oxford(t) {
+      /* "bathing, dressing, feeding" -> "bathing, dressing, and feeding" */
+      return t.replace(/((?:\b[\w-]+,\s+){2,})([\w-]+)(?=$|\s+(?:for|to|in|at|on|with)\b)/, function (all, head, last) {
+        return /\band\s*$/.test(head) ? all : head + "and " + last;
+      });
+    }
+
+    function composeAction(text, family) {
+      var clauses = splitActions(text).map(function (c) { return cleanClause(c, family); })
+        .filter(function (c) { return words(c) > 1; });
+      if (!clauses.length) return "";
+      var list = [];
+      for (var i = 0; i < clauses.length; i++) {
+        var merged = list.length ? mergeShared(list[list.length - 1], clauses[i]) : null;
+        if (merged) list[list.length - 1] = merged;
+        else list.push(i === 0 ? cap(clauses[i]) : lower(clauses[i]));
+      }
+      return list.map(oxford);
+    }
+
+    /* ---------------- measures ---------------- */
+
+    /* A numbers entry {what, value} as a noun phrase. */
+    function numberPhrase(n) {
+      var what = phrase(n.what || "").replace(/\bmy\b/gi, "the").replace(/\bour\b/gi, "the");
+      var value = phrase(String(n.value == null ? "" : n.value));
+      if (!value) return "";
+      if (!/\d|\b(one|two|three|four|five|six|seven|eight|nine|ten|zero|no|little|every|all|half)\b/i.test(value)) return "";
+      if (what && new RegExp("\\b" + what.split(" ").pop().replace(/s$/, "") + "", "i").test(value)) return value;
+      var inst = value.match(/^(.+?)\s+instead of\s+(.+)$/i);
+      if (inst) return inst[1] + " " + what + " instead of " + inst[2];
+      if (/^0$/.test(value)) return "zero " + what;
+      if (/%$/.test(value) && /reduc|drop|cut|lower|down/i.test(what)) return value + " " + what.replace(/\s*(reduction|drop|cut|decrease)\b/i, "") + " reduction";
+      return value + (what ? " " + what : "");
+    }
+
+    /* Pull "100-150 people a day" style phrases out of a sentence. */
+    function extractScale(sentence) {
+      var s = phrase(sentence);
+      var re = new RegExp("((?:about |over |up to |nearly |around |~)?\\$?\\d[\\d,.]*\\+?(?:\\u2013\\d[\\d,.]*)?%?\\s+(?:" + PEOPLE + "|orders|calls|tickets|pallets|units|rooms|stores|lanes|tables|shifts|trucks|deliveries|transactions|beds|items|boxes|cases|accounts|appointments)(?:\\s+(?:a|per|each|every)\\s+(?:day|shift|week|night|month|hour))?)", "i");
+      var m = s.match(re);
+      return m ? m[1] : "";
+    }
+
+    /* Turn one measure fragment into something that attaches to the
+       action: " for 100-150 customers a day", ", each in five minutes". */
+    function attachMeasure(frag, family, action) {
+      var f = stripEnd(phrase(frag)).replace(/^(on any given day|on a typical day|on a normal day|every day|each day|usually|typically),?\s+/i, "");
+      f = f.replace(/^(we|i|they)\s+(serve|served|handle|handled|see|saw|help|helped|have|had|get|got|take|took)\s+/i, "");
+      f = f.replace(/\bmy\b/gi, "the").replace(/\bour\b/gi, "the");
+      if (!f) return "";
+      var each = f.match(/^each (\w+)\s+(?:has to be|had to be|must be|is|was|goes|went|got)?\s*(?:out|done|ready|served|finished)?\s*((?:in|within|under)\s.+)$/i);
+      if (each) return ", each " + (new RegExp("\\b" + each[1].replace(/s$/, ""), "i").test(action) ? "" : each[1] + " ") + each[2];
+      if (/^(each|every)\b/i.test(f)) return ", " + lower(f);
+      if (/^(for|across|with|in|at|on|over|under|within|per|during|through)\b/i.test(f)) return " " + lower(f);
+      if (/instead of/i.test(f)) return " with " + f;
+      if (/^(zero|no|little to no|near-zero)\b/i.test(f)) return " with " + f;
+      var crew = f.match(/^(\d+)\s+(?:people|associates|employees|staff)\s+on\s+the\s+(crew|team|shift)\b/i);
+      if (crew) return " for a " + crew[2] + " of " + crew[1];
+      if (new RegExp("^(?:about |over |up to |nearly |around )?[\\d\\u2013]+\\s+(?:" + PEOPLE + ")\\b", "i").test(f)) return " for " + f;
+      if (/^(?:about |over |up to )?\d/.test(f) && /\b(?:a|per|each|every)\s+(?:day|shift|week|night|month|hour)$/i.test(f)) return ", averaging " + f + ",";
+      if (/^\d/.test(f) && words(f) <= 6) return " across " + f;
+      if (words(f) <= 8) return " with " + f;
+      return "";
+    }
+
+    /* ---------------- results ---------------- */
+
+    function composeResult(text, family) {
+      var r = stripEnd(phrase(text));
+      if (!r) return "";
+      r = r.replace(/\s+because\b.*$/i, "").replace(/\s+since\s+(?:i|we)\s+(\w+)/i, function (a, v) { return " since " + ingOf(pastOf(v)); });
+      r = r.replace(/\bin our location\b/i, "in the area");
+      r = firstClause(r);
+      var rules = [
+        [/^(?:they|the company|the store|the manager|my manager|management)\s+promoted me to\s+(.+)$/i, function (m) { return "earning promotion to " + m[1]; }],
+        [/^(?:i|we)\s+(?:have\s+)?never\s+(?:had|missed)\s+(?:a|an|any)\s+(.+?)$/i, function (m) { return "with no " + plural(m[1]); }],
+        [/^(?!(?:morning|evening|during|nothing|something|everything|building|spring|string)\b)[a-z]+ing\s.*$/i, function (m) { return m[0]; }],
+        [/^no\s+(.+)$/i, function (m) { return "with no " + dePronoun(m[1]).replace(/\s+since\s+\w+ing\b.*$/i, ""); }],
+        [/^(?:i|we)\s+got\s+(.+?)\s+down\s+(from\s+.+)$/i, function (m) { return "cutting " + dePronoun(m[1]) + " " + m[2]; }],
+        [/^(?:the |my |our )?(.+?)\s+(?:is|was|stays|stayed|has stayed)\s+((?:above|over|below|under|at|within)\s+.+)$/i, function (m) { return "holding " + dePronoun(m[1]) + " " + m[2]; }],
+        [/^(.+?)\s+(?:went down|dropped|fell|decreased|came down)\s+(by\s+)?(.+)$/i, function (m) { return "cutting " + lower(dePronoun(m[1])) + " " + (/^\d/.test(m[3]) ? "" : "by ") + m[3]; }],
+        [/^(.+?)\s+(?:went up|rose|increased|grew)\s+(by\s+)?(.+)$/i, function (m) { return "raising " + lower(dePronoun(m[1])) + " " + (/^\d|^from\b/.test(m[3]) ? "" : "by ") + m[3]; }],
+        [/^out of (?:the last )?(\d+)\s+(?:people|hires|aides|staff)?\s*(?:i|we)\s+(?:trained|hired|onboarded)\s*,?\s*(\d+)\s+(?:are|were)\s+still\s+(?:here|there|on staff|with us)(.*)$/i,
+          function (m) { return "retaining " + m[2] + " of " + m[1] + " new hires" + m[3]; }],
+        [/^(?:we|i)\s+kept\s+(\d+)\s+of\s+(?:the\s+)?(?:last\s+)?(\d+)\s+(?:people|hires)?[^,]*?(?:,\s*(?:before|up from|compared to)\s+(?:it was\s+)?(.+))?$/i,
+          function (m) { return "retaining " + m[1] + " of the last " + m[2] + " new hires" + (m[3] ? ", up from " + m[3].replace(/^about\s+/, "about ") : ""); }],
+        [/^((?:about |over |nearly )?\d[\w–]*\s+[\w\s-]+?)\s+(?:got|were|was)\s+(\w+ed)\b(.*)$/i, function (m) { return ingOf(m[2]) + " " + lower(m[1]) + m[3]; }],
+        [/^(?:the|our)\s+(store|team|unit|shift|location|department|restaurant|crew)\s+(?:is|was|became)\s+(.+)$/i, function (m) { return "helping make the " + m[1] + " " + m[2]; }],
+        [/^(?:the\s+)?(.+?)\s+(?:has not|have not|hasn't|haven't)\s+had to\s+(.+?)(?:\s+since\b.*)?$/i, function (m) { return "so the " + lower(m[1]).replace(/^the\s+/, "") + " no longer had to " + dePronoun(m[2]); }],
+        [/^(?:they|she|he|the nurse|the team|the manager|the doctor)\s+(\w+ed|caught|got|kept|found|made|took|ran|went)\s+(.+)$/i, function (m) { return "helping " + baseOf(m[1]) + " " + dePronoun(m[2]); }],
+        [/^they\s+were\s+(\w+ing)\s+(.+)$/i, function (m) { return "so they were " + m[1] + " " + dePronoun(m[2]); }],
+        [/^(?:i|we)\s+(\w+)\s+(.+)$/i, function (m) { return ingOf(pastOf(m[1])) + " " + dePronoun(m[2]); }]
+      ];
+      for (var i = 0; i < rules.length; i++) {
+        var m = r.match(rules[i][0]);
+        if (m) return squash(firstClause(rules[i][1](m)));
+      }
+      return "so " + lower(firstClause(dePronoun(r)));
+    }
+    function plural(n) { return /s$/.test(n) ? n : n + "s"; }
+    function dePronoun(t) {
+      return squash(String(t).replace(/\bour\b/gi, "the").replace(/\bmy\b/gi, "the").replace(/\bwe\b/gi, "the team").replace(/\bus\b/gi, "the team")
+        .replace(/\s+(?:and\s+)?(?:i|me)\b.*$/i, "").replace(/\bme\b/gi, ""));
+    }
+    /* Keep a result to one idea: cut at a second subject. */
+    function firstClause(t) {
+      return stripEnd(String(t).replace(/\s+and\s+(?:the|my|our|she|he|they|it|we|i)\b(?!\s+(?:team|crew)\s+got).*$/i, ""));
+    }
+
+    /* ---------------- assembly ---------------- */
+
+    /* A current job reads in present tense (Lead, Manage), a past job in
+       past tense (Led, Managed). Only the verbs that open an action
+       change; results keep their own grammar. */
+    function presentOf(word) {
+      if (/^stood$/i.test(word)) return /^[A-Z]/.test(word) ? "Stand" : "stand";
+      if (!/ed$/i.test(word) && !PAST_FORMS[word.toLowerCase()]) return word;
+      var base = baseOf(word);
+      return /^[A-Z]/.test(word) ? cap(base) : base;
+    }
+    function toPresent(action) {
+      return action
+        .replace(/^(\w+)(\s+and\s+)(\w+)/, function (m, a, j, b) { return a + j + (isVerb(b) ? presentOf(b) : b); })
+        .replace(/^(\w+)/, function (m) { return presentOf(m); });
+    }
+    function compose(v, family, opts) {
+      v = v || {};
+      var fam = family || "any";
+      var present = Boolean(opts && opts.tense === "present");
+      var actions = composeAction(v.action || "", fam);
+      if (present) actions = actions.map(toPresent);
+      if (!actions.length && String(v.action || "").trim()) actions = [cap(stripEnd(phrase(v.action)))];
+      var measures = String(v.measure || "").split(/\s*;\s*/).map(function (m) { return stripEnd(phrase(m)); }).filter(Boolean);
+      var result = String(v.result || "").trim() ? composeResult(v.result, fam) : "";
+      if (present) result = result.replace(/\bno longer had to\b/, "no longer has to");
+      if (!actions.length && !measures.length && !result) return "";
+
+      /* "Showed them the register" + "3 new hires" -> "Showed 3 new hires
+         the register". The number lands inside the action. */
+      if (actions.length && /\bthem\b/i.test(actions[0])) {
+        var who = -1;
+        measures.forEach(function (m, i) { if (who < 0 && new RegExp("^(?:about |over )?\\d[\\d\\u2013]*\\s+(?:new\\s+)?(?:" + PEOPLE + ")$", "i").test(m)) who = i; });
+        if (who >= 0) { actions[0] = actions[0].replace(/\bthem\b/i, measures[who]); measures.splice(who, 1); }
+      }
+
+      /* "Served customers" + "100-150 customers a day" -> "Served 100-150
+         customers a day". Same for "Picked orders in the warehouse". */
+      if (actions.length) {
+        measures = measures.filter(function (m) {
+          var mm = m.match(/^((?:about |over |up to |nearly )?\d[\d,.\u2013]*\s+)(?:new\s+)?([a-z]+)\b/i);
+          if (!mm) return true;
+          var re = new RegExp("^(\\S+(?:\\s+and\\s+\\S+)?\\s+)(?:the\\s+|all\\s+(?:the\\s+)?)?" + mm[2] + "\\b", "i");
+          if (!re.test(actions[0])) return true;
+          actions[0] = actions[0].replace(re, "$1" + m);
+          return false;
+        });
+      }
+
+      /* "Lead the closing crew" + "8 people on the crew" -> "Lead the
+         closing crew of 8". */
+      if (actions.length) {
+        measures = measures.filter(function (m) {
+          var c = m.match(/^(\d+)\s+(?:people|associates|employees|staff)\s+on\s+(?:the|my|our)\s+(crew|team|shift)\b/i);
+          if (!c) return true;
+          var re = new RegExp("\\b((?:the|a)\\s+(?:[\\w-]+\\s+)?" + c[2] + ")\\b(?!\\s+of\\b)", "i");
+          if (!re.test(actions[0])) return true;
+          actions[0] = actions[0].replace(re, "$1 of " + c[1]);
+          return false;
+        });
+      }
+
+      /* Say each number once. A measure goes when its numbers, or its
+         main noun, already appear in the action or the result. */
+      var said = (actions.join(" ") + " " + result).toLowerCase();
+      var kept = [];
+      measures.forEach(function (m) {
+        var nums = m.match(/\d[\d,.%\u2013]*/g);
+        var inSaid = nums && nums.every(function (n) { return said.indexOf(n.toLowerCase()) >= 0; });
+        var inKept = nums && kept.some(function (k) { return nums.every(function (n) { return k.indexOf(n) >= 0; }); });
+        var noun = (m.match(/([a-z]{4,})s?$/i) || [])[1];
+        var nounSaid = !nums && noun && said.indexOf(noun.toLowerCase().replace(/s$/, "")) >= 0;
+        if (!inSaid && !inKept && !nounSaid) kept.push(m);
+      });
+      var rank = function (t) { return /\d/.test(t) ? 2 : /\b(one|two|three|four|five|six|seven|eight|nine|ten|twelve|fifteen|twenty|thirty|zero|half)\b/i.test(t) ? 1 : 0; };
+      kept.sort(function (a, b) { return rank(b) - rank(a); });
+      var actionText = actions.join(" ");
+      var attached = [];
+      kept.forEach(function (m) {
+        var a = attachMeasure(m, fam, actionText);
+        if (a && attached.length < 3 && attached.indexOf(a) < 0) attached.push(a);
+      });
+      var vague = VAGUE_RESULT.test(v.result || "");
+
+      function joinActions(list) {
+        if (list.length <= 1) return list.join("");
+        if (list.length === 2) return list[0] + " and " + list[1];
+        return list.slice(0, -1).join(", ") + ", and " + list[list.length - 1];
+      }
+      function build(list, measureList, withResult) {
+        if (!list.length) return "";
+        var first = list[0] + measureList.join("");
+        var out = joinActions([first].concat(list.slice(1)));
+        if (withResult && result) out += (/^with /.test(result) ? " " : ", ") + result;
+        out = squash(out).replace(/\band and\b/g, "and").replace(/,\s*,/g, ",");
+        return cap(out).replace(/[.,;:\s]+$/, "") + ".";
+      }
+      /* Candidate action lists, fullest first. */
+      var actionSets = [];
+      var addSet = function (l) { var k = l.join("|"); if (l.length && !actionSets.some(function (x) { return x.join("|") === k; })) actionSets.push(l); };
+      for (var n = Math.min(actions.length, 3); n >= 1; n--) {
+        addSet(actions.slice(0, n));
+        var shrunk = actions.slice(0, n).map(compressAction);
+        if (shrunk.join("|") !== actions.slice(0, n).join("|")) shrunk = shrunk.map(function (c) { return c.replace(/\s+with them\b/i, ""); });
+        addSet(shrunk);
+      }
+      var plans = [];
+      var measureSets = [];
+      for (var k = attached.length; k >= 0; k--) measureSets.push(attached.slice(0, k));
+      if (vague) {
+        /* A vague result is the first thing to go. */
+        measureSets.forEach(function (ms) { actionSets.forEach(function (as) { plans.push([as, ms, true]); plans.push([as, ms, false]); }); });
+        plans.sort(function (p, q) { return q[1].length - p[1].length || (q[2] ? 1 : 0) - (p[2] ? 1 : 0); });
+      } else {
+        /* A real result stays longest; actions shrink first, then measures. */
+        [true, false].forEach(function (wr) {
+          measureSets.forEach(function (ms) { actionSets.forEach(function (as) { plans.push([as, ms, wr]); }); });
+        });
+        plans.sort(function (p, q) {
+          return (q[2] ? 1 : 0) - (p[2] ? 1 : 0) || Math.min(q[1].length, 1) - Math.min(p[1].length, 1) || q[1].length - p[1].length;
+        });
+      }
+      for (var i = 0; i < plans.length; i++) {
+        var text = build(plans[i][0], plans[i][1], plans[i][2]);
+        if (text && words(text) <= MAX_WORDS) return text;
+      }
+      var fallback = build([compressAction(actions[0] || "")], [], false).replace(/\.$/, "").split(/\s+/).slice(0, MAX_WORDS).join(" ");
+      return fallback ? stripEnd(fallback) + "." : "";
+    }
+
+    /* Boxes from a story as typed. */
+    function prefill(story, family) {
+      story = story || {};
+      var fam = family || "any";
+      var action = composeAction(story.whatIDid || story.title || "", fam);
+      var joined = action.length <= 1 ? action.join("") : action.length === 2 ? action[0] + " and " + action[1] : action.slice(0, -1).join(", ") + ", and " + action[action.length - 1];
+      var frags = [];
+      (story.numbers || []).forEach(function (n) { var p = numberPhrase(n); if (p) frags.push(p); });
+      String(story.situation || "").split(/(?<=[.!?])\s+/).forEach(function (sent) {
+        var s = stripEnd(phrase(sent));
+        var each = s.match(/\beach (\w+) (?:has to be|had to be|must be|is|was)?\s*(?:out|done|ready)?\s*((?:in|within|under)\s.+)$/i);
+        if (each) { frags.push("each " + each[1] + " " + each[2]); return; }
+        var scale = extractScale(s);
+        if (scale) frags.push(scale);
+      });
+      var seen = {};
+      frags = frags.filter(function (f) { var k = f.toLowerCase(); if (seen[k]) return false; seen[k] = 1; return true; });
+      frags.sort(function (a, b) { return (/\d/.test(b) ? 1 : 0) - (/\d/.test(a) ? 1 : 0); });
+      var result = stripEnd(phrase(story.whatChanged || ""));
+      return { action: joined, measure: frags.slice(0, 3).join("; "), result: result };
+    }
+
+    /* What a person should look at before a bullet goes on the page.
+       Plain words, one line each, empty when the bullet is ready. */
+    function check(text) {
+      var t = String(text || "").trim();
+      var out = [];
+      if (!t) return out;
+      var n = words(t);
+      if (n > WARN_WORDS) out.push("It runs " + n + " words. Under " + WARN_WORDS + " keeps it to two lines.");
+      var first = t.split(/\s+/)[0].replace(/[^A-Za-z-]/g, "");
+      if (/^(responsible|duties|helped|assisted|worked|ensured|was|were|tasked|in)$/i.test(first)) out.push("Open with what you did: served, trained, ran, fixed.");
+      else if (!isVerb(first) && !/ed$/i.test(first) && !/^stood$/i.test(first)) out.push("Open with a verb: served, trained, ran, fixed.");
+      if (/\b(i|i'm|i've|me|my|we|our)\b/i.test(t)) out.push("It still has \u201cI\u201d, \u201cmy\u201d or \u201cwe\u201d in it. The page is about you, so those can go.");
+      if (/;/.test(t)) out.push("It has a semicolon. One sentence reads faster than two joined together.");
+      if (!/\d|\b(one|two|three|four|five|six|seven|eight|nine|ten|twelve|twenty|dozen|half|zero|every|all)\b/i.test(t)) out.push("No number yet. How many, how often, how fast, or how much?");
+      var fill = t.match(/\b(with a smile|customer satisfaction|various|stuff|things like that)\b/i);
+      if (fill) out.push("\u201c" + fill[0] + "\u201d says less than a number would.");
+      return out;
+    }
+
+    return { prefill: prefill, compose: compose, check: check, MAX_WORDS: MAX_WORDS, _t: { pastOf: pastOf, ingOf: ingOf, splitActions: splitActions, composeResult: composeResult, attachMeasure: attachMeasure, numberPhrase: numberPhrase } };
+  }();
+  /* XYZ-COMPOSER:END */
   function storyToBullet(jobId) {
     const stories = get("about.stories", []);
     const wrap = el("div");
     wrap.innerHTML = `
-    <p class="sub">Pick a story. It becomes a bullet point, and you choose how long.</p>
+    <p class="sub">Pick a story. It becomes one resume bullet you can check and edit before it goes on the page.</p>
     <div id="sb-list" class="stack"></div>
     <div id="sb-out" style="margin-top:16px" aria-live="polite"></div>`;
     const list = $("#sb-list", wrap);
@@ -14225,138 +14929,117 @@ h1, .contact, .headline { text-align: center; }
     const out = $("#sb-out", wrap);
     /* The XYZ builder. Module 3's impact statement: what you did (Z),
        measured by what (Y), with what result (X). Three boxes, filled
-       from the story, assembled live, and the final line is editable
-       because the person's numbers belong in it even when the parser
-       missed them. The generated alternatives stay underneath. */
-    function xyzPrefill(story) {
-      const firstPerson = /^(i\s+am\s+the\s+one\s+who|i'm\s+the\s+one\s+who|i\s+was\s+the\s+one\s+who|i\s+am|i\s+was|i've|i\s+have|i)\s+/i;
-      /* Clause-leading verbs go to past tense, which is the resume
-         convention. A small irregular map, then the ordinary rule. It
-         is a draft for the person to fix, not a claim to be right. */
-      const IRR = { makes:"made", takes:"took", ensures:"ensured", serves:"served", runs:"ran", keeps:"kept", handles:"handled", helps:"helped", gets:"got", leads:"led", teaches:"taught", sells:"sold", builds:"built", deals:"dealt", does:"did", goes:"went", has:"had", is:"was", am:"was", are:"were", works:"worked", manages:"managed", opens:"opened", closes:"closed", trains:"trained", covers:"covered", answers:"answered", counts:"counted", stocks:"stocked", cleans:"cleaned", drives:"drove", writes:"wrote", brings:"brought", puts:"put", sets:"set", cuts:"cut", holds:"held", finds:"found", meets:"met", pays:"paid", says:"said", sees:"saw", shows:"showed", speaks:"spoke", stands:"stood", tells:"told", thinks:"thought", wins:"won", makes_sure:"made sure" };
-      const pastify = (w) => {
-        const lw = w.toLowerCase();
-        if (IRR[lw]) return IRR[lw];
-        if (/ies$/.test(lw)) return lw.replace(/ies$/, "ied");
-        if (/(sh|ch|ss|x|z)es$/.test(lw)) return lw.replace(/es$/, "ed");
-        if (/es$/.test(lw) && /[^aeiou]e s$/.test(lw.replace(/s$/, " s"))) return lw.replace(/s$/, "d");
-        if (/[^s]s$/.test(lw)) { const base = lw.replace(/s$/, ""); return /e$/.test(base) ? base + "d" : base + "ed"; }
-        return w;
-      };
-      let action = String(story.whatIDid || "").trim().replace(firstPerson, "").replace(/\.$/, "");
-      action = action.split(/(,\s*(?:and\s+)?|\s+and\s+)/).map((part, i) => i % 2 ? part : part.replace(/^(\w+)/, (m) => pastify(m))).join("");
-      const numberish = (t) => /\d|\b(one|two|three|four|five|six|seven|eight|nine|ten|dozen|hundred|thousand|half|twice|double)\b/i.test(t);
-      const frags = [];
-      (story.numbers || []).forEach((n) => {
-        const bits = [n.what, n.value].filter(Boolean).map(String);
-        if (bits.length) frags.push(bits.join(bits.length === 2 && /^[\d$]/.test(bits[1]) ? ": " : " ").replace(/\.$/, ""));
-      });
-      String(story.situation || "").split(/(?<=[.!?])\s+/).forEach((sent) => { if (numberish(sent)) frags.push(sent.trim().replace(/\.$/, "")); });
-      /* Digits first, at most two fragments, and the throat-clearing
-         openers trimmed so it reads as a measure rather than a sentence. */
-      const tidy = (f) => f.replace(/^(on any given day|on a typical day|on a normal day|every day|each day|usually|typically),?\s+/i, "").replace(/^(we|i)\s+(serve|served|handle|handled|deliver|delivered|see|saw|help|helped)\s+/i, "");
-      const uniq = frags.filter((f, i) => frags.indexOf(f) === i).map(tidy);
-      uniq.sort((a, b2) => (/\d/.test(b2) ? 1 : 0) - (/\d/.test(a) ? 1 : 0));
-      const measure = uniq.slice(0, 2).join("; ");
-      const result = String(story.whatChanged || "").trim().replace(/\.$/, "");
-      return { action, measure, result };
-    }
-    function xyzAssemble(v) {
-      const lower = (t) => t ? t.charAt(0).toLowerCase() + t.slice(1) : "";
-      const cap = (t) => t ? t.charAt(0).toUpperCase() + t.slice(1) : "";
-      let out2 = cap(v.action.trim());
-      if (v.measure.trim()) out2 += (out2 ? ", " : "") + lower(v.measure.trim());
-      if (v.result.trim()) out2 += (out2 ? "; " : "") + lower(v.result.trim());
-      return out2.replace(/\s+/g, " ").replace(/[.;,]+$/, "") + (out2 ? "." : "");
-    }
+       from the story, and one sentence composed from them live (see
+       XYZ above). The final line stays editable because the person's
+       own words and numbers belong in it. */
+    const fam = get("build.roleFamily", "") || "any";
+    function xyzPrefill(story) { return XYZ.prefill(story, fam); }
+    const job0 = get("build.experience", []).find((j) => j.id === jobId) || {};
+    const tense = !String(job0.to || "").trim() || /present|now|current/i.test(job0.to) ? "present" : "past";
+    function xyzAssemble(v) { return XYZ.compose(v, fam, { tense }); }
     function showVariants(story) {
-      let result;
-      try {
-        result = RESUME.bulletFrom(story, { role: get("build.target.role", "") });
-      } catch {
-        result = { bullets: [story.whatIDid], notes: [] };
-      }
-      const bullets = (result.bullets || []).filter(Boolean);
+      /* One good draft. The old RESUME.bulletFrom variants are retired
+         from this view (the resume importer still uses the parser).
+         Coach versions appear underneath only when the coach wrote them. */
+      const coachBullets = [];
       const pre = xyzPrefill(story);
-      out.innerHTML = `
+      const paintChecks = (text) => {
+        const slot = $("#xyz-checks", out);
+        if (!slot) return;
+        const issues = XYZ.check(text);
+        const n = (text.trim().match(/\S+/g) || []).length;
+        slot.innerHTML = issues.length
+          ? `<span class="sub">${n} words. Worth a look:</span><ul style="margin:4px 0 0;padding-left:18px">${issues.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>`
+          : `<span class="sub">${n} words. Reads like a resume line.</span>`;
+      };
+      const paint = () => {
+        out.innerHTML = `
       <section class="card card-sm" style="margin:0 0 16px">
-        <h4 style="margin:0 0 4px">Build it as an impact statement</h4>
-        <p class="sub" style="margin:0 0 12px">What you did, measured by what, with what result. Fix any box; the line at the bottom rewrites itself, and you can edit that too before adding it.</p>
+        <h4 style="margin:0 0 4px">Your bullet</h4>
+        <p class="sub" style="margin:0 0 12px">Built from your story as one sentence: what you did, measured by what, with what result. Change any box and the bullet rewrites itself. Edit the bullet directly and it stays yours.</p>
         <div class="field"><label for="xyz-z">What you did <span class="sub">(start with a verb: served, handled, trained)</span></label>
           <input id="xyz-z" type="text" value="${esc(pre.action)}"></div>
-        <div class="field"><label for="xyz-y">Measured by <span class="sub">(the numbers)</span></label>
+        <div class="field"><label for="xyz-y">Measured by <span class="sub">(the numbers; separate them with ;)</span></label>
           <input id="xyz-y" type="text" value="${esc(pre.measure)}" placeholder="100 to 150 customers a day; each order in five minutes or less"></div>
         <div class="field"><label for="xyz-x">The result</label>
           <input id="xyz-x" type="text" value="${esc(pre.result)}"></div>
-        <div class="field" style="margin-bottom:8px"><label for="xyz-final">The bullet <span class="sub">(edit it here; aim for under 30 words, and cut anything a stranger doesn\u2019t need)</span></label>
+        <div class="field" style="margin-bottom:6px"><label for="xyz-final">The bullet</label>
           <textarea id="xyz-final" rows="3">${esc(xyzAssemble(pre))}</textarea></div>
-        <button class="btn btn-primary btn-sm" type="button" id="xyz-add">Add this bullet</button>
+        <div id="xyz-checks" aria-live="polite" style="margin:0 0 12px;font-size:var(--yns-t-sm)"></div>
+        <div class="row">
+          <button class="btn btn-primary btn-sm" type="button" id="xyz-add">Add this bullet</button>
+          ${aiReady() ? `<button class="btn btn-ghost btn-sm" type="button" id="sb-ai">Ask the coach for another version</button>` : ""}
+        </div>
       </section>
-      <div class="note note-info" style="margin:0 0 12px">
-        <span class="note-t">Or pick one of these</span>
-        ${(result.notes || []).slice(0, 2).map((n) => `<div>${esc(n)}</div>`).join("")}
-      </div>
-      ${bullets.map((b, i) => `
-        <label class="bullet-opt">
-          <input type="radio" name="sb" value="${i}"${i === 0 ? " checked" : ""}>
-          <span>${esc(b)}<em>${b.trim().split(/\s+/).length} words</em></span>
-        </label>`).join("")}
-      <div class="row" style="margin-top:12px">
-        <button class="btn btn-primary btn-sm" id="sb-add">Add to my resume</button>
-        ${aiReady() ? `<button class="btn btn-ghost btn-sm" id="sb-ai">Try an AI version</button>` : ""}
-      </div>`;
-      $("#sb-add", out).addEventListener("click", () => {
-        const picked = bullets[Number((wrap.querySelector('input[name="sb"]:checked') || {}).value || 0)];
-        if (!picked) return;
-        const job = get("build.experience", []).find((x) => x.id === jobId);
-        updateById("build.experience", jobId, { bullets: [...job.bullets || [], picked] });
+      ${coachBullets.length ? `
+      <div id="sb-coach">
+        <p class="sub" style="margin:0 0 8px">From the coach. Pick one to use it instead.</p>
+        ${coachBullets.map((b, i) => `
+          <label class="bullet-opt">
+            <input type="radio" name="sb" value="${i}"${i === 0 ? " checked" : ""}>
+            <span>${esc(b)}<em>${b.trim().split(/\s+/).length} words</em></span>
+          </label>`).join("")}
+        <button class="btn btn-primary btn-sm" id="sb-add" style="margin-top:8px">Use this one</button>
+      </div>` : ""}`;
+        wireBuilder();
+      };
+      const addBullet = (text) => {
+        const job = get("build.experience", []).find((j2) => j2.id === jobId);
+        updateById("build.experience", jobId, { bullets: [...job.bullets || [], text] });
         updateById("about.stories", story.id, { usedInResume: true });
         toast("Added to your resume", "ok");
         announce("Bullet added");
         closeIt();
         renderBuild();
-      });
-      /* XYZ wiring: any box edits the final line unless the person has
-         already put their own words in it. */
-      (function () {
+      };
+      function wireBuilder() {
         const z = $("#xyz-z", out), y = $("#xyz-y", out), x = $("#xyz-x", out), fin = $("#xyz-final", out);
         let touched = false;
-        if (fin) fin.addEventListener("input", () => { touched = true; });
-        [z, y, x].forEach((inp) => inp && inp.addEventListener("input", () => {
-          if (!touched && fin) fin.value = xyzAssemble({ action: z.value, measure: y.value, result: x.value });
+        paintChecks(fin.value);
+        fin.addEventListener("input", () => { touched = true; paintChecks(fin.value); });
+        [z, y, x].forEach((inp) => inp.addEventListener("input", () => {
+          if (touched) return;
+          fin.value = xyzAssemble({ action: z.value, measure: y.value, result: x.value });
+          paintChecks(fin.value);
         }));
-        const add = $("#xyz-add", out);
-        if (add) add.addEventListener("click", () => {
-          const text = (fin ? fin.value : "").trim();
+        $("#xyz-add", out).addEventListener("click", () => {
+          const text = fin.value.trim();
           if (!text) { toast("Nothing to add yet", "warn"); return; }
-          const job = get("build.experience", []).find((j2) => j2.id === jobId);
-          updateById("build.experience", jobId, { bullets: [...job.bullets || [], text] });
-          toast("Added to your resume", "ok");
-          closeIt();
-          renderBuild();
+          addBullet(text);
         });
-      })();
-      const aiBtn = $("#sb-ai", out);
-      if (aiBtn) aiBtn.addEventListener("click", async () => {
-        aiBtn.disabled = true;
-        aiBtn.innerHTML = '<span class="spin"></span> Thinking';
-        const res = await run(TASKS.RESUME_BULLETS, {
-          where: story.where,
-          situation: story.situation,
-          whatIDid: story.whatIDid,
-          whatChanged: story.whatChanged,
-          numbers: (story.numbers || []).map((n) => `${n.what}: ${n.value}`),
-          role: get("build.target.role", "")
+        const pick = $("#sb-add", out);
+        if (pick) pick.addEventListener("click", () => {
+          const chosen = coachBullets[Number((wrap.querySelector('input[name="sb"]:checked') || {}).value || 0)];
+          if (chosen) addBullet(chosen);
         });
-        aiBtn.remove();
-        if (res.ok && res.json && Array.isArray(res.json.bullets)) {
-          bullets.push(...res.json.bullets.filter(Boolean));
-          showVariants(story);
-          if (res.json.why) toast(res.json.why);
-        } else {
-          toast(res.message || "That did not come back. The versions above still work.", "warn");
-        }
-      });
+        const aiBtn = $("#sb-ai", out);
+        if (aiBtn) aiBtn.addEventListener("click", async () => {
+          aiBtn.disabled = true;
+          aiBtn.innerHTML = '<span class="spin"></span> Thinking';
+          const res = await run(TASKS.RESUME_BULLETS, {
+            where: story.where,
+            situation: story.situation,
+            whatIDid: story.whatIDid,
+            whatChanged: story.whatChanged,
+            numbers: (story.numbers || []).map((n) => `${n.what}: ${n.value}`),
+            role: get("build.target.role", "")
+          });
+          if (res.ok && res.json && Array.isArray(res.json.bullets)) {
+            coachBullets.push(...res.json.bullets.filter(Boolean));
+            pre.action = z.value; pre.measure = y.value; pre.result = x.value;
+            const kept = fin.value;
+            paint();
+            $("#xyz-final", out).value = kept;
+            paintChecks(kept);
+            if (res.json.why) toast(res.json.why);
+          } else {
+            aiBtn.disabled = false;
+            aiBtn.textContent = "Ask the coach for another version";
+            toast(res.message || "That did not come back. The bullet above still works.", "warn");
+          }
+        });
+      }
+      paint();
     }
     const { close } = modal({ title: "Turn a story into a bullet point", body: wrap, actions: [{ label: "Done", class: "btn-ghost" }] });
     function closeIt() {
@@ -14630,8 +15313,7 @@ h1, .contact, .headline { text-align: center; }
     wireCover(body);
   }
   function wireCover(body) {
-    const reelSlot = $("#c-reel", body);
-    if (reelSlot) reelSlot.replaceChildren(reelCard("coverLetter", { compact: true, title: "While you write" }));
+    mountCoach(body, "coverLetter", "While you write", "#c-reel");
     wireAdvice(body, () => ({
       extra: `Role: ${get("build.target.role", "") || "not named"}. Company: ${get("build.target.company", "") || "not named"}.`,
       draft: get("build.whyThisJob", "")
@@ -15109,12 +15791,12 @@ h1, .contact, .headline { text-align: center; }
         ${days === 0 ? "You have done the work. Read your answers over once, then close this and go be a person. You are ready." : "Tonight is for one run through your best two stories. Nothing new. Get some sleep."}
       </div>` : ""}
 
-    <div class="note note-info" style="margin:0 0 14px">
-      <span class="note-t">How to practise</span>
-      Read the question, press the mic and answer out loud with the clock running, or type it. Then press <b>How did that go</b> for one thing that landed and one thing to try next.
-      <b>Different question</b> gives you another of the same kind; the menu on the right switches the kind. Three answers and you have a kit.
-      ${(() => { const n = get("carry.practice", []).length; return n ? `<div style="margin-top:6px"><b>${n} ${n === 1 ? "answer" : "answers"} practised so far.</b>${n >= 3 ? ` That is a kit. <button class="btn btn-ghost btn-sm" data-go="kit" type="button">See it</button>` : ""}</div>` : ""; })()}
-    </div>
+    <details class="disclose" style="margin:0 0 14px">
+      <summary>How to practise</summary>
+      <div>Read the question, press the mic and answer out loud with the clock running, or type it. Then press <b>How did that go</b> for one thing that landed and one thing to try next.
+      <b>Different question</b> gives you another of the same kind; the menu on the right switches the kind. Three answers and you have a kit.</div>
+    </details>
+    ${(() => { const n = get("carry.practice", []).length; return n ? `<div style="margin-top:6px"><b>${n} ${n === 1 ? "answer" : "answers"} practised so far.</b>${n >= 3 ? ` That is a kit. <button class="btn btn-ghost btn-sm" data-go="kit" type="button">See it</button>` : ""}</div>` : ""; })()}
     <section class="q-card">
       <div class="q-meta">
         <span class="badge">${esc(cat.label || current.category)}</span>
@@ -15169,8 +15851,7 @@ h1, .contact, .headline { text-align: center; }
 
     <div id="p-reel"></div>
     <div id="fb-out" style="margin-top:20px" aria-live="polite"></div>`;
-    const reelSlot = $("#p-reel", body);
-    if (reelSlot) reelSlot.replaceChildren(reelCard("interview", { compact: true, title: "While you practise" }));
+    mountCoach(body, "interview", "While you practise", "#p-reel");
     wireAdvice(body, () => ({
       question: current ? current.q : "",
       draft: ($("#ans", body) || {}).value || ""
@@ -15687,10 +16368,10 @@ h1, .contact, .headline { text-align: center; }
     </div>`;
     container.replaceChildren(host);
 
-    on(host, "click", '[data-act="kit-print-resume"]', () => printDocument({ title: `${get("about.name") || "Resume"}`, css: RESUME.PRINT_CSS, bodyHTML: resumeHTML(load()) }));
+    on(host, "click", '[data-act="kit-print-resume"]', () => printDocument({ title: resumeFileName(get("about.name")).replace(/\.pdf$/, ""), css: RESUME.PRINT_CSS, bodyHTML: resumePrintHTML(load()) }));
     on(host, "click", '[data-act="kit-word-resume"]', () => {
       const nm = (get("about.name") || "resume").replace(/\s+/g, "-").toLowerCase();
-      downloadAsWord(`${nm}-resume.doc`, "Resume", RESUME.PRINT_CSS, resumeHTML(load()));
+      downloadAsWord(`${nm}-resume.doc`, "Resume", RESUME.PRINT_CSS, resumePrintHTML(load()));
     });
     on(host, "click", '[data-act="kit-print-cover"]', () => printDocument({ title: "Cover letter", css: COVER.PRINT_CSS, bodyHTML: `<pre style="white-space:pre-wrap;font-family:Georgia,serif;font-size:11pt;line-height:1.5">${esc(get("build.cover.full", ""))}</pre>` }));
     on(host, "click", '[data-act="kit-word-cover"]', () => {
